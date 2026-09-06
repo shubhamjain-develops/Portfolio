@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio Internals</title>
+<style>
+  :root{
+    --paper:#eff1ee; --surface:#ffffff; --surface-2:#e4e7e1;
+    --ink:#171b1f; --dim:#4b5259; --faint:#838a90;
+    --line:#d7dbd5; --line-strong:#b9c0b7;
+    --accent:#33507b; --accent-soft:#33507b1a; --accent-ink:#ffffff;
+    --amber:#8c6a3f; --amber-soft:#8c6a3f16;
+    --term-bg:#1b1f23; --term-ink:#e7e9e7; --term-dim:#8a9198; --term-accent:#7fa0dd; --term-amber:#d2ad79;
+    --shadow: 0 1px 2px rgba(23,27,31,.04), 0 10px 26px -14px rgba(23,27,31,.16);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#14171a; --surface:#1a1e22; --surface-2:#20252a;
+      --ink:#e7e9e7; --dim:#a7aea9; --faint:#767d78;
+      --line:#2b302e; --line-strong:#3a413d;
+      --accent:#7fa0dd; --accent-soft:#7fa0dd22; --accent-ink:#0e1524;
+      --amber:#d2ad79; --amber-soft:#d2ad7920;
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 30px -16px rgba(0,0,0,.6);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14171a; --surface:#1a1e22; --surface-2:#20252a;
+    --ink:#e7e9e7; --dim:#a7aea9; --faint:#767d78;
+    --line:#2b302e; --line-strong:#3a413d;
+    --accent:#7fa0dd; --accent-soft:#7fa0dd22; --accent-ink:#0e1524;
+    --amber:#d2ad79; --amber-soft:#d2ad7920;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 30px -16px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+
+  @font-face{ font-family:"JetBrains Mono"; }
+  *{ box-sizing:border-box; }
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:"Source Serif 4", Georgia, "Times New Roman", serif;
+    font-size:17px; line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{ background:var(--accent); color:var(--accent-ink); }
+
+  .mono{ font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+  a{ color:var(--accent); text-decoration-thickness:1px; text-underline-offset:3px; }
+  a:not(.plain){ text-decoration-line:underline; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+
+  h1,h2,h3,h4{ font-family:"JetBrains Mono", ui-monospace, monospace; font-weight:700; text-wrap:balance; letter-spacing:-0.01em; color:var(--ink); }
+  p{ text-wrap:pretty; }
+
+  .frame{ max-width:1180px; margin:0 auto; padding:0 clamp(18px,4vw,56px); }
+  .layout{ display:grid; grid-template-columns: 1fr; gap:0; }
+  @media (min-width:1020px){
+    .layout{ grid-template-columns: 200px minmax(0,720px); gap:56px; justify-content:center; }
+  }
+
+  /* ---- masthead ---- */
+  .masthead{ padding:56px 0 40px; border-bottom:1px solid var(--line); }
+  .eyebrow{
+    font-family:"JetBrains Mono", monospace; font-size:0.72rem; font-weight:700;
+    text-transform:uppercase; letter-spacing:0.14em; color:var(--accent);
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:""; width:7px; height:7px; background:var(--accent); display:inline-block; }
+  h1.title{ font-size:clamp(1.9rem,4.6vw,2.9rem); line-height:1.08; margin:16px 0 0; }
+  .dek{ margin:16px 0 0; max-width:56ch; color:var(--dim); font-size:1.05rem; }
+  .stackrow{ margin-top:26px; display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-family:"JetBrains Mono",monospace; font-size:0.72rem; font-weight:500;
+    color:var(--dim); background:var(--surface-2); border:1px solid var(--line);
+    padding:5px 10px; border-radius:4px;
+  }
+  .meta{ margin-top:22px; font-family:"JetBrains Mono",monospace; font-size:0.78rem; color:var(--faint); display:flex; gap:22px; flex-wrap:wrap; }
+  .meta b{ color:var(--dim); font-weight:600; }
+
+  /* ---- rail ---- */
+  .rail{ display:none; }
+  @media (min-width:1020px){
+    .rail{ display:block; padding-top:56px; }
+    .rail-inner{ position:sticky; top:28px; }
+    .rail-label{ font-family:"JetBrains Mono",monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.12em; color:var(--faint); margin-bottom:14px; }
+    .rail ol{ list-style:none; margin:0; padding:0; border-left:1px solid var(--line); }
+    .rail li{ margin:0; }
+    .rail a{
+      display:block; padding:7px 0 7px 14px; margin-left:-1px; border-left:1px solid transparent;
+      font-family:"JetBrains Mono",monospace; font-size:0.78rem; color:var(--dim); text-decoration:none;
+      transition:color .15s, border-color .15s;
+    }
+    .rail a:hover{ color:var(--accent); border-left-color:var(--accent); }
+    .rail .num{ color:var(--faint); margin-right:8px; }
+  }
+
+  /* ---- main column ---- */
+  main{ padding:44px 0 90px; min-width:0; }
+  section.doc{ padding:38px 0; border-bottom:1px solid var(--line); }
+  section.doc:last-of-type{ border-bottom:none; }
+  .sec-head{ display:flex; align-items:baseline; gap:14px; }
+  .sec-num{ font-family:"JetBrains Mono",monospace; font-size:0.85rem; color:var(--accent); font-weight:700; flex:none; }
+  h2{ font-size:clamp(1.28rem,2.6vw,1.55rem); margin:0; }
+  h3{ font-size:1.05rem; margin:30px 0 10px; }
+  section.doc > .sec-head + *{ margin-top:18px; }
+
+  p{ margin:14px 0; max-width:66ch; }
+  ul, ol.steps{ margin:14px 0; padding-left:22px; max-width:66ch; }
+  li{ margin:7px 0; }
+  ol.steps{ list-style:none; padding-left:0; counter-reset:step; }
+  ol.steps li{ counter-increment:step; position:relative; padding-left:30px; }
+  ol.steps li::before{
+    content: counter(step, decimal-leading-zero); position:absolute; left:0; top:0.1em;
+    font-family:"JetBrains Mono",monospace; font-size:0.72rem; color:var(--accent); font-weight:700;
+  }
+
+  code.inline{
+    font-family:"JetBrains Mono",monospace; font-size:0.86em; background:var(--surface-2);
+    border:1px solid var(--line); border-radius:4px; padding:0.05em 0.4em; color:var(--ink);
+  }
+
+  .term{
+    background:var(--term-bg); color:var(--term-ink); border-radius:8px; overflow:hidden;
+    margin:18px 0; box-shadow:var(--shadow); max-width:100%;
+  }
+  .term-bar{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:9px 14px; border-bottom:1px solid #ffffff14;
+    font-family:"JetBrains Mono",monospace; font-size:0.7rem; color:var(--term-dim);
+  }
+  .term-dots{ display:flex; gap:5px; }
+  .term-dots span{ width:8px; height:8px; border-radius:50%; background:#ffffff20; display:inline-block; }
+  .term pre{ margin:0; padding:16px 18px; overflow-x:auto; }
+  .term code{
+    font-family:"JetBrains Mono",monospace; font-size:0.83rem; line-height:1.6; white-space:pre;
+  }
+  .tk{ color:var(--term-accent); }
+  .ts{ color:var(--term-amber); }
+  .tc{ color:var(--term-dim); font-style:italic; }
+
+  .callout{
+    display:grid; grid-template-columns:auto 1fr; gap:12px; align-items:start;
+    background:var(--amber-soft); border:1px solid var(--amber); border-left-width:3px;
+    border-radius:6px; padding:16px 18px; margin:20px 0; max-width:66ch;
+  }
+  .callout .tag{
+    font-family:"JetBrains Mono",monospace; font-size:0.66rem; font-weight:700; text-transform:uppercase;
+    letter-spacing:0.1em; color:var(--amber); writing-mode:vertical-rl; text-orientation:mixed;
+    align-self:stretch; padding:2px 0;
+  }
+  .callout p{ margin:0; font-size:0.96rem; }
+  .callout p + p{ margin-top:8px; }
+
+  table{ width:100%; border-collapse:collapse; margin:18px 0; font-size:0.92rem; }
+  caption{ caption-side:top; text-align:left; font-family:"JetBrains Mono",monospace; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--faint); margin-bottom:8px; }
+  th, td{ text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ font-family:"JetBrains Mono",monospace; font-size:0.72rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--dim); font-weight:600; }
+  td.hit{ color:var(--accent); font-weight:600; font-family:"JetBrains Mono",monospace; font-size:0.85em; }
+  .tablewrap{ overflow-x:auto; }
+
+  .filepath{ font-family:"JetBrains Mono",monospace; font-size:0.82rem; color:var(--faint); }
+
+  .qa{ border:1px solid var(--line); border-radius:8px; background:var(--surface); margin:12px 0; max-width:66ch; box-shadow:var(--shadow); }
+  .qa + .qa{ margin-top:10px; }
+  .qa summary{
+    cursor:pointer; list-style:none; padding:15px 18px; font-family:"JetBrains Mono",monospace;
+    font-size:0.92rem; font-weight:600; display:flex; gap:10px; align-items:baseline;
+  }
+  .qa summary::-webkit-details-marker{ display:none; }
+  .qa summary::before{ content:"+"; color:var(--accent); font-weight:700; flex:none; }
+  .qa[open] summary::before{ content:"–"; }
+  .qa .a{ padding:0 18px 18px 40px; color:var(--dim); font-size:0.96rem; }
+  .qa .a p{ max-width:none; }
+
+  .refbox{
+    border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:18px 20px;
+    margin:20px 0; max-width:66ch; box-shadow:var(--shadow);
+  }
+  .refbox h4{ margin:0 0 10px; font-size:0.78rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--faint); font-family:"JetBrains Mono",monospace; }
+  .refbox .cmd{ display:flex; align-items:center; gap:10px; font-family:"JetBrains Mono",monospace; font-size:0.85rem; padding:5px 0; }
+  .refbox .cmd .dollar{ color:var(--faint); }
+  .refbox .cmd code{ color:var(--accent); }
+  .refbox .cmd .desc{ color:var(--faint); margin-left:auto; font-family:"Source Serif 4",serif; font-size:0.85rem; }
+
+  footer{ border-top:1px solid var(--line); padding:34px 0 60px; }
+  footer p{ font-family:"JetBrains Mono",monospace; font-size:0.75rem; color:var(--faint); max-width:none; }
+
+  strong{ color:var(--ink); }
+
+  @media (max-width:640px){
+    .refbox .cmd{ flex-wrap:wrap; }
+    .refbox .cmd .desc{ margin-left:0; width:100%; }
+  }
+</style>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&display=swap">
+
+</head>
+<body>
+<div class="frame">
+  <div class="masthead">
+    <p class="eyebrow">Field notes · repo walkthrough</p>
+    <h1 class="title">Portfolio Internals</h1>
+    <p class="dek">How <span class="mono" style="font-size:0.9em;">shubhamjain-develops/Portfolio</span> actually renders, themes, animates and ships — written so you can defend every decision in an interview, not just describe what it looks like.</p>
+    <div class="stackrow">
+      <span class="chip">Next.js 15 · App Router</span>
+      <span class="chip">React 19</span>
+      <span class="chip">TypeScript</span>
+      <span class="chip">Tailwind CSS 3.4</span>
+      <span class="chip">Framer Motion 11</span>
+      <span class="chip">next-themes</span>
+      <span class="chip">Vercel</span>
+    </div>
+    <div class="meta">
+      <span><b>Route model</b> — fully static</span>
+      <span><b>First load JS</b> — 162 kB</span>
+      <span><b>Server work</b> — none</span>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav class="rail" aria-label="Section index">
+      <div class="rail-inner">
+        <p class="rail-label">Contents</p>
+        <ol>
+          <li><a href="#rendering"><span class="num">01</span>Rendering model</a></li>
+          <li><a href="#components"><span class="num">02</span>Server vs client</a></li>
+          <li><a href="#data"><span class="num">03</span>Data layer</a></li>
+          <li><a href="#theming"><span class="num">04</span>Theming</a></li>
+          <li><a href="#motion"><span class="num">05</span>Animation</a></li>
+          <li><a href="#canvas"><span class="num">06</span>Hero canvas</a></li>
+          <li><a href="#nav"><span class="num">07</span>Scroll-spy nav</a></li>
+          <li><a href="#a11y"><span class="num">08</span>Accessibility</a></li>
+          <li><a href="#perf"><span class="num">09</span>Performance</a></li>
+          <li><a href="#seo"><span class="num">10</span>SEO</a></li>
+          <li><a href="#qa"><span class="num">11</span>Interview Q&amp;A</a></li>
+        </ol>
+      </div>
+    </nav>
+
+    <main>
+
+      <section class="doc" id="rendering">
+        <div class="sec-head"><span class="sec-num">01</span><h2>The rendering model</h2></div>
+        <p>The build log is the whole story:</p>
+        <div class="term">
+          <div class="term-bar"><span>npm run build</span><span class="term-dots"><span></span><span></span><span></span></span></div>
+          <pre><code>Route (app)                     Size  First Load JS
+<span class="tk">┌ ○ /</span>                        59.3 kB         162 kB
+<span class="tc">○  (Static)  prerendered as static content</span></code></pre>
+        </div>
+        <p>That <code class="inline">○ (Static)</code> marker means Next.js runs every component <strong>once, at build time</strong>, and writes finished HTML to disk. A visitor's browser gets a file from a CDN — no server executes React per request, no database is touched. This is <strong>SSG</strong> (Static Site Generation).</p>
+        <div class="tablewrap">
+        <table>
+          <caption>Three rendering models</caption>
+          <thead><tr><th>Model</th><th>HTML is made</th><th>Cost per visitor</th><th>Used here</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SSG</strong></td><td>once, at build</td><td>~zero — CDN serves a file</td><td class="hit">yes</td></tr>
+            <tr><td>SSR</td><td>per request, on a server</td><td>CPU every time</td><td>no</td></tr>
+            <tr><td>CSR</td><td>in the browser, after JS loads</td><td>blank page until JS runs</td><td>no</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p>SSG fits because nothing here is per-visitor: the content is a name, a job history, some projects — it changes when the file changes, not when someone loads the page. Computing that at request time would just be waste.</p>
+        <div class="callout">
+          <span class="tag">Ask back</span>
+          <div>
+            <p><strong>"When would you have needed SSR instead?"</strong></p>
+            <p>Anything shown per-visitor or that changes between requests — a logged-in dashboard, live inventory, personalised pricing. A portfolio never needs that.</p>
+          </div>
+        </div>
+        <h3>Hydration — where static and interactive meet</h3>
+        <p>The static HTML isn't the whole payload. React also ships a JS bundle (the 162 kB above) that boots in the browser and attaches event handlers to the DOM that's already there — that's <strong>hydration</strong>. The rule it enforces: the server's HTML and the client's first render must match exactly, or React discards the mismatch and warns. Two real fixes for that rule live in <a href="#theming">§04</a>.</p>
+      </section>
+
+      <section class="doc" id="components">
+        <div class="sec-head"><span class="sec-num">02</span><h2>Server components vs client components</h2></div>
+        <p>Most files in <span class="filepath">src/components/</span> open with <code class="inline">"use client"</code>. A few don't — <span class="filepath">layout.tsx</span>, <span class="filepath">page.tsx</span>, <span class="filepath">Section.tsx</span>, <span class="filepath">JsonLd.tsx</span>, <span class="filepath">Icons.tsx</span>. That line is the entire concept.</p>
+        <p><strong>Server Components</strong> (the App Router default) run only during the build. Their code is <strong>never sent to the browser</strong> — they can't use <code class="inline">useState</code> or an <code class="inline">onClick</code>, because there's no browser to run them in yet.</p>
+        <p><strong>Client Components</strong> render at build time <em>and</em> ship to the browser to hydrate, so they can hold state and respond to events.</p>
+        <div class="term">
+          <div class="term-bar"><span>src/components/JsonLd.tsx</span></div>
+          <pre><code><span class="tc">// no "use client" — this whole function runs at build time only.</span>
+<span class="tk">export function</span> JsonLd() {
+  <span class="tk">const</span> data = { <span class="ts">"@type"</span>: <span class="ts">"Person"</span>, name: site.name, <span class="tc">/* … */</span> };
+  <span class="tk">return</span> &lt;script type=<span class="ts">"application/ld+json"</span>
+    dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} /&gt;;
+}</code></pre>
+        </div>
+        <p>Zero bytes of this function reach the visitor — its output is baked straight into the page's <code class="inline">&lt;head&gt;</code>. Compare <span class="filepath">ThemeToggle.tsx</span>, which needs <code class="inline">onClick</code> and so must ship its JS in full.</p>
+        <div class="callout">
+          <span class="tag">Say this</span>
+          <div><p><code class="inline">"use client"</code> doesn't mean "renders on the client" — it means <strong>"this component's code must also be sent to the browser"</strong>. It marks a boundary, and everything imported below it is pulled into the client bundle too. That boundary is the whole lever for keeping bundle size down.</p></div>
+        </div>
+      </section>
+
+      <section class="doc" id="data">
+        <div class="sec-head"><span class="sec-num">03</span><h2>The data layer — one typed file</h2></div>
+        <p>Every word on the site lives in <span class="filepath">src/data/content.ts</span> as exported objects. Components import from it; there's no fetch, no API, no CMS.</p>
+        <div class="term">
+          <div class="term-bar"><span>src/data/content.ts</span></div>
+          <pre><code><span class="tk">export const</span> site = { name: <span class="ts">"Shubham Jain"</span>, role: <span class="ts">"…"</span>, github: <span class="ts">"https://github.com/…"</span> } <span class="tk">as const</span>;
+<span class="tk">export type</span> Project = { slug: <span class="tk">string</span>; title: <span class="tk">string</span>; repo?: <span class="tk">string</span>; <span class="tc">/* … */</span> };
+<span class="tk">export const</span> projects: Project[] = [ <span class="tc">/* … */</span> ];</code></pre>
+        </div>
+        <p><code class="inline">as const</code> makes every field a literal, readonly type — <code class="inline">site.name</code> isn't typed <code class="inline">string</code>, it's typed <code class="inline">"Shubham Jain"</code>. And because <code class="inline">Project</code> is exported and shared by <span class="filepath">Work.tsx</span> and <span class="filepath">CaseStudyModal.tsx</span>, adding a required field breaks the build everywhere it's used until every project object supplies it.</p>
+        <p>The payoff shows up as a content-driven UI pattern used three times over: <code class="inline">{'{site.github && (…)}'}</code>. Set <code class="inline">site.github</code> to an empty string and every GitHub link disappears, sitewide, with no component touched.</p>
+      </section>
+
+      <section class="doc" id="theming">
+        <div class="sec-head"><span class="sec-num">04</span><h2>Theming: CSS variables, not <code class="inline">dark:</code> everywhere</h2></div>
+        <p>The naive approach is <code class="inline">className="bg-white dark:bg-black"</code> repeated on every element. This site declares the palette twice as raw channels and lets one class flip re-tint everything.</p>
+        <ol class="steps">
+          <li><strong>globals.css</strong> stores each color as space-separated RGB channels: <code class="inline">--c-bg: 251 250 247</code> under <code class="inline">:root</code>, redefined under <code class="inline">.dark</code>.</li>
+          <li><strong>tailwind.config.ts</strong> maps each variable into a Tailwind color: <code class="inline">bg: "rgb(var(--c-bg) / &lt;alpha-value&gt;)"</code>.</li>
+          <li><strong>Components</strong> just write <code class="inline">bg-bg</code>, <code class="inline">text-accent</code> — no <code class="inline">dark:</code> variant anywhere.</li>
+        </ol>
+        <p>Storing <em>bare channels</em> rather than a full <code class="inline">rgb(...)</code> string is the detail that makes it work: Tailwind splices its alpha placeholder in, so <code class="inline">bg-accent/10</code> compiles to <code class="inline">rgb(var(--c-accent) / 0.10)</code> — a working translucent color. A complete <code class="inline">rgb()</code> string would make every opacity modifier silently fail.</p>
+        <p><code class="inline">next-themes</code> toggles one class, <code class="inline">class="dark"</code>, on <code class="inline">&lt;html&gt;</code>. Tailwind is set to <code class="inline">darkMode: "class"</code> to match. One flip re-resolves every variable — no re-render, pure cascade.</p>
+        <h3>The two hydration bugs this creates</h3>
+        <p><strong>Flash of wrong theme.</strong> The server can't know a visitor prefers dark, so it builds one HTML file for everyone. <code class="inline">next-themes</code> injects a blocking script in <code class="inline">&lt;head&gt;</code> that reads <code class="inline">localStorage</code> and sets the class before first paint. That script mutates the DOM before React hydrates — which is exactly why <span class="filepath">layout.tsx</span> carries:</p>
+        <div class="term">
+          <div class="term-bar"><span>src/app/layout.tsx</span></div>
+          <pre><code>&lt;html lang=<span class="ts">"en"</span> <span class="tk">suppressHydrationWarning</span>&gt;</code></pre>
+        </div>
+        <p>That attribute is scoped to this one element and tells React "I know this will differ, don't warn." <strong>This is a very common interview question</strong> — now the answer is precise, not vague.</p>
+        <p><strong>The toggle icon itself.</strong> At build time there's no way to know sun or moon. Rendering either guarantees a mismatch, so:</p>
+        <div class="term">
+          <div class="term-bar"><span>src/components/ThemeToggle.tsx</span></div>
+          <pre><code><span class="tk">const</span> [mounted, setMounted] = useState(<span class="tk">false</span>);
+useEffect(<span class="tk">() =&gt;</span> setMounted(<span class="tk">true</span>), []);
+<span class="tc">// server render: mounted=false → empty button</span>
+<span class="tc">// client first render: mounted=false → empty button → matches → hydrates</span>
+<span class="tc">// effect fires → mounted=true → correct icon animates in</span>
+{mounted &amp;&amp; (isDark ? &lt;MoonIcon/&gt; : &lt;SunIcon/&gt;)}</code></pre>
+        </div>
+        <p>The general principle: render the server-safe version first, upgrade after mount. The button keeps a static <code class="inline">aria-label</code> and fixed size throughout so nothing shifts and screen readers are never left without a label.</p>
+      </section>
+
+      <section class="doc" id="motion">
+        <div class="sec-head"><span class="sec-num">05</span><h2>The animation architecture</h2></div>
+        <p>Every effect on the site is built from four reusable primitives sharing one easing curve — <code class="inline">cubic-bezier(0.22, 1, 0.36, 1)</code>, defined once in <span class="filepath">Reveal.tsx</span> — so the whole page moves in one voice.</p>
+        <h3><span class="mono" style="font-weight:700;">Reveal</span> — scroll-in, via IntersectionObserver</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/Reveal.tsx</span></div>
+          <pre><code>&lt;MotionTag
+  initial={{ opacity: <span class="ts">0</span>, y: <span class="ts">22</span> }}
+  whileInView={{ opacity: <span class="ts">1</span>, y: <span class="ts">0</span> }}
+  viewport={{ once: <span class="tk">true</span>, margin: <span class="ts">"0px 0px -12% 0px"</span> }}
+/&gt;</code></pre>
+        </div>
+        <p><code class="inline">whileInView</code> uses the browser's native IntersectionObserver, not a scroll handler measuring positions. <code class="inline">once: true</code> means it fires and stops watching. <code class="inline">StaggerGroup</code> extends this with Framer's variant system — the parent declares <code class="inline">staggerChildren: 0.08</code> and children just opt in, so they cascade without knowing their own index.</p>
+        <h3><span class="mono" style="font-weight:700;">SpotlightCard</span> — glow and tilt, off the render cycle</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/SpotlightCard.tsx</span></div>
+          <pre><code><span class="tk">const</span> spotlight = useMotionTemplate<span class="tc">`radial-gradient(340px circle at ${'${mx}'}px ${'${my}'}px, …)`</span>;</code></pre>
+        </div>
+        <p><code class="inline">useMotionTemplate</code> builds a live CSS string from motion values; as the pointer moves, the gradient's center follows. Tilt is computed the same pass and eased through <code class="inline">useSpring</code>. The performance point: motion values update <strong>outside React's render cycle</strong> — Framer writes to the DOM style directly, so moving your mouse over a card never triggers a re-render. Doing this with <code class="inline">useState</code> would re-render on every mousemove.</p>
+        <h3><span class="mono" style="font-weight:700;">MagneticButton</span> — restraint as a decision</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/MagneticButton.tsx</span></div>
+          <pre><code>x.set(Math.max(<span class="ts">-7</span>, Math.min(<span class="ts">7</span>, relX * <span class="ts">0.28</span>)));</code></pre>
+        </div>
+        <p>Hard-clamped to ±7px. A button that leans 30px toward your cursor is a usability bug — you end up chasing it. Worth saying out loud: the interesting decision is the cap, not the effect.</p>
+        <h3><span class="mono" style="font-weight:700;">CountUp</span> — hand-rolled, on purpose</h3>
+        <p>A Framer motion value would render fractional numbers mid-flight (<code class="inline">43.7</code>, then <code class="inline">44.2</code>), and rounding digit widths jitters visibly. So this one runs its own <code class="inline">requestAnimationFrame</code> loop with an <code class="inline">easeOutExpo</code> curve and rounds to an integer every frame. Under reduced motion, it skips straight to the final number — every reduced-motion branch in this codebase shows the end state, never nothing.</p>
+      </section>
+
+      <section class="doc" id="canvas">
+        <div class="sec-head"><span class="sec-num">06</span><h2>The hero canvas: a real particle system</h2></div>
+        <p><span class="filepath">HeroCanvas.tsx</span> is the most algorithmically substantial file in the repo — a constellation of nodes on <code class="inline">&lt;canvas&gt;</code> that links neighbours and reacts to the cursor.</p>
+        <h3>Sharp on Retina, without overpaying elsewhere</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/HeroCanvas.tsx</span></div>
+          <pre><code><span class="tk">const</span> dpr = Math.min(window.devicePixelRatio || <span class="ts">1</span>, <span class="ts">2</span>);
+canvas.width  = Math.floor(width  * dpr);   <span class="tc">// backing store: device px</span>
+canvas.style.width = <span class="ts">`${'${width}'}px`</span>;         <span class="tc">// CSS box: layout px</span>
+ctx.setTransform(dpr, <span class="ts">0</span>, <span class="ts">0</span>, dpr, <span class="ts">0</span>, <span class="ts">0</span>);</code></pre>
+        </div>
+        <p>The backing store is sized in device pixels while the CSS box stays in layout pixels — that's the Retina-sharpness trick. <code class="inline">Math.min(dpr, 2)</code> is a deliberate cap: a 3× display would otherwise ask for 9× the pixels on a background effect nobody inspects closely.</p>
+        <h3>Three forces per particle</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/HeroCanvas.tsx</span></div>
+          <pre><code>p.x  += p.vx;                             <span class="tc">// 1. drift</span>
+p.vx += (p.hx - p.x) * <span class="ts">0.00035</span>;         <span class="tc">// 2. spring back toward home</span>
+p.vx += (dx / d) * push * <span class="ts">0.1</span>;          <span class="tc">// 3. pushed away from the cursor</span>
+p.vx *= <span class="ts">0.986</span>;                          <span class="tc">// damping — bleeds off energy</span></code></pre>
+        </div>
+        <p>Each particle remembers a home position and is weakly pulled back to it — without that, drift would eventually clump or empty the field. This is a hand-rolled spring-damper, the same math <code class="inline">useSpring</code> runs internally.</p>
+        <h3>Honest complexity: O(n²), bounded on purpose</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/HeroCanvas.tsx</span></div>
+          <pre><code><span class="tk">for</span> (<span class="tk">let</span> i = <span class="ts">0</span>; i &lt; particles.length; i++)
+  <span class="tk">for</span> (<span class="tk">let</span> j = i + <span class="ts">1</span>; j &lt; particles.length; j++) { <span class="tc">/* link check */</span> }</code></pre>
+        </div>
+        <p>Every pair is checked every frame — at the hard-capped 76 particles that's ~2,850 checks/frame, trivial for modern JS. <strong>But it's only fine because of the cap</strong>, not because the algorithm scales; thousands of particles would need a spatial grid or quadtree. One micro-optimisation that is present: distances are compared squared (<code class="inline">d2 &gt; LINK_DIST²</code>) so <code class="inline">Math.sqrt</code> only runs for pairs that actually draw a line.</p>
+        <div class="callout">
+          <span class="tag">Ask back</span>
+          <div><p>Naming both the algorithm <em>and</em> where it breaks (interviewer: "what if you needed 5,000 particles?") demonstrates more than either half alone.</p></div>
+        </div>
+        <h3>Canvas pixels can't inherit CSS — so it watches for changes</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/HeroCanvas.tsx</span></div>
+          <pre><code><span class="tk">const</span> mo = <span class="tk">new</span> MutationObserver(<span class="tk">() =&gt;</span> { accent = readAccent(); });
+mo.observe(document.documentElement, { attributes: <span class="tk">true</span>, attributeFilter: [<span class="ts">"class"</span>] });</code></pre>
+        </div>
+        <p>The canvas reads <code class="inline">--c-accent</code> straight off <code class="inline">document.documentElement</code> and watches for the theme class flipping, so the constellation re-tints on toggle. Light mode also gets a higher alpha multiplier — the same channel values would be nearly invisible against a bright background.</p>
+        <p>And the cleanup a junior dev forgets: the effect's teardown calls <code class="inline">cancelAnimationFrame</code> and disconnects both the <code class="inline">ResizeObserver</code> and the <code class="inline">MutationObserver</code>. Skip that and every theme change starts a second animation loop on top of the first — <strong>missing <code class="inline">useEffect</code> cleanup is the textbook answer</strong> when an interviewer asks you to spot a leak.</p>
+      </section>
+
+      <section class="doc" id="nav">
+        <div class="sec-head"><span class="sec-num">07</span><h2>Scroll-spy and the sliding pill</h2></div>
+        <h3>Which section am I reading</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/Nav.tsx</span></div>
+          <pre><code><span class="tk">const</span> line = window.scrollY + window.innerHeight * <span class="ts">0.32</span>;
+<span class="tk">for</span> (<span class="tk">const</span> section <span class="tk">of</span> sections)
+  <span class="tk">if</span> (section.offsetTop &lt;= line) current = section.id;</code></pre>
+        </div>
+        <p>An imaginary line a third of the way down the viewport — tuned to where a reader's eye actually sits, not the top edge. Two edge cases are handled explicitly, which is what separates a working implementation from a demo: at the very bottom of the page the last section is forced active (its top may never cross the line), and inside the hero nothing is marked active at all, so the pill doesn't cling to the first item. The listener is also registered <code class="inline">{'{ passive: true }'}</code>, promising the browser it won't call <code class="inline">preventDefault()</code> — scrolling never waits on it.</p>
+        <h3>The pill itself: a shared layout animation</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/Nav.tsx</span></div>
+          <pre><code>{active === item.id &amp;&amp; &lt;motion.span layoutId=<span class="ts">"nav-pill"</span> /&gt;}</code></pre>
+        </div>
+        <p>Only one pill element exists at a time; it unmounts from one link and mounts on another as <code class="inline">active</code> changes. Because both instances share <code class="inline">layoutId="nav-pill"</code>, Framer treats them as the same logical element, measures before/after positions, and animates the difference with a spring — a gliding pill with zero position math written by hand.</p>
+      </section>
+
+      <section class="doc" id="a11y">
+        <div class="sec-head"><span class="sec-num">08</span><h2>Accessibility: not decorative</h2></div>
+        <h3>Focus trap in the case-study dialog</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/CaseStudyModal.tsx</span></div>
+          <pre><code><span class="tk">const</span> previouslyFocused = document.activeElement;
+document.body.style.overflow = <span class="ts">"hidden"</span>;
+setTimeout(<span class="tk">() =&gt;</span> closeRef.current?.focus(), <span class="ts">60</span>);
+<span class="tc">// on Tab: wrap last→first and Shift+Tab: wrap first→last</span>
+<span class="tk">return</span> <span class="tk">() =&gt;</span> previouslyFocused?.focus?.();</code></pre>
+        </div>
+        <p>Tabbing past the last focusable element wraps to the first, and vice versa with Shift+Tab — keyboard focus never escapes into the page behind the dialog. Closing <strong>restores focus to whatever was focused before</strong>, which is the detail people miss; without it, a keyboard user gets dumped at the top of the document. The dialog also carries <code class="inline">role="dialog"</code>, <code class="inline">aria-modal="true"</code> and <code class="inline">aria-labelledby</code>.</p>
+        <h3>Two independent layers of motion safety</h3>
+        <p>JS animations check <code class="inline">useReducedMotion()</code>. CSS-driven ones (a pulsing dot, a hover sheen) aren't visible to Framer, so <span class="filepath">globals.css</span> carries a blanket override collapsing every animation and transition to near-zero duration under <code class="inline">prefers-reduced-motion: reduce</code>. Belt and braces — the site is fully usable and fully readable with motion off.</p>
+        <h3><span class="mono" style="font-weight:700;">ScrambleText</span> and the accessibility tree</h3>
+        <p>The role line decodes from random glyphs on load. Done naively, that puts garbage in front of a screen reader and search engine while it animates. Instead the real string is present in the accessibility tree throughout, and reduced motion renders the final text immediately — the effect costs nothing in SEO or for assistive tech.</p>
+        <p>Also present: a "skip to content" link that appears on focus as the very first element in <code class="inline">&lt;body&gt;</code>, a global <code class="inline">:focus-visible</code> ring, <code class="inline">aria-hidden</code> on every decorative element, and <code class="inline">rel="noopener noreferrer"</code> on external links.</p>
+      </section>
+
+      <section class="doc" id="perf">
+        <div class="sec-head"><span class="sec-num">09</span><h2>Performance decisions, and why</h2></div>
+        <ul>
+          <li><strong>Self-hosted fonts</strong> via <code class="inline">next/font/local</code> — no third-party request to Google, no extra DNS/TLS round trip before first paint, and the build works with no network access. <code class="inline">display: "swap"</code> shows the fallback face immediately rather than hiding text.</li>
+          <li><strong>Motion values over React state</strong> for pointer tracking — no re-render per <code class="inline">mousemove</code> (§05).</li>
+          <li><strong>IntersectionObserver over scroll math</strong> for reveals — native, off the main thread (§05).</li>
+          <li><strong><code class="inline">once: true</code></strong> everywhere an observer is used — nothing keeps watching after it fires.</li>
+          <li><strong>Passive scroll listener</strong> in the nav — never blocks the browser's scroll thread.</li>
+          <li><strong>Bounded canvas cost</strong> — DPR capped at 2, particles capped at 76 (§06).</li>
+          <li><strong>Server Components for non-interactive parts</strong> — <code class="inline">JsonLd</code>, <code class="inline">Section</code>, <code class="inline">Icons</code> ship no JS at all (§02).</li>
+        </ul>
+      </section>
+
+      <section class="doc" id="seo">
+        <div class="sec-head"><span class="sec-num">10</span><h2>SEO surface</h2></div>
+        <p><span class="filepath">layout.tsx</span> exports a <code class="inline">metadata</code> object — Next's file-based metadata API — generating the title, description, OpenGraph tags (link previews in Slack/LinkedIn/iMessage) and Twitter card tags. <code class="inline">title.template</code> would auto-suffix any future page's title with the site name.</p>
+        <p><span class="filepath">sitemap.ts</span> and <span class="filepath">robots.ts</span> are functions that run at build time and produce real <code class="inline">/sitemap.xml</code> and <code class="inline">/robots.txt</code> files — both read <code class="inline">site.url</code> from the content file, which is why that field has to match the real domain after deploying.</p>
+        <p><span class="filepath">JsonLd.tsx</span> emits schema.org <code class="inline">Person</code> structured data — <code class="inline">worksFor</code>, <code class="inline">alumniOf</code>, <code class="inline">knowsAbout</code> built straight from the skills array — so Google can render a rich result on a name search. It's a Server Component, so it costs zero client-side bytes (§02).</p>
+      </section>
+
+      <section class="doc" id="qa">
+        <div class="sec-head"><span class="sec-num">11</span><h2>Questions to be ready for</h2></div>
+        <details class="qa" open>
+          <summary>Why Next.js, not plain React (Vite / CRA)?</summary>
+          <div class="a"><p>Static prerendering, file-based routing, built-in metadata/sitemap APIs, <code class="inline">next/font</code> optimisation, zero-config Vercel deploys. Plain React would ship a near-empty HTML shell and render everything client-side — worse for SEO and slower first paint on a content-first site like this.</p></div>
+        </details>
+        <details class="qa">
+          <summary>Why not just plain HTML and CSS, then?</summary>
+          <div class="a"><p>Fair pushback, worth partly conceding. Componentisation plus one typed content file is what makes the case-study modal, the theme system and the scroll interactions maintainable — by hand that's a lot more code. But it's a real trade: 162 kB of JS for what is fundamentally a document. The counter is that the HTML renders and is fully readable before any of that JS ever arrives.</p></div>
+        </details>
+        <details class="qa">
+          <summary>What's the biggest weakness of this site?</summary>
+          <div class="a"><p>Bundle size for a document; an O(n²) canvas loop that only works because of a hard particle cap; no tests; no CI. Naming a real weakness lands better than claiming there isn't one.</p></div>
+        </details>
+        <details class="qa">
+          <summary>Walk me through what happens when someone visits.</summary>
+          <div class="a"><p>CDN returns prebuilt HTML → the blocking theme script sets the <code class="inline">dark</code> class before first paint → the browser paints fully-styled, readable content → JS downloads → React hydrates and attaches handlers → effects run: the canvas starts, the scroll listener attaches, IntersectionObservers arm → interactions go live.</p></div>
+        </details>
+        <details class="qa">
+          <summary>Where does state actually live?</summary>
+          <div class="a"><p>Deliberately minimal and local. <code class="inline">Work</code> holds <code class="inline">selected: Project | null</code> for the modal; <code class="inline">Nav</code> holds <code class="inline">active</code>/<code class="inline">scrolled</code>/<code class="inline">open</code>. Theme lives in <code class="inline">next-themes</code>'s own context. No Redux, no Zustand, no custom Context — nothing here is shared across distant parts of the tree, so a state library would be solving a problem that doesn't exist.</p></div>
+        </details>
+        <details class="qa">
+          <summary>How would you add a blog to this?</summary>
+          <div class="a"><p><code class="inline">src/app/blog/[slug]/page.tsx</code> with <code class="inline">generateStaticParams()</code> to enumerate posts at build time — still fully static, and <code class="inline">title.template</code> already handles per-post titles.</p></div>
+        </details>
+      </section>
+
+      <div class="refbox">
+        <h4>Run it locally</h4>
+        <div class="cmd"><span class="dollar">$</span><code>npm install</code><span class="desc">one-time, pulls Next/React/Tailwind/Framer into node_modules</span></div>
+        <div class="cmd"><span class="dollar">$</span><code>npm run dev</code><span class="desc">localhost:3000, hot-reloads on save</span></div>
+        <div class="cmd"><span class="dollar">$</span><code>npm run build</code><span class="desc">production build — this is what generates the table in §01</span></div>
+        <div class="cmd"><span class="dollar">$</span><code>npm start</code><span class="desc">serves the build from npm run build</span></div>
+      </div>
+
+    </main>
+  </div>
+
+  <footer>
+    <p>Written as interview prep for the Portfolio repo. Every snippet on this page is real code from the codebase, not paraphrased.</p>
+  </footer>
+</div>
+</body>
+</html>
