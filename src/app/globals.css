@@ -1,0 +1,186 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ *
+ * Palette. Channels only (R G B) so Tailwind alpha modifiers work.
+ * Light is the base; .dark overrides. Both are declared explicitly so
+ * neither theme depends on a media query.
+ * ------------------------------------------------------------------ */
+@layer base {
+  :root {
+    --c-bg: 251 250 247;
+    --c-surface: 255 255 255;
+    --c-surface-2: 244 242 237;
+    --c-border: 227 224 216;
+    --c-border-strong: 203 199 188;
+    --c-text: 20 24 29;
+    --c-dim: 84 93 105;
+    --c-faint: 125 135 148;
+    --c-accent: 10 115 101;
+    --c-accent-2: 37 99 168;
+    --c-accent-ink: 255 255 255;
+
+    --glow: 10 115 101;
+    --shadow-card: 0 1px 2px rgb(20 24 29 / 0.04), 0 8px 24px -12px rgb(20 24 29 / 0.14);
+    --shadow-lift: 0 2px 4px rgb(20 24 29 / 0.05), 0 18px 40px -18px rgb(20 24 29 / 0.22);
+    --grid-line: 20 24 29;
+    --grid-alpha: 0.045;
+
+    color-scheme: light;
+  }
+
+  .dark {
+    --c-bg: 8 11 16;
+    --c-surface: 16 22 30;
+    --c-surface-2: 23 31 41;
+    --c-border: 35 44 55;
+    --c-border-strong: 55 68 82;
+    --c-text: 233 238 244;
+    --c-dim: 154 167 181;
+    --c-faint: 107 119 131;
+    --c-accent: 63 224 200;
+    --c-accent-2: 122 172 255;
+    --c-accent-ink: 4 32 28;
+
+    --glow: 63 224 200;
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 10px 30px -14px rgb(0 0 0 / 0.6);
+    --shadow-lift: 0 2px 6px rgb(0 0 0 / 0.45), 0 22px 48px -20px rgb(0 0 0 / 0.75);
+    --grid-line: 233 238 244;
+    --grid-alpha: 0.05;
+
+    color-scheme: dark;
+  }
+
+  * {
+    @apply border-line;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* the sticky nav is 64px; keep anchors clear of it */
+    scroll-padding-top: 84px;
+  }
+
+  body {
+    @apply bg-bg font-sans text-ink antialiased;
+    font-size: 16px;
+    line-height: 1.65;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: rgb(var(--c-accent));
+    color: rgb(var(--c-accent-ink));
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-bold tracking-[-0.018em];
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-bg;
+    border-radius: 4px;
+  }
+
+  /* Firefox / WebKit scrollbar, themed */
+  * {
+    scrollbar-color: rgb(var(--c-border-strong)) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--c-border-strong));
+    border-radius: 99px;
+    border: 3px solid rgb(var(--c-bg));
+  }
+}
+
+@layer components {
+  .shell {
+    @apply mx-auto w-full max-w-shell px-5 sm:px-7 lg:px-8;
+  }
+
+  .eyebrow {
+    @apply font-mono text-[0.72rem] font-medium uppercase tracking-[0.16em] text-accent;
+  }
+
+  .card-surface {
+    background-color: rgb(var(--c-surface));
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Faint blueprint grid used behind the hero + contact block. */
+  .grid-bg {
+    background-image:
+      linear-gradient(to right, rgb(var(--grid-line) / var(--grid-alpha)) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--grid-line) / var(--grid-alpha)) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 20%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, #000 20%, transparent 78%);
+  }
+
+  .accent-sweep {
+    background-image: linear-gradient(
+      100deg,
+      rgb(var(--c-accent)) 0%,
+      rgb(var(--c-accent)) 34%,
+      rgb(var(--c-accent-2)) 52%,
+      rgb(var(--c-accent)) 70%,
+      rgb(var(--c-accent)) 100%
+    );
+    background-size: 260% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hairline that fades out at both ends — used as section dividers. */
+  .rule-fade {
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(var(--c-border)) 12%,
+      rgb(var(--c-border)) 88%,
+      transparent
+    );
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Motion safety. Framer Motion components read useReducedMotion(), and
+ * this catches every CSS transition/animation that isn't JS-driven.
+ * ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
