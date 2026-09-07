@@ -20,8 +20,8 @@ export const site = {
   /** This site's own repo — linked in the footer as a quiet "the source is here". */
   repo: "https://github.com/shubhamjain-develops/Portfolio",
 
-  /** Update after your first Vercel deploy — used for OpenGraph + sitemap. */
-  url: "https://shubhamjain.dev",
+  /** Free Vercel subdomain — swap for a custom domain later if you buy one. */
+  url: "https://shubhamjain-develops.vercel.app",
 
   resumePath: "/Shubham_Jain_Resume.pdf",
 
