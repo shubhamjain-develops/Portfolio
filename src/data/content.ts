@@ -104,12 +104,12 @@ export const experience: Job[] = [
     summary:
       "Full-stack ownership at an AI-native healthcare startup, working inside a human + AI agentic engineering model.",
     points: [
-      "Build and ship full-stack features end to end — SSO login optimisation, centralised audit logging and reusable UI components — spanning backend APIs, frontend and database engineering.",
-      "Direct AI coding agents through development, debugging, refactoring and testing while owning technical direction, requirements, architecture and validation myself.",
-      "Helped design a structured AI-agent workflow covering change-impact analysis, implementation and local verification, measurably improving the reliability of agent-driven development.",
-      "Delivered and stabilised the hospital front-office intake flow, fixing data-persistence defects and integrating Azure OCR to read patient details from driving licences and insurance cards.",
-      "Led the restructuring of the platform's multi-tenant architecture — redesigned master tenant tables and implemented PostgreSQL Row-Level Security for stronger data isolation.",
-      "Built end-to-end Playwright coverage for post-deployment validation and automated regression verification.",
+      "Build and ship full-stack features for Synexar using .NET, Angular, PostgreSQL and Azure, owning work end to end across backend APIs, frontend and database engineering.",
+      "Direct AI coding agents through development, debugging, refactoring and testing while owning technical direction and architecture, backed by a structured change-impact and verification workflow.",
+      "Delivered centralised audit logging with a reporting dashboard optimised for fast retrieval using materialised views and keyset (cursor-based) pagination, validated end-to-end with Playwright coverage for regression-safe deployments.",
+      "Stabilised the hospital front-office intake flow, resolving data-persistence defects and integrating Azure OCR to extract patient details from driving licences and insurance cards — cutting manual entry by 40%.",
+      "Led the restructuring of the platform's multi-tenant architecture to model real-world clinic and hospital structures — redesigned master tenant tables and implemented PostgreSQL Row-Level Security for stronger data isolation.",
+      "Reduced SSO login time by 50% by streamlining the authentication flow and optimising auth validation to minimise redundant user verification.",
     ],
     tech: [".NET", "Angular", "PostgreSQL", "Azure", "Playwright"],
   },
@@ -122,12 +122,12 @@ export const experience: Job[] = [
       "Backend architecture for Kaveri 2.0, the Government of Karnataka's statewide property-registration platform.",
     points: [
       "Architected and optimised backend microservices for a platform serving 69M+ residents and 15M+ daily API requests, achieving a 70% reduction in API latency and query execution time through schema redesign, indexing strategy and query optimisation.",
-      "Designed idempotent, fault-tolerant REST APIs in .NET Core with transactional integrity for 9,000+ daily property registrations, supporting ₹20,000+ crore in annual government revenue.",
-      "Implemented authentication and authorisation using JWT, RBAC, API keys, schema validation and Redis rate limiting — meeting compliance and auditability requirements for 40K DAU / 900K MAU.",
-      "Built Azure DevOps CI/CD pipelines for automated deployment, testing and monitoring of high-availability microservices.",
-      "Led a team of four with end-to-end ownership of multiple critical microservices — delivered on schedule with zero major incidents.",
+      "Designed idempotent, transactionally safe .NET Core REST APIs, documented with Swagger, for 9,000+ daily registrations supporting ₹20,000+ crore in annual government revenue, engineered for fault tolerance and high availability under peak load.",
+      "Implemented authentication and authorisation using JWT, RBAC, API keys, schema validation and Redis rate limiting — meeting compliance and auditability requirements for 40,000 DAU in a highly regulated environment.",
+      "Leveraged AI-assisted development tools (GitHub Copilot, Cursor IDE) to accelerate feature development, refactoring and test-case generation, improving delivery speed and code quality.",
+      "Optimised an MIS dashboard covering 30+ reports, improving report generation speed by 27% on average through streamlined third-party data flows and database query optimisation — indexing, joins and pagination.",
     ],
-    tech: [".NET Core", "PostgreSQL", "Redis", "Azure DevOps", "Microservices"],
+    tech: [".NET Core", "PostgreSQL", "Redis", "Swagger", "Microservices"],
   },
   {
     title: "Associate Software Engineer",
@@ -135,23 +135,26 @@ export const experience: Job[] = [
     location: "Bengaluru, India",
     period: "Jun 2023 — Mar 2025",
     summary:
-      "Core property-registration workflows, plus one internal product designed and shipped solo.",
+      "Angular frontend engineering for Kaveri 2.0's core registration workflows, plus CI/CD delivery and team leadership.",
     points: [
-      "Developed .NET APIs and Angular applications for core registration workflows — reactive forms and lazy loading — for a 40,000 daily-active-user base.",
-      "Single-handedly designed and launched an in-house 360° Feedback application with role-based authentication, enabling peer and upward feedback for 500+ users — work that earned two promotions.",
+      "Engineered Angular frontends with reactive forms and lazy loading, supporting real-time validation, dynamic valuations and secure data handling for authenticated and guest users across a 900,000 MAU base.",
+      "Established Azure DevOps CI/CD pipelines for automated deployment, testing and monitoring of high-availability microservices, accelerating delivery cycles and supporting platform reliability under peak load.",
+      "Led a team of 4 developers with full end-to-end ownership of multiple critical microservices and modules, from architecture through production deployment — serving as the main technical point of contact with stakeholders to align requirements and priorities, and delivering every release on schedule.",
     ],
-    tech: [".NET Core MVC", "Angular", "MySQL"],
+    tech: ["Angular", "Reactive Forms", "Azure DevOps", "CI/CD"],
   },
   {
     title: "Junior Software Engineer",
     company: "Center for Smart Governance",
     location: "Bengaluru, India",
     period: "Aug 2021 — May 2023",
-    summary: "Government technology solutions across the stack.",
+    summary:
+      "Foundational Kaveri 2.0 modules, plus one internal product designed and shipped solo.",
     points: [
-      "Built Angular applications, .NET backend services and REST APIs for government technology solutions.",
+      "Built Kaveri 2.0 modules from the ground up, delivering complex workflow screens such as fee calculation and integrating multiple statewide land and property record systems, including Bhoomi and e-Aasthi.",
+      "Single-handedly designed and launched the in-house 360° Feedback application (.NET Core MVC, Angular, MySQL, Entity Framework) with role-based authentication, enabling peer and upward feedback for 500+ users — work that earned two promotions.",
     ],
-    tech: ["Angular", ".NET", "REST"],
+    tech: [".NET Core MVC", "Angular", "MySQL", "Entity Framework"],
   },
 ];
 
@@ -274,10 +277,12 @@ export const skills: SkillGroup[] = [
       "C#",
       ".NET Core",
       "ASP.NET Core",
+      "Entity Framework",
       "REST APIs",
+      "Swagger",
       "Microservices",
       "Distributed Systems",
-      "System Design",
+      "System Design & Architecture",
       "Multi-Tenant Architecture",
       "Idempotency",
     ],
@@ -299,7 +304,7 @@ export const skills: SkillGroup[] = [
   },
   {
     title: "Cloud & DevOps",
-    items: ["Azure", "Azure OCR", "Azure DevOps", "CI/CD", "Docker"],
+    items: ["Azure", "Azure OCR", "Azure DevOps", "CI/CD", "Docker", "Git"],
   },
   {
     title: "Frontend",
@@ -307,11 +312,11 @@ export const skills: SkillGroup[] = [
   },
   {
     title: "Testing & Security",
-    items: ["Playwright", "JWT", "RBAC", "Rate Limiting", "Schema Validation"],
+    items: ["Playwright", "JWT", "RBAC", "SSO", "Rate Limiting", "Schema Validation"],
   },
 ];
 
-export const languages = ["C#", "SQL", "TypeScript", "Python"];
+export const languages = ["C#", "Java", "Node.js", "SQL", "TypeScript", "Python"];
 
 export type Credential = {
   title: string;
