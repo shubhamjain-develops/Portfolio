@@ -6,7 +6,7 @@ confidence_post: 85
 repo: Portfolio
 base: origin/main
 branch: feat/resume-sync-copy-refresh
-phase: scored
+phase: pushed
 created: 2026-09-08
 ---
 
