@@ -102,7 +102,7 @@ export const experience: Job[] = [
     period: "May 2026 — Present",
     current: true,
     summary:
-      "Full-stack ownership at an AI-native healthcare startup, working inside a human + AI agentic engineering model.",
+      "Full-stack ownership at an AI-native healthcare startup, directing AI coding agents inside a human-supervised engineering model rather than avoiding them or handing them the keys. I own requirements, architecture and validation while agents do the typing, which so far has cut SSO login time by 50% and manual front-desk data entry by 40%.",
     points: [
       "Build and ship full-stack features for Synexar using .NET, Angular, PostgreSQL and Azure, owning work end to end across backend APIs, frontend and database engineering.",
       "Direct AI coding agents through development, debugging, refactoring and testing while owning technical direction and architecture, backed by a structured change-impact and verification workflow.",
@@ -119,7 +119,7 @@ export const experience: Job[] = [
     location: "Bengaluru, India",
     period: "Apr 2025 — Apr 2026",
     summary:
-      "Backend architecture for Kaveri 2.0, the Government of Karnataka's statewide property-registration platform.",
+      "Backend architecture for Kaveri 2.0, the Government of Karnataka's statewide property-registration platform, serving 69M+ residents and 15M+ API requests a day. Schema redesign, indexing and query-optimisation work here cut API latency by 70%, and I leaned on AI-assisted tooling — GitHub Copilot, Cursor IDE — to keep delivery speed up while doing it.",
     points: [
       "Architected and optimised backend microservices for a platform serving 69M+ residents and 15M+ daily API requests, achieving a 70% reduction in API latency and query execution time through schema redesign, indexing strategy and query optimisation.",
       "Designed idempotent, transactionally safe .NET Core REST APIs, documented with Swagger, for 9,000+ daily registrations supporting ₹20,000+ crore in annual government revenue, engineered for fault tolerance and high availability under peak load.",
@@ -135,7 +135,7 @@ export const experience: Job[] = [
     location: "Bengaluru, India",
     period: "Jun 2023 — Mar 2025",
     summary:
-      "Angular frontend engineering for Kaveri 2.0's core registration workflows, plus CI/CD delivery and team leadership.",
+      "Angular frontend engineering for Kaveri 2.0's core registration workflows, serving a 900,000-monthly-active-user base, plus the Azure DevOps CI/CD pipelines behind the platform's releases. I also led a team of four developers with end-to-end ownership of several critical microservices.",
     points: [
       "Engineered Angular frontends with reactive forms and lazy loading, supporting real-time validation, dynamic valuations and secure data handling for authenticated and guest users across a 900,000 MAU base.",
       "Established Azure DevOps CI/CD pipelines for automated deployment, testing and monitoring of high-availability microservices, accelerating delivery cycles and supporting platform reliability under peak load.",
@@ -149,7 +149,7 @@ export const experience: Job[] = [
     location: "Bengaluru, India",
     period: "Aug 2021 — May 2023",
     summary:
-      "Foundational Kaveri 2.0 modules, plus one internal product designed and shipped solo.",
+      "Built foundational Kaveri 2.0 workflow screens from the ground up, integrating statewide land-record systems like Bhoomi and e-Aasthi. Also designed and shipped an internal 360° Feedback product solo, end to end, for 500+ users — the work that earned two promotions.",
     points: [
       "Built Kaveri 2.0 modules from the ground up, delivering complex workflow screens such as fee calculation and integrating multiple statewide land and property record systems, including Bhoomi and e-Aasthi.",
       "Single-handedly designed and launched the in-house 360° Feedback application (.NET Core MVC, Angular, MySQL, Entity Framework) with role-based authentication, enabling peer and upward feedback for 500+ users — work that earned two promotions.",
