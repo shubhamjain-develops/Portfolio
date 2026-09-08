@@ -87,3 +87,101 @@ export function ExternalIcon({ className, size = 14 }: IconProps) {
     </svg>
   );
 }
+
+/**
+ * Skill-pill icons below. Deliberately abstract, hand-drawn glyphs in the
+ * same thin-stroke style as the icons above — not traced brand logos —
+ * so they read consistently with the rest of the set at 14-16px.
+ */
+
+export function DotNetIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <ellipse cx="8" cy="12" rx="4.2" ry="3.4" />
+      <ellipse cx="16" cy="12" rx="4.2" ry="3.4" />
+    </svg>
+  );
+}
+
+export function CSharpIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="3" y="3" width="18" height="18" rx="4" />
+      <text x="12" y="15.5" textAnchor="middle" fontSize="8.5" fontFamily="var(--font-mono, monospace)" fill="currentColor" stroke="none">
+        C#
+      </text>
+    </svg>
+  );
+}
+
+export function TypeScriptIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="3" y="3" width="18" height="18" rx="4" />
+      <text x="12" y="15.5" textAnchor="middle" fontSize="8" fontFamily="var(--font-mono, monospace)" fill="currentColor" stroke="none">
+        TS
+      </text>
+    </svg>
+  );
+}
+
+export function PostgresIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <ellipse cx="12" cy="6.5" rx="7" ry="3" />
+      <path d="M5 6.5v11a7 3 0 0 0 14 0v-11" />
+      <path d="M5 12a7 3 0 0 0 14 0" />
+    </svg>
+  );
+}
+
+export function RedisIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="3" y="3" width="18" height="18" rx="4" />
+      <path d="M13 6 7.5 13.2h4L10.5 20l7-9.2h-4L14.5 6Z" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function AzureIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M9.5 4h4l6.2 16h-5.1l-3.1-8.3-4.3 8.3H2.3Z" />
+    </svg>
+  );
+}
+
+export function DockerIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <rect x="3.5" y="10" width="3.6" height="3.6" />
+      <rect x="8.2" y="10" width="3.6" height="3.6" />
+      <rect x="8.2" y="5.4" width="3.6" height="3.6" />
+      <rect x="12.9" y="10" width="3.6" height="3.6" />
+      <path d="M2 14.2c1.6 3.6 5 5.6 9.5 5.6 4.7 0 8.3-2.3 10.5-6.7-2 .5-4 .4-5-.2" />
+    </svg>
+  );
+}
+
+export function GitIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <circle cx="6" cy="6" r="2" />
+      <circle cx="6" cy="18" r="2" />
+      <circle cx="18" cy="12" r="2" />
+      <path d="M6 8v8" />
+      <path d="M6 11.5c0-2.8 2.6-3.9 5.6-3.9H16" />
+    </svg>
+  );
+}
+
+export function AngularIcon({ className, size = 14 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
+      <path d="M12 2.5 20.5 5.8 19 17 12 21.5 5 17 3.5 5.8Z" />
+      <path d="M8.3 15.5 12 6.5l3.7 9" />
+      <path d="M9.9 12.2h4.2" />
+    </svg>
+  );
+}
