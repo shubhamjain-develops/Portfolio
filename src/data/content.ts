@@ -6,7 +6,7 @@
 export const site = {
   name: "Shubham Jain",
   initials: "SJ",
-  role: "Backend & Distributed Systems Engineer",
+  role: "Full-Stack Engineer | AI-Native Engineering",
   location: "Bengaluru, India",
   availability: "Open to remote",
   email: "shubhamjainiiitb@gmail.com",
@@ -26,15 +26,14 @@ export const site = {
   resumePath: "/Shubham_Jain_Resume.pdf",
 
   intro:
-    "Full-stack engineer with five years across statewide government infrastructure and early-stage startup engineering — specialising in .NET, PostgreSQL and distributed systems, and in directing AI coding agents inside a human-in-the-loop workflow.",
+    "Full-stack engineer with five years across statewide government infrastructure and early-stage startup engineering — specialising in .NET, Angular and PostgreSQL, and in directing AI coding agents inside a human-in-the-loop workflow.",
 
   /** The one line a recruiter should remember. */
   thesis: {
     before: "Led backend architecture for a platform serving ",
     highlights: [
       { value: "69M+ residents", after: " — cut API latency " },
-      { value: "70%", after: " and held " },
-      { value: "zero major incidents", after: " across a 15M-request-a-day system." },
+      { value: "70%", after: " across a 15M-request-a-day system." },
     ],
   },
 } as const;
@@ -66,7 +65,7 @@ export const about = {
   heading: "Systems that hold up under real constraints",
   paragraphs: [
     "I work on the boundary between “it works” and “it works at scale.” Over the past five years that has meant architecting the backend for a statewide property-registration platform used by 69 million residents, rebuilding multi-tenant data isolation with real guarantees behind it, and — as a founding engineer at an AI-native healthcare startup — directing AI coding agents inside a structured, human-supervised workflow rather than either avoiding them or handing them the keys.",
-    "The through-line is ownership. On Kaveri 2.0 I led a team of four with end-to-end responsibility for critical microservices carrying ₹20,000+ crore in annual government revenue. At Synexar I own requirements, architecture and validation while agents do the typing — which turns out to demand more engineering judgement, not less.",
+    "The through-line is ownership. On Kaveri 2.0 I led a team of four with end-to-end responsibility for critical microservices underpinning the state's entire property-registration system. At Synexar I own requirements, architecture and validation while agents do the typing — which turns out to demand more engineering judgement, not less.",
     "I like problems with constraints that bite: regulatory requirements, data nobody can afford to lose, and traffic that doesn't ask permission before it spikes.",
   ],
 };
@@ -102,14 +101,14 @@ export const experience: Job[] = [
     period: "May 2026 — Present",
     current: true,
     summary:
-      "Full-stack ownership at an AI-native healthcare startup, working inside a human + AI agentic engineering model.",
+      "Full-stack ownership at an AI-native healthcare startup, directing AI coding agents inside a human-supervised engineering model rather than avoiding them or handing them the keys. I own requirements, architecture and validation while agents do the typing, which so far has cut SSO login time by 50% and manual front-desk data entry by 40%.",
     points: [
-      "Build and ship full-stack features end to end — SSO login optimisation, centralised audit logging and reusable UI components — spanning backend APIs, frontend and database engineering.",
-      "Direct AI coding agents through development, debugging, refactoring and testing while owning technical direction, requirements, architecture and validation myself.",
-      "Helped design a structured AI-agent workflow covering change-impact analysis, implementation and local verification, measurably improving the reliability of agent-driven development.",
-      "Delivered and stabilised the hospital front-office intake flow, fixing data-persistence defects and integrating Azure OCR to read patient details from driving licences and insurance cards.",
-      "Led the restructuring of the platform's multi-tenant architecture — redesigned master tenant tables and implemented PostgreSQL Row-Level Security for stronger data isolation.",
-      "Built end-to-end Playwright coverage for post-deployment validation and automated regression verification.",
+      "Build and ship full-stack features for Synexar using .NET, Angular, PostgreSQL and Azure, owning work end to end across backend APIs, frontend and database engineering.",
+      "Direct AI coding agents through development, debugging, refactoring and testing while owning technical direction and architecture, backed by a structured change-impact and verification workflow.",
+      "Delivered centralised audit logging with a reporting dashboard optimised for fast retrieval using materialised views and keyset (cursor-based) pagination, validated end-to-end with Playwright coverage for regression-safe deployments.",
+      "Stabilised the hospital front-office intake flow, resolving data-persistence defects and integrating Azure OCR to extract patient details from driving licences and insurance cards — cutting manual entry by 40%.",
+      "Led the restructuring of the platform's multi-tenant architecture to model real-world clinic and hospital structures — redesigned master tenant tables and implemented PostgreSQL Row-Level Security for stronger data isolation.",
+      "Reduced SSO login time by 50% by streamlining the authentication flow and optimising auth validation to minimise redundant user verification.",
     ],
     tech: [".NET", "Angular", "PostgreSQL", "Azure", "Playwright"],
   },
@@ -119,15 +118,15 @@ export const experience: Job[] = [
     location: "Bengaluru, India",
     period: "Apr 2025 — Apr 2026",
     summary:
-      "Backend architecture for Kaveri 2.0, the Government of Karnataka's statewide property-registration platform.",
+      "Backend architecture for Kaveri 2.0, the Government of Karnataka's statewide property-registration platform, serving 69M+ residents and 15M+ API requests a day. Schema redesign, indexing and query-optimisation work here cut API latency by 70%, and I leaned on AI-assisted tooling — GitHub Copilot, Cursor IDE — to keep delivery speed up while doing it.",
     points: [
       "Architected and optimised backend microservices for a platform serving 69M+ residents and 15M+ daily API requests, achieving a 70% reduction in API latency and query execution time through schema redesign, indexing strategy and query optimisation.",
-      "Designed idempotent, fault-tolerant REST APIs in .NET Core with transactional integrity for 9,000+ daily property registrations, supporting ₹20,000+ crore in annual government revenue.",
-      "Implemented authentication and authorisation using JWT, RBAC, API keys, schema validation and Redis rate limiting — meeting compliance and auditability requirements for 40K DAU / 900K MAU.",
-      "Built Azure DevOps CI/CD pipelines for automated deployment, testing and monitoring of high-availability microservices.",
-      "Led a team of four with end-to-end ownership of multiple critical microservices — delivered on schedule with zero major incidents.",
+      "Designed idempotent, transactionally safe .NET Core REST APIs, documented with Swagger, for 9,000+ daily registrations supporting ₹20,000+ crore in annual government revenue, engineered for fault tolerance and high availability under peak load.",
+      "Implemented authentication and authorisation using JWT, RBAC, API keys, schema validation and Redis rate limiting — meeting compliance and auditability requirements for 40,000 DAU in a highly regulated environment.",
+      "Leveraged AI-assisted development tools (GitHub Copilot, Cursor IDE) to accelerate feature development, refactoring and test-case generation, improving delivery speed and code quality.",
+      "Optimised an MIS dashboard covering 30+ reports, improving report generation speed by 27% on average through streamlined third-party data flows and database query optimisation — indexing, joins and pagination.",
     ],
-    tech: [".NET Core", "PostgreSQL", "Redis", "Azure DevOps", "Microservices"],
+    tech: [".NET Core", "PostgreSQL", "Redis", "Swagger", "Microservices"],
   },
   {
     title: "Associate Software Engineer",
@@ -135,23 +134,26 @@ export const experience: Job[] = [
     location: "Bengaluru, India",
     period: "Jun 2023 — Mar 2025",
     summary:
-      "Core property-registration workflows, plus one internal product designed and shipped solo.",
+      "Angular frontend engineering for Kaveri 2.0's core registration workflows, serving a 900,000-monthly-active-user base, plus the Azure DevOps CI/CD pipelines behind the platform's releases. I also led a team of four developers with end-to-end ownership of several critical microservices.",
     points: [
-      "Developed .NET APIs and Angular applications for core registration workflows — reactive forms and lazy loading — for a 40,000 daily-active-user base.",
-      "Single-handedly designed and launched an in-house 360° Feedback application with role-based authentication, enabling peer and upward feedback for 500+ users — work that earned two promotions.",
+      "Engineered Angular frontends with reactive forms and lazy loading, supporting real-time validation, dynamic valuations and secure data handling for authenticated and guest users across a 900,000 MAU base.",
+      "Established Azure DevOps CI/CD pipelines for automated deployment, testing and monitoring of high-availability microservices, accelerating delivery cycles and supporting platform reliability under peak load.",
+      "Led a team of 4 developers with full end-to-end ownership of multiple critical microservices and modules, from architecture through production deployment — serving as the main technical point of contact with stakeholders to align requirements and priorities, and delivering every release on schedule.",
     ],
-    tech: [".NET Core MVC", "Angular", "MySQL"],
+    tech: ["Angular", "Reactive Forms", "Azure DevOps", "CI/CD"],
   },
   {
     title: "Junior Software Engineer",
     company: "Center for Smart Governance",
     location: "Bengaluru, India",
     period: "Aug 2021 — May 2023",
-    summary: "Government technology solutions across the stack.",
+    summary:
+      "Built foundational Kaveri 2.0 workflow screens from the ground up, integrating statewide land-record systems like Bhoomi and e-Aasthi. Also designed and shipped an internal 360° Feedback product solo, end to end, for 500+ users — the work that earned two promotions.",
     points: [
-      "Built Angular applications, .NET backend services and REST APIs for government technology solutions.",
+      "Built Kaveri 2.0 modules from the ground up, delivering complex workflow screens such as fee calculation and integrating multiple statewide land and property record systems, including Bhoomi and e-Aasthi.",
+      "Single-handedly designed and launched the in-house 360° Feedback application (.NET Core MVC, Angular, MySQL, Entity Framework) with role-based authentication, enabling peer and upward feedback for 500+ users — work that earned two promotions.",
     ],
-    tech: ["Angular", ".NET", "REST"],
+    tech: [".NET Core MVC", "Angular", "MySQL", "Entity Framework"],
   },
 ];
 
@@ -194,7 +196,7 @@ export const projects: Project[] = [
       "Shipped it through Azure DevOps CI/CD with automated deployment, testing and monitoring, and led a team of four owning the critical services end to end.",
     ],
     result:
-      "70% reduction in API latency and query execution time, zero major incidents across the period I owned the services, and a platform serving 40K daily / 900K monthly active users without special handling at peak.",
+      "70% reduction in API latency and query execution time, and a platform serving 40K daily / 900K monthly active users without special handling at peak.",
     tech: [".NET Core", "PostgreSQL", "Redis", "Microservices", "Azure DevOps", "JWT / RBAC"],
     confidential: true,
   },
@@ -274,10 +276,12 @@ export const skills: SkillGroup[] = [
       "C#",
       ".NET Core",
       "ASP.NET Core",
+      "Entity Framework",
       "REST APIs",
+      "Swagger",
       "Microservices",
       "Distributed Systems",
-      "System Design",
+      "System Design & Architecture",
       "Multi-Tenant Architecture",
       "Idempotency",
     ],
@@ -299,7 +303,7 @@ export const skills: SkillGroup[] = [
   },
   {
     title: "Cloud & DevOps",
-    items: ["Azure", "Azure OCR", "Azure DevOps", "CI/CD", "Docker"],
+    items: ["Azure", "Azure OCR", "Azure DevOps", "CI/CD", "Docker", "Git"],
   },
   {
     title: "Frontend",
@@ -307,11 +311,11 @@ export const skills: SkillGroup[] = [
   },
   {
     title: "Testing & Security",
-    items: ["Playwright", "JWT", "RBAC", "Rate Limiting", "Schema Validation"],
+    items: ["Playwright", "JWT", "RBAC", "SSO", "Rate Limiting", "Schema Validation"],
   },
 ];
 
-export const languages = ["C#", "SQL", "TypeScript", "Python"];
+export const languages = ["C#", "Java", "Node.js", "SQL", "TypeScript", "Python"];
 
 export type Credential = {
   title: string;

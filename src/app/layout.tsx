@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { Analytics } from "@vercel/analytics/next";
 import { site } from "@/data/content";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
@@ -53,8 +54,8 @@ export const metadata: Metadata = {
   description,
   keywords: [
     "Shubham Jain",
-    "Backend Engineer",
-    "Distributed Systems",
+    "Full-Stack Engineer",
+    "AI-Native Engineering",
     ".NET",
     "Angular",
     "PostgreSQL",
@@ -109,6 +110,7 @@ export default function RootLayout({
           </a>
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
