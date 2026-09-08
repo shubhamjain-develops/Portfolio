@@ -33,8 +33,7 @@ export const site = {
     before: "Led backend architecture for a platform serving ",
     highlights: [
       { value: "69M+ residents", after: " — cut API latency " },
-      { value: "70%", after: " and held " },
-      { value: "zero major incidents", after: " across a 15M-request-a-day system." },
+      { value: "70%", after: " across a 15M-request-a-day system." },
     ],
   },
 } as const;
@@ -66,7 +65,7 @@ export const about = {
   heading: "Systems that hold up under real constraints",
   paragraphs: [
     "I work on the boundary between “it works” and “it works at scale.” Over the past five years that has meant architecting the backend for a statewide property-registration platform used by 69 million residents, rebuilding multi-tenant data isolation with real guarantees behind it, and — as a founding engineer at an AI-native healthcare startup — directing AI coding agents inside a structured, human-supervised workflow rather than either avoiding them or handing them the keys.",
-    "The through-line is ownership. On Kaveri 2.0 I led a team of four with end-to-end responsibility for critical microservices carrying ₹20,000+ crore in annual government revenue. At Synexar I own requirements, architecture and validation while agents do the typing — which turns out to demand more engineering judgement, not less.",
+    "The through-line is ownership. On Kaveri 2.0 I led a team of four with end-to-end responsibility for critical microservices underpinning the state's entire property-registration system. At Synexar I own requirements, architecture and validation while agents do the typing — which turns out to demand more engineering judgement, not less.",
     "I like problems with constraints that bite: regulatory requirements, data nobody can afford to lose, and traffic that doesn't ask permission before it spikes.",
   ],
 };
@@ -197,7 +196,7 @@ export const projects: Project[] = [
       "Shipped it through Azure DevOps CI/CD with automated deployment, testing and monitoring, and led a team of four owning the critical services end to end.",
     ],
     result:
-      "70% reduction in API latency and query execution time, zero major incidents across the period I owned the services, and a platform serving 40K daily / 900K monthly active users without special handling at peak.",
+      "70% reduction in API latency and query execution time, and a platform serving 40K daily / 900K monthly active users without special handling at peak.",
     tech: [".NET Core", "PostgreSQL", "Redis", "Microservices", "Azure DevOps", "JWT / RBAC"],
     confidential: true,
   },
