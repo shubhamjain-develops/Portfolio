@@ -6,7 +6,7 @@
 export const site = {
   name: "Shubham Jain",
   initials: "SJ",
-  role: "Backend & Distributed Systems Engineer",
+  role: "Full-Stack Engineer | AI-Native Engineering",
   location: "Bengaluru, India",
   availability: "Open to remote",
   email: "shubhamjainiiitb@gmail.com",
@@ -26,7 +26,7 @@ export const site = {
   resumePath: "/Shubham_Jain_Resume.pdf",
 
   intro:
-    "Full-stack engineer with five years across statewide government infrastructure and early-stage startup engineering — specialising in .NET, PostgreSQL and distributed systems, and in directing AI coding agents inside a human-in-the-loop workflow.",
+    "Full-stack engineer with five years across statewide government infrastructure and early-stage startup engineering — specialising in .NET, Angular and PostgreSQL, and in directing AI coding agents inside a human-in-the-loop workflow.",
 
   /** The one line a recruiter should remember. */
   thesis: {

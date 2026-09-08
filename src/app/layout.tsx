@@ -53,8 +53,8 @@ export const metadata: Metadata = {
   description,
   keywords: [
     "Shubham Jain",
-    "Backend Engineer",
-    "Distributed Systems",
+    "Full-Stack Engineer",
+    "AI-Native Engineering",
     ".NET",
     "Angular",
     "PostgreSQL",
