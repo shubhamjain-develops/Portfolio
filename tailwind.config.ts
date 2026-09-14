@@ -21,6 +21,7 @@ const config: Config = {
         faint: "rgb(var(--c-faint) / <alpha-value>)",
         accent: "rgb(var(--c-accent) / <alpha-value>)",
         "accent-2": "rgb(var(--c-accent-2) / <alpha-value>)",
+        warm: "rgb(var(--c-warm) / <alpha-value>)",
         "accent-ink": "rgb(var(--c-accent-ink) / <alpha-value>)",
       },
       fontFamily: {

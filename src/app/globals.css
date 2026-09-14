@@ -19,6 +19,9 @@
     --c-faint: 125 135 148;
     --c-accent: 10 115 101;
     --c-accent-2: 37 99 168;
+    /* Coral, the one extra colour. Kept to three spots: the current role on
+       the timeline, the hero click-burst and the hamster. */
+    --c-warm: 201 78 44;
     --c-accent-ink: 255 255 255;
 
     --glow: 10 115 101;
@@ -41,6 +44,7 @@
     --c-faint: 107 119 131;
     --c-accent: 63 224 200;
     --c-accent-2: 122 172 255;
+    --c-warm: 255 146 107;
     --c-accent-ink: 4 32 28;
 
     --glow: 63 224 200;
