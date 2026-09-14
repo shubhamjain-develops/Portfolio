@@ -10,14 +10,22 @@ const DROP_MS = 680;
 
 /** The SVG's viewBox width, for turning screen pixels into SVG units. */
 const VIEWBOX_WIDTH = 180;
-/** Eye centres in viewBox coordinates. */
-const EYE_Y = 50;
-const EYES_MID_X = 79;
-/** How far (in SVG units) the eyes may move off-centre. */
-const LOOK_X = 2.6;
-const LOOK_Y = 2.2;
+/** Midpoint between the eyes, in viewBox coordinates. */
+const FACE_X = 79;
+const FACE_Y = 50;
+/**
+ * How far the eyes move (in SVG units) when looking fully to one side. The
+ * white sparkles move a little further than the dark bead, so the eyes read as
+ * rolling toward the cursor rather than sliding.
+ */
+const EYE_RANGE = { x: 5.5, y: 3.6 };
+const SPARKLE_EXTRA = { x: 1.6, y: 1.1 };
+/** Gentle body lean toward the cursor, in degrees. */
+const MAX_TILT = 7;
+/** Eyes are fully turned once the cursor is this many screen pixels away. */
+const FULL_TURN_AT = 80;
 /** The cursor counts as "close" within this many screen pixels of the face. */
-const EXCITED_WITHIN = 190;
+const EXCITED_WITHIN = 220;
 
 type Heart = { id: number; x: number; r: number; delay: number };
 
@@ -36,8 +44,9 @@ function readStored(): string | null {
  * what's in localStorage, and a guessed count would flash on hydration.
  *
  * It also watches the cursor: its eyes follow it anywhere on the page, its body
- * leans toward it, and it gets excited when the cursor comes close. With no
- * cursor it glances around on its own. All of that is off under reduced motion.
+ * leans gently after it, and it gets excited when the cursor comes close. With
+ * no cursor it glances around on its own. All of that is off under reduced
+ * motion.
  */
 export function Hamster() {
   const reduce = useReducedMotion();
@@ -57,6 +66,7 @@ export function Hamster() {
   const svgRef = useRef<SVGSVGElement>(null);
   const lookRef = useRef<SVGGElement>(null);
   const eyeRefs = useRef<(SVGGElement | null)[]>([]);
+  const sparkleRefs = useRef<(SVGGElement | null)[]>([]);
 
   const later = (fn: () => void, ms: number) => {
     timers.current.push(window.setTimeout(fn, ms));
@@ -88,7 +98,7 @@ export function Hamster() {
     };
   }, []);
 
-  // Eyes and head follow the cursor. One rAF loop eases toward a target and
+  // Eyes and body follow the cursor. One rAF loop eases toward a target and
   // writes straight to the SVG, so pointer moves never re-render React.
   useEffect(() => {
     if (!mounted || reduce) return;
@@ -99,42 +109,41 @@ export function Hamster() {
     let pointer: { x: number; y: number } | null = null;
     let nextGlance = 0;
     let raf = 0;
-    const target = { x: 0, y: 0, tilt: 0 };
-    const eased = { x: 0, y: 0, tilt: 0 };
+    // Where to look, as a direction from -1 to 1 on each axis.
+    const target = { x: 0, y: 0 };
+    const eased = { x: 0, y: 0 };
 
     const aim = (now: number) => {
       if (!pointer) {
         // No cursor (touch screen, or it left the window): glance around.
         button.classList.remove("hm-excited");
         if (now < nextGlance) return;
-        const side = Math.floor(Math.random() * 3) - 1; // left, ahead or right
-        target.x = side * LOOK_X * 0.8;
-        target.y = (Math.random() - 0.5) * LOOK_Y;
-        target.tilt = side * 3;
+        target.x = (Math.floor(Math.random() * 3) - 1) * 0.85; // left, ahead or right
+        target.y = (Math.random() - 0.5) * 0.9;
         nextGlance = now + 1400 + Math.random() * 1600;
         return;
       }
       const rect = svg.getBoundingClientRect();
       const scale = rect.width / VIEWBOX_WIDTH;
-      const dx = pointer.x - (rect.left + EYES_MID_X * scale);
-      const dy = pointer.y - (rect.top + EYE_Y * scale);
+      const dx = pointer.x - (rect.left + FACE_X * scale);
+      const dy = pointer.y - (rect.top + FACE_Y * scale);
       const distance = Math.hypot(dx, dy) || 1;
-      // Fully sideways once the cursor is ~120px away; centred when on the face.
-      const reach = Math.min(1, distance / 120);
-      target.x = (dx / distance) * LOOK_X * reach;
-      target.y = (dy / distance) * LOOK_Y * reach;
-      target.tilt = Math.max(-7, Math.min(7, dx / 45));
+      const reach = Math.min(1, distance / FULL_TURN_AT);
+      target.x = (dx / distance) * reach;
+      target.y = (dy / distance) * reach;
       button.classList.toggle("hm-excited", distance < EXCITED_WITHIN);
     };
 
     const frame = (now: number) => {
       aim(now);
-      eased.x += (target.x - eased.x) * 0.2;
-      eased.y += (target.y - eased.y) * 0.2;
-      eased.tilt += (target.tilt - eased.tilt) * 0.12;
-      const shift = `translate(${eased.x.toFixed(2)} ${eased.y.toFixed(2)})`;
-      for (const eye of eyeRefs.current) eye?.setAttribute("transform", shift);
-      lookRef.current?.style.setProperty("transform", `rotate(${eased.tilt.toFixed(2)}deg)`);
+      eased.x += (target.x - eased.x) * 0.22;
+      eased.y += (target.y - eased.y) * 0.22;
+
+      const eyes = `translate(${(eased.x * EYE_RANGE.x).toFixed(2)} ${(eased.y * EYE_RANGE.y).toFixed(2)})`;
+      const sparkle = `translate(${(eased.x * SPARKLE_EXTRA.x).toFixed(2)} ${(eased.y * SPARKLE_EXTRA.y).toFixed(2)})`;
+      for (const eye of eyeRefs.current) eye?.setAttribute("transform", eyes);
+      for (const glint of sparkleRefs.current) glint?.setAttribute("transform", sparkle);
+      lookRef.current?.style.setProperty("transform", `rotate(${(eased.x * MAX_TILT).toFixed(2)}deg)`);
       raf = requestAnimationFrame(frame);
     };
 
@@ -241,6 +250,7 @@ export function Hamster() {
           svgRef={svgRef}
           lookRef={lookRef}
           eyeRefs={eyeRefs}
+          sparkleRefs={sparkleRefs}
           treat={treat}
           dropping={dropping}
           hideTreat={full}
@@ -276,10 +286,43 @@ function HeartIcon() {
   );
 }
 
+function Eye({
+  cx,
+  index,
+  eyeRefs,
+  sparkleRefs,
+}: {
+  cx: number;
+  index: number;
+  eyeRefs: React.MutableRefObject<(SVGGElement | null)[]>;
+  sparkleRefs: React.MutableRefObject<(SVGGElement | null)[]>;
+}) {
+  return (
+    <g className="hm-eye">
+      <g
+        ref={(el) => {
+          eyeRefs.current[index] = el;
+        }}
+      >
+        <ellipse cx={cx} cy="50" rx="6.3" ry="7.2" fill="#2a1b16" />
+        <g
+          ref={(el) => {
+            sparkleRefs.current[index] = el;
+          }}
+        >
+          <circle cx={cx + 2.4} cy="46.8" r="2.5" fill="#fff" />
+          <circle cx={cx - 1.8} cy="53.4" r="1.1" fill="#fff" opacity=".85" />
+        </g>
+      </g>
+    </g>
+  );
+}
+
 function HamsterArt({
   svgRef,
   lookRef,
   eyeRefs,
+  sparkleRefs,
   treat,
   dropping,
   hideTreat,
@@ -287,6 +330,7 @@ function HamsterArt({
   svgRef: React.RefObject<SVGSVGElement | null>;
   lookRef: React.RefObject<SVGGElement | null>;
   eyeRefs: React.MutableRefObject<(SVGGElement | null)[]>;
+  sparkleRefs: React.MutableRefObject<(SVGGElement | null)[]>;
   treat: number;
   dropping: boolean;
   hideTreat: boolean;
@@ -379,28 +423,8 @@ function HamsterArt({
             <ellipse cx="108" cy="72" rx="12" ry="11" fill="#fff4e6" />
             <ellipse cx="106" cy="67" rx="7" ry="4.2" fill="#ff9db3" opacity=".65" />
           </g>
-          <g className="hm-eye">
-            <g
-              ref={(el) => {
-                eyeRefs.current[0] = el;
-              }}
-            >
-              <ellipse cx="62" cy="50" rx="6.3" ry="7.2" fill="#2a1b16" />
-              <circle cx="64.4" cy="46.8" r="2.5" fill="#fff" />
-              <circle cx="60.2" cy="53.4" r="1.1" fill="#fff" opacity=".85" />
-            </g>
-          </g>
-          <g className="hm-eye">
-            <g
-              ref={(el) => {
-                eyeRefs.current[1] = el;
-              }}
-            >
-              <ellipse cx="96" cy="50" rx="6.3" ry="7.2" fill="#2a1b16" />
-              <circle cx="98.4" cy="46.8" r="2.5" fill="#fff" />
-              <circle cx="94.2" cy="53.4" r="1.1" fill="#fff" opacity=".85" />
-            </g>
-          </g>
+          <Eye cx={62} index={0} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
+          <Eye cx={96} index={1} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
           <path className="hm-nose" d="M76.4 59.6Q79 57.2 81.6 59.6Q79 63.2 76.4 59.6Z" fill="#ee7f95" />
           <path
             d="M74.6 64Q76.8 67 79 64Q81.2 67 83.4 64"

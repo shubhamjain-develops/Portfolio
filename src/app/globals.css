@@ -244,7 +244,7 @@
 .hamster {
   position: relative;
   display: block;
-  width: 150px;
+  width: 168px;
   padding: 0;
   border: 0;
   background: none;
@@ -259,7 +259,7 @@
 }
 @media (max-width: 640px) {
   .hamster {
-    width: 116px;
+    width: 124px;
   }
 }
 .hamster-heart {
