@@ -2,11 +2,11 @@
 slug: portfolio-motion-pass
 tier: 2
 confidence_pre: 74
-confidence_post: null
+confidence_post: 78
 repo: Portfolio
 base: origin/main
 branch: feat/portfolio-motion-pass
-phase: branched
+phase: scored
 created: 2026-09-14
 ---
 
@@ -27,7 +27,18 @@ created: 2026-09-14
 >
 > 2026-09-14: "make the se1,2,3 as software engineer 1,2,3. make the fed counter per day wise. like it should say fed 3 times today. then reset every day."
 >
-> Standing decisions from the proposal sessions (recommended options, not overridden by the user): the Résumé buttons download the new General CV; keep the old PDF until the user confirms deleting it; one treat at a time; treats rotate seed → strawberry → blueberry; hamster smaller on phones; reduced motion keeps the hamster still and only puffs its cheeks; theme switch uses View Transitions and is instant where unsupported; Founding Software Engineer title unchanged; the 70% figure stays only as the existing text; the skills highlight is included as the optional last step.
+> Standing decisions from the proposal sessions (recommended options, not overridden by the user):
+> - The Résumé buttons download the new General CV. Keep the old PDF until the user confirms deleting it.
+> - Hamster: one treat at a time; treats rotate seed → strawberry → blueberry; smaller on phones; under reduced motion it stays still and only puffs its cheeks.
+> - The theme switch uses View Transitions and is instant where unsupported.
+> - Founding Software Engineer title unchanged. The 70% figure stays only as the existing text.
+> - The skills highlight is included as the optional last step.
+>
+> **Added mid-quest by the user (2026-09-14), all during verification:**
+> - "Remove open to remote. as i am open to hybrid or onsite also. suggest some thing else, if i like it we use that else scrape it". Offered three rewordings; the user chose **remove it**.
+> - "1. also is it possible for the hamster to be more animated and it looks at your curser always. 2. remove  — the work that earned two promotions." Shown the five places the claim appears; the user chose **everywhere on the site**.
+> - "it is still a bit static, like the body and eyes move but it is not that clear." Then: "i do not need much of body movment, it is fine as it is, i need iys eyes to move more".
+> - Later ideas (sleeping hamster, props, whoami terminal, status footer, git-log timeline, postmortems, a hamster redesign) were deliberately split out into a follow-up quest stacked on this branch. The user chose to ship this one first.
 
 ## 2. What this change does
 
@@ -35,17 +46,25 @@ created: 2026-09-14
 - Motion is the existing reveal-on-scroll and the hero constellation.
 - The Résumé buttons download `Shubham_Jain_Resume.pdf`.
 - The Center for Smart Governance roles read Junior / Associate / Software Engineer.
+- The hero says "Open to remote".
+- Two roles and a case study claim "earned two promotions".
 - There's no hamster.
 
 **After:**
 - **Hero:** blue request packets hop between the teal nodes, and a click sends a coral burst out from the nearest node.
-- **Section headings:** the eyebrow types in, the title rises line by line, and a short teal underline draws in.
-- **Timeline:** each role's dot lights up as the scroll line reaches it and its dates flip in. The current role glows coral.
-- **Project cards:** a teal light circles the border on hover.
+- **Section headings:** the eyebrow types in, the title's words rise out of a clip, and a short teal underline draws in.
+- **Timeline:** each role's dot lights up when the drawn scroll line reaches it and its dates flip in. The current role glows coral.
+- **Project cards:** a teal light circles the border on hover or keyboard focus.
 - **Theme toggle:** the new theme opens as a circle from the toggle.
-- **Hamster:** sits in the bottom-left corner. Clicking feeds it, and "Fed N times today" resets at the visitor's local midnight.
+- **Hamster:** sits in the bottom-left corner.
+  - Clicking feeds it, and "Fed N times today" resets at local midnight.
+  - Its eyes follow the cursor anywhere on the page, its body leans gently toward it, and it gets excited when the cursor comes close.
 - **Skills:** hovering one keeps related skills lit and dims the rest.
-- **Content:** the Résumé buttons download `Shubham_Jain_General.pdf`, and the three Center for Smart Governance roles read Software Engineer 1 / 2 / 3.
+- **Content:**
+  - The Résumé buttons download `Shubham_Jain_General.pdf`.
+  - The three CSG roles read Software Engineer 1 / 2 / 3.
+  - The hero shows just "Bengaluru, India", and the contact line reads "Based in Bengaluru."
+  - The promotions claims are gone.
 
 Visitors who ask their device to reduce motion get today's static site.
 
@@ -53,92 +72,116 @@ Visitors who ask their device to reduce motion get today's static site.
 
 | File | What changes | Why |
 |---|---|---|
-| `public/Shubham_Jain_General.pdf` | Added (copied from ai-job-search) | New CV the Résumé buttons serve |
-| `src/data/content.ts` | `resumePath`; three CSG job titles; `skillLinks` pairs for the highlight | All copy/data lives here |
-| `src/app/globals.css` | `--c-warm` token (both themes); keyframes/utilities for mask-rise, underline, caret, card trace (`@property --trace`), node ignite, date flip, View Transition rules, hamster styles | Styling for every slice |
-| `tailwind.config.ts` | `warm` colour + new keyframes/animations | Tailwind access to the token and animations |
-| `src/components/HeroCanvas.tsx` | Packets hopping along links, click fan-out burst and ring; reads `--c-accent-2` and `--c-warm` | Hero demo |
-| `src/components/Section.tsx` | New exported `SectionHeading` (eyebrow typing, masked title lines, underline). The existing unused `Section` stays as is | Shared heading. This is the existing "shared section chrome" file |
-| `About.tsx`, `Experience.tsx`, `Work.tsx`, `Skills.tsx`, `Education.tsx` | Swap the inline eyebrow + h2 for `SectionHeading` | Heading reveal applies to all five |
-| `src/components/Experience.tsx` | Nodes ignite from the spine's scroll progress; current role in coral; dates flip in | Timeline demo |
-| `src/components/SpotlightCard.tsx` | Border-trace pseudo-element on hover/focus | Card demo |
-| `src/components/ThemeToggle.tsx` | `document.startViewTransition` with a circular clip from the button; applies the `dark` class synchronously inside the callback, then persists via `setTheme` | Theme demo |
-| `src/lib/hamsterCount.ts` (new) | Pure `readCount` / `recordFeed` for the daily count, with the date and storage injected | Testable day rollover |
-| `src/components/Hamster.tsx` (new) | SVG hamster, feed interaction, hearts/+1, daily counter, reduced-motion path | Hamster feature |
+| `public/Shubham_Jain_General.pdf` | Added, byte-identical to the ai-job-search copy | New CV the Résumé buttons serve |
+| `src/data/content.ts` | `resumePath`; three CSG job titles; `skillLinks` pairs; `availability: ""` and the contact body; promotions claims removed | All copy/data lives here |
+| `src/app/globals.css` | `--c-warm` token (both themes); hamster styles incl. the excited state and 168/124px size; `::view-transition-*` rules | Token + the slices that need plain CSS |
+| `tailwind.config.ts` | `warm` colour | Tailwind access to the token |
+| `src/components/HeroCanvas.tsx` | Packets along links; click fan-out burst and ring, listened for on the hero section | Hero |
+| `src/components/Section.tsx` | New exported `SectionHeading`. The unused `Section` is unchanged | Shared heading |
+| `About.tsx`, `Experience.tsx`, `Work.tsx`, `Skills.tsx`, `Education.tsx` | Inline eyebrow + h2 swapped for `SectionHeading` | Heading reveal in all five |
+| `src/components/Experience.tsx` | Nodes light from the spine's sprung scroll progress, measured against the track; current role coral; dates flip in | Timeline |
+| `src/components/SpotlightCard.tsx` | Masked conic edge light turning while hovered/focused | Cards |
+| `src/components/ThemeToggle.tsx` | `startViewTransition` + circular clip, applying the theme class inside the callback | Theme |
+| `src/lib/hamsterCount.ts` (new) | Pure `localDay` / `readCount` / `recordFeed` | Testable day rollover |
+| `src/components/Hamster.tsx` (new) | SVG hamster, feed sequence, daily counter, cursor-following eyes and lean, excited state, reduced-motion path | Hamster |
 | `src/app/page.tsx` | Mount `<Hamster />` | Place it on the page |
-| `src/components/Skills.tsx` | Hover/focus highlight of related skills using `skillLinks` | Optional last slice |
+| `src/components/Skills.tsx` | Hover highlight using `skillLinks` | Optional last slice |
+| `src/components/Hero.tsx` | Renders " · availability" only when non-empty | Show the location alone |
 
 **Blast radius:**
-- **Hero, headings, timeline, cards:** every section that renders a heading changes markup, but not copy. `HeroCanvas` only affects the hero background. `SpotlightCard` is used only by `Work.tsx`.
-- **Theme toggle:** `ThemeToggle` is only in `Nav.tsx`.
-- **Content:** `resumePath` is read by `Hero.tsx`, `Nav.tsx` (×2) and `Contact.tsx`. Job titles render only in `Experience.tsx`. No API routes and no server data.
-- **Hamster:** a new fixed element at z-40, which sits under the nav (z-50) and the case-study modal (z-70).
-- **Metadata:** SEO, metadata and JSON-LD are untouched.
+- **Headings:** markup changes in every section that renders a heading, but the copy doesn't change.
+- **Hero canvas, cards and theme toggle:** `HeroCanvas` only affects the hero background, `SpotlightCard` is used only by `Work.tsx`, and `ThemeToggle` is only in `Nav.tsx`.
+- **Content:** `resumePath` is read by `Hero.tsx`, `Nav.tsx` (×2) and `Contact.tsx`. Job titles render only in `Experience.tsx`. `site.availability` is read only by `Hero.tsx`.
+- **Hamster:** a new fixed element at z-40, which sits under the nav (z-50) and the case-study modal (z-70). It adds one window `pointermove` listener and one rAF loop, both skipped under reduced motion.
+- **Unchanged:** no API routes, server data, metadata or JSON-LD changes, and no new npm packages.
 
 **Deliberately NOT touched:**
 - The old `Shubham_Jain_Resume.pdf`, kept until the user confirms deletion.
-- `Contact.tsx`'s heading, which has a different centred card layout and no eyebrow.
-- The unused `Section` component.
-- The hero title sweep and the copy, including the 70% text.
-- The General CV's own wording, which still says "zero major incidents", "Rs. 20,000+ crore" and Junior/Associate titles. The user owns that document.
-- No new npm packages.
+- `Contact.tsx`'s centred heading and the unused `Section` component.
+- The hero title sweep and the 70% text.
+- The "Currently" card's "Remote, or Bengaluru on-site / hybrid" line and Synexar's "Bengaluru — Remote" location.
+- The General CV's own wording, which the user owns.
+- The follow-up ideas listed in §1, which are a separate stacked quest.
 
 ## 4. Tier and why
 
 | Axis | Score | Evidence |
 |---|---|---|
-| Blast radius | **T2** | About 15 files across data, styles and 9 components. No exported contract |
-| Reversibility | T1 | `git revert` per commit; localStorage key is namespaced and harmless if orphaned |
-| Unknowns | **T2** | next-themes 0.4.6 applies the class in a `useEffect` after `setTheme` (read from `node_modules/next-themes/dist/index.mjs`), so the View Transition needs a synchronous DOM change; aligning node ignite with the sprung spine |
-| Verification | **T2** | No test suite (`verify.test: null`). Needs a new check (node type-stripped run of `hamsterCount.ts` with a mutation check) plus manual browser verification in both themes |
+| Blast radius | **T2** | 17 files across data, styles and 11 components. No exported contract |
+| Reversibility | T1 | `git revert` per commit; the localStorage key is namespaced |
+| Unknowns | **T2** | next-themes 0.4.6 applies the class in a `useEffect` after `setTheme`; aligning node ignite with the sprung spine |
+| Verification | **T2** | No test suite. New Node checks with mutation runs, plus browser verification in a live dev server |
 | Contract | T1 | No public API, schema or wire change |
 | Data / security | T1 | localStorage holds `{day, count}` only; no new egress; no auth |
 
-**Tier 2, set by the blast radius, unknowns and verification axes.** Tier 1 is also disqualified by the >5 files rule. No hard escalator applies.
+**Tier 2, set by the blast radius, unknowns and verification axes.** No hard escalator applies.
 
 ### Approach
 
-- **Theme circle (chosen: View Transitions, applying the class ourselves).** Inside `startViewTransition`, toggle `html.dark` and `color-scheme` directly, then call `setTheme` to persist. Rejected: *`startViewTransition(() => setTheme(x))`*, because next-themes applies the class in an effect, so the snapshot would show the old theme. Also rejected: *framer overlay of the new background colour*, which only paints a flat colour, not the real page in the new theme.
-- **Timeline ignite (chosen: derived from the spine's own `scrollYProgress`).** Each node gets the fraction of the track where it sits and ignites when progress passes it, so the light and the line agree. Rejected: *per-node `whileInView`*, which fires on viewport position rather than when the line reaches the node.
-- **Headings (chosen: `SectionHeading` exported from the existing `Section.tsx`).** Rejected: *animating each of the five inline headings*, which duplicates the same motion five times.
-- **Daily counter (chosen: a pure helper in `src/lib/hamsterCount.ts` with date and storage injected).** Rejected: *logic inline in the component*, which can't be exercised without a browser or a test framework.
+- **Theme circle (chosen: View Transitions, applying the class ourselves).** Rejected: `startViewTransition(() => setTheme(x))` (snapshot shows the old theme), and a flat-colour overlay.
+- **Timeline ignite (chosen: derived from the spine's own `scrollYProgress`).** Rejected: per-node `whileInView`.
+- **Headings (chosen: `SectionHeading` in the existing `Section.tsx`).** Rejected: five inline copies.
+- **Daily counter (chosen: pure helper in `src/lib/hamsterCount.ts`).** Rejected: logic inline in the component.
+- **Hamster tracking (chosen: one rAF loop writing SVG attributes on refs).** Rejected: React state per pointer move, which would re-render the component every frame.
+- **Implementation note:** the prototype's CSS keyframes were ported as framer-motion values inside components, keeping each slice to its own files.
+
+### Mid-flight notes
+
+- **Timeline defect.** Browser verification showed the lower nodes lighting immediately. While an article's Reveal wrapper is still transformed, Chrome makes it the article's `offsetParent`, so `offsetTop` read 0 (articles 3-4 at 0 instead of 1541 / 2092px). Fixed in its own commit by summing offsets up to the track, then re-sampled. Same file, same approach, so no escalation.
+- **Scope additions by the user during verification.** The tagline removal (`content.ts` plus a one-line conditional in `Hero.tsx`), the promotions removal (`content.ts`), and the cursor-following hamster in two iterations (`Hamster.tsx`, `globals.css`). Each was requested explicitly, and each is a copy change or confined to the hamster files. No axis moves.
 
 ## 5. What good looks like
 
-1. The Résumé buttons in the hero, nav (desktop and mobile menu) and contact block download `/Shubham_Jain_General.pdf`, and that URL serves the PDF.
-2. The timeline reads Founding Software Engineer, Software Engineer 3, Software Engineer 2, Software Engineer 1. No "Associate"/"Junior" titles or "SE1/SE2/SE3" remain on the page.
-3. Hero: blue packets travel between teal nodes, and clicking the hero sends a coral burst from the nearest node.
-4. About, Experience, Work, Skills and Education headings play the reveal (typed eyebrow, rising title, teal underline) once on first view. Their text is readable before and after the animation.
-5. Timeline: nodes light up as the scroll line reaches them; Synexar's node is coral, the rest teal; dates flip in.
+1. The Résumé buttons (hero, desktop nav, mobile menu, contact) download `/Shubham_Jain_General.pdf`, and that URL serves the PDF.
+2. The timeline reads Founding Software Engineer, Software Engineer 3, 2, 1. No "Associate"/"Junior" or "SE1-3" titles remain.
+3. Hero: blue packets travel between teal nodes; clicking the hero (not a link or button) sends a coral burst from the nearest node.
+4. About, Experience, Work, Skills and Education headings play the reveal once on first view. Screen readers get plain text.
+5. Timeline: nodes light when the scroll line reaches them, in order. Synexar's node is coral, the rest teal. Dates flip in.
 6. Project cards: a teal light circles the border on hover and keyboard focus.
-7. Theme toggle: the new theme spreads as a circle from the button where View Transitions exist, and switches instantly elsewhere. The hero canvas re-tints either way.
-8. Hamster: bottom-left, below the nav and modal. Clicking plays eat → chew → hearts → next treat, increments "Fed N times today" (singular "time" at 1), and ignores clicks mid-chew. The count survives a reload the same day and reads 0 on a new day, including in an open tab after midnight. It's keyboard-operable with a spoken label and smaller on phones.
-9. Skills: hovering or focusing a skill keeps its related skills lit and dims the rest; leaving restores all.
-10. Colour: coral appears only in the current timeline node, the hero burst, and the hamster (hearts, counter, twinkle). No violet, pink or rainbow gradients.
-11. Reduced motion: no hero animation loop, no heading/timeline/card/theme animation, and the hamster doesn't idle-animate.
-12. `npm run lint` and `npm run build` pass.
+7. Theme toggle: where View Transitions run, the new theme spreads as a circle from the button; otherwise it switches instantly. The choice is saved.
+8. Hamster feeding: bottom-left, below the nav and modal. Clicking plays eat → chew → hearts → next treat and increments "Fed N times today", ignoring clicks mid-chew. The count survives a same-day reload and reads 0 on a new day.
+9. Skills: hovering a skill keeps related skills lit and dims the rest; leaving the grid restores all. Hover-only.
+10. Colour: coral only in the current timeline node, the hero burst and the hamster. No violet, pink or rainbow.
+11. Reduced motion: no hero loop, heading/timeline/card/theme animation, hamster idle animation or cursor tracking.
+12. The hero eyebrow reads "Bengaluru, India", the contact line "Based in Bengaluru.", and "Open to remote" appears nowhere.
+13. No "promotion" text anywhere on the site.
+14. Hamster tracking:
+    - The eyes follow the cursor anywhere on the page, fully turned about 80px away, up to 5.5 / 3.6 SVG units, with the sparkles moving further.
+    - The body leans at most 7°.
+    - It hops, perks its ears and sniffs faster when the cursor is within about 220px, except while eating.
+    - With no cursor it glances around.
+    - It's 168px wide (124px on phones).
+15. `npm run lint` and `npm run build` pass.
 
 ## 6. How it is verified
 
-| # | Verifies | Command or manual step | Expected |
+| # | Verifies | Command or step | Observed |
 |---|---|---|---|
-| 1 | §5.8 day logic | `node scratch/check-hamster-count.ts` against `src/lib/hamsterCount.ts` (Node 24 type stripping): same day keeps the count, next day resets, malformed storage reads 0 | All assertions pass |
-| 2 | §5.8 mutation | Remove the day comparison in `hamsterCount.ts`, rerun #1 | The next-day assertion **fails**; restore, passes again |
-| 3 | §5.1 | `curl -I localhost:3000/Shubham_Jain_General.pdf`; grep rendered HTML for resume links | 200 `application/pdf`; all links point at the General PDF |
-| 4 | §5.2 | `grep` rendered HTML and `content.ts` for "Associate Software Engineer", "Junior Software Engineer", "SE3" | No matches; "Software Engineer 1/2/3" present |
-| 5 | §5.3–5.9 | Dev server + Chrome, in light and dark: hero click, heading reveal, timeline scroll, card hover, theme toggle, hamster feed ×2 + reload, skills hover | Each behaves as §5 states; record what was seen |
-| 6 | §5.8 midnight | In the browser console, write yesterday's date into the storage key and reload; separately, advance the stored day under an open tab and fire `visibilitychange` | Reads 0 today |
-| 7 | §5.10 | `grep` the diff for colour tokens; visual check in #5 | Coral used only in the three places |
-| 8 | §5.11 | Read every reduced-motion branch in the diff; Chrome can't toggle the media query from this harness | Each animation has an explicit `reduce` guard (recorded as code-review evidence, not runtime) |
-| 9 | §5.12 | `npm run lint`, `npm run build` (dev server stopped first) | Both pass |
+| 1 | §5.8 day logic | `node check-hamster-count.mts src/lib/hamsterCount.ts` | 9/9 pass |
+| 2 | §5.8 mutation | Same checks against a copy with the day comparison removed | "a new day reads 0" and "first feed of a new day is 1" **FAIL**; the real helper passes 9/9 |
+| 3 | §5.8 browser | Dev server, JS clicks on the real button | Mid-chew click ignored; 2 feeds → "Fed 2 times today", stored `{"day":"2026-09-14","count":2}`; reload keeps 2; yesterday's stored value reads 0; dock at left 16px / bottom 12px, z-40 vs nav z-50 |
+| 4 | §5.1 | `curl` the rendered page and the PDF | 3 rendered links → `/Shubham_Jain_General.pdf` (mobile menu renders on open); `200 application/pdf`, 69,618 bytes |
+| 5 | §5.2 | Count titles in the rendered HTML | Founding / Software Engineer 3 / 2 / 1 once each; Associate, Junior, SE1-3 zero |
+| 6 | §5.3 | Canvas pixel probe in a visible tab around a synthetic hero click | Coral pixels 92 → 865 within 200ms, 426 after 2s; blue steady at ~180 |
+| 7 | §5.7 | Wrapped `startViewTransition` / `Element.animate`, toggled twice | `ready` resolved both times; the clip on `::view-transition-new(root)` grows from the toggle over 560ms; saved. In a hidden tab it rejected with "Document hidden" and the theme still switched (fallback works) |
+| 8 | §5.4 | Computed styles after scrolling to About; rendered HTML | Eyebrow typed, caret faded, underline at full scale, all 7 words risen; all 5 headings have plain `sr-only` text |
+| 9 | §5.5 | Reload from the top, step the scroll through the timeline | Before the fix: articles 3-4 measured at `offsetTop` 0. After: `0000` at load, nodes lit at the computed reach points 1037 / 1909 / 2743 / 3361px (2 samples lag one step: spring); coral/teal/teal/teal |
+| 10 | §5.6 | Real mouse hover on the first card | `:hover` true, edge-light opacity 1, angle 140° → 197° in 400ms |
+| 11 | §5.9 | Synthetic pointer events on the pills | Redis from heading: 2 partners lit, 39 dimmed. Angular: 4 partners, 37 dimmed. Leaving resets. `skillLinks` check 4/4, and a misspelt copy fails |
+| 12 | §5.10 | `grep` src for colour tokens | `--c-warm` only in the token, hamster CSS, the Experience current node and the HeroCanvas burst |
+| 13 | §5.11 | Read every reduced-motion branch | HeroCanvas, SectionHeading, Experience, SpotlightCard, ThemeToggle, and Hamster (feed and tracking) each guarded. Code-review evidence, not runtime |
+| 14 | §5.12, §5.13 | Rendered HTML | Eyebrow "Bengaluru, India"; 0 × "Open to remote"; contact line updated; 0 × "promotion"; 360° card tagline "Designed, built and launched solo for 500+ users." |
+| 15 | §5.14 | Browser probe + user review | **Partially verified.** The probe tab was hidden (rAF paused), so pointer-driven values stayed frozen. After two real-mouse hovers the eye transform read `translate(0.84 -1.87)` and the lean 3.2°, so the loop runs, but not a controlled measurement. The user viewed the first version and asked for bigger eye movement; the enlarged version (5.5 / 3.6 units, 168px) was hot-reloaded with no errors but has not been observed by me or explicitly confirmed by the user |
+| 16 | §5.15 | `npm run lint`, `npm run build` (dev server stopped, fresh `.next`) | Pass at every slice; `/` first-load JS 180 kB |
 
 ## 7. Risks and rollback
 
-- **Risk:** View Transition snapshots before next-themes updates the DOM, so no circle or a flash. **Mitigation:** apply the class synchronously in the callback; verify in Chrome in both directions.
-- **Risk:** the heading refactor subtly changes spacing in five sections. **Mitigation:** `SectionHeading` reproduces the existing classes exactly; before/after screenshots of each section.
-- **Risk:** the hamster covers content or controls bottom-left on small screens. **Mitigation:** z-40 under the nav and modal, smaller on phones; checked at phone width.
-- **Risk:** after merge, `git pull` on local `main` refuses because the untracked `public/Shubham_Jain_General.pdf` would be overwritten. **Mitigation:** flag it in the PR; the identical untracked copy can be deleted before pulling.
-- **Rollback:** each slice is its own commit; `git revert` any of them. The localStorage key is namespaced and harmless if left behind.
+- **Risk:** View Transition snapshot timing with next-themes. **Mitigation:** the class is applied inside the callback; verified both ways (#7).
+- **Risk:** the heading refactor shifts spacing. **Mitigation:** classes match the originals; the underline adds 19px below each title, as intended.
+- **Risk:** the hamster, now 168px, covers bottom-left content on small screens. **Mitigation:** z-40 and 124px under 640px. **Not checked at phone width.**
+- **Risk:** a window-level pointer listener and a continuous rAF loop for the hamster cost CPU. **Mitigation:** the loop writes three attributes per frame with no React renders, and rAF pauses in hidden tabs. Skipped under reduced motion.
+- **Risk:** after merge, `git pull` on local `main` refuses because the untracked `public/Shubham_Jain_General.pdf` would be overwritten. **Mitigation:** flagged in the PR.
+- **Rollback:** each slice is its own commit; `git revert` any of them.
 
 ## 8. Confidence
 
@@ -146,40 +189,44 @@ Visitors who ask their device to reduce motion get today's static site.
 
 | Judgment | Assessment | Evidence |
 |---|---|---|
-| Cause identified, not just symptom | Feature work. Each requirement maps to a named file and a working prototype in the artifact | §3; artifact v5 source files |
-| Fix addresses the cause | Prototypes are proven in plain JS; porting to React/Tailwind/next-themes is where they can break | next-themes timing finding |
-| No other call site has the same defect | `resumePath` has 4 consumers, all read the one constant; `SpotlightCard` has 1 consumer; job titles render in 1 place | grep during recon |
-| Verification distinguishes fixed from unfixed | Day logic gets a real mutation check; the visual items rely on manual browser observation | §6 |
-| Blast radius fully examined | All five heading sites and the resume consumers were read | recon reads |
-
-**What keeps this below 100:**
-- The theme circle is untested against next-themes. It's designed around the effect-timing issue but not run.
-- Visual fidelity of seven animations ported into a different styling system, in two themes, can only be judged by eye.
-- Reduced-motion behaviour can't be exercised at runtime from this harness.
-
-**What would raise it:** the circle working in Chrome in both directions with the canvas re-tinting; a clean before/after pass over all five headings; the user confirming the hamster and colours on the live preview deploy.
+| Cause identified, not just symptom | Feature work; each requirement maps to named files | §3 |
+| Fix addresses the cause | The timeline port defect was found by verification and fixed | §4 mid-flight notes |
+| No other call site has the same defect | `resumePath` 4, `SpotlightCard` 1, titles 1, `availability` 1; offsetTop measuring only in Experience; "promotion" 0 after the fix | grep |
+| Verification distinguishes fixed from unfixed | Mutation runs for day logic and `skillLinks`; the timeline probe showed broken and fixed | §6 #2, #9, #11 |
+| Blast radius fully examined | All heading sites and content consumers read | recon |
 
 ## 9. Security
 
-Floor: tier 2. Results per `08-security.md`, filled in before the push gate.
+Floor: tier 2, run on the composed branch diff `origin/main...HEAD`.
 
 | # | Check | Result | Note |
 |---|---|---|---|
-| 1 | Secret scan | pending | |
-| 2 | Personal-data guard | pending | The General CV carries phone and email. Both are already public in `content.ts` and the tracked `Shubham_Jain_Resume.pdf`; adding it is the user's explicit request. Will record as accepted with that reason |
-| 3 | Permission diff | pending | |
-| 4 | No manifest/lockfile movement | pending | No dependency planned |
+| 1 | Secret scan | pass | Added lines grepped for key headers, AWS ids, bearer/Authorization, `user:pass@`, GitHub/`sk-` tokens, api_key/password assignments: no matches (re-run at push gate) |
+| 2 | Personal-data guard | accepted | `public/Shubham_Jain_General.pdf` carries the user's phone and email, already public in `content.ts` and the tracked `Shubham_Jain_Resume.pdf`; publishing it is the user's explicit request |
+| 3 | Permission diff | pass | No `.claude/`, `.github/`, `.gitignore` or `package.json` in the diff |
+| 4 | Manifest/lockfile movement | pass | None |
 | 5 | Repo guards | n/a | `verify.security: null` |
-| 6 | No hook bypass | pending | |
-| 7 | Input-trust review | pending | localStorage JSON is parsed defensively |
-| 8 | Dependency review | n/a | none added |
-| 9 | Authorization touchpoints | n/a | no auth |
-| 10 | Logging/output | pending | |
-| 11 | Egress | pending | none expected |
-| 12 | `/security-review` | pending | Last run picked up the wrong cwd; will run it against the worktree explicitly |
+| 6 | No hook bypass | pass | Plain `git commit`; one amend on an unpushed HEAD to fix a count in its message |
+| 7 | Input-trust review | pass | Only new input is localStorage, parsed in try/catch with a string day and a finite/positive count. Pointer events contribute coordinates only. No HTML sinks |
+| 8 | Dependency review | n/a | None added |
+| 9 | Authorization touchpoints | n/a | No auth |
+| 10 | Logging/output | pass | No `console.*` added |
+| 11 | Egress | pass | No network calls or new URLs in added code |
+| 12 | `/security-review` | manual | The skill reads git context from the session cwd (the main checkout); instead, added `src` lines were grepped for HTML sinks, eval, network calls and URLs (none), plus #7 |
 
-**Open findings:** none yet (checks not run).
+**Open findings:** none.
 
 ## 10. Post-implementation
 
-_Appended after verification runs. Do not fill in before._
+**Post-implementation confidence: 78/100** (pre was 74, delta +4)
+
+**What moved it:**
+- **Up:** the two named pre-implementation unknowns were settled by runtime evidence. The View Transition resolved with the clip requested in both directions (§6 #7), and the timeline's line/node sync was sampled against computed geometry (§6 #9). Verification also caught and re-proved a real port defect, and the mutation checks fail when broken.
+- **Down:** the earlier re-score draft sat at 82 before the user's late additions. The final hamster tracking tweak has not been observed in a browser by me or confirmed by the user (§6 #15), which is what takes it to 78.
+
+**What is still unknown:**
+- **Hamster eyes:** whether the enlarged movement now reads clearly to the user, and it hasn't been measured in a visible tab.
+- **Reduced motion:** verified by reading every branch, not at runtime.
+- **Skills highlight:** proven via React's pointer path with synthetic events, not a real-mouse hover.
+- **Phone width:** not checked.
+- **Browsers:** Chrome only; Firefox/Safari rely on the View Transition fallback and unprefixed `mask-composite`.
