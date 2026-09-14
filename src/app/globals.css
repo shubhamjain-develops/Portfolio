@@ -305,6 +305,19 @@
 .hm-cheek { transform-origin: center; }
 .hm-crumbs circle { opacity: 0; transform-origin: center; }
 
+/* Following the cursor: Hamster.tsx tilts .hm-look and moves the eyes.
+   When the cursor is close it gets excited — hops, perks its ears, sniffs
+   faster — unless it is busy eating. */
+.hm-look { transform-box: fill-box; transform-origin: 50% 90%; }
+.hamster.hm-excited:not(.eating) .hm-body { animation: hm-hop 0.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.hamster.hm-excited:not(.eating) .hm-paws { animation: none; }
+.hamster.hm-excited:not(.eating) .hm-ear { animation: hm-ear-perk 0.8s ease-in-out infinite; }
+.hamster.hm-excited:not(.eating) .hm-ear.r { animation-name: hm-ear-perk-r; }
+.hamster.hm-excited .hm-nose { animation-duration: 0.35s; }
+@keyframes hm-hop { 0%, 100% { transform: none; } 35% { transform: translateY(-4px); } 60% { transform: translateY(0); } }
+@keyframes hm-ear-perk { 0%, 100% { transform: none; } 50% { transform: rotate(-10deg); } }
+@keyframes hm-ear-perk-r { 0%, 100% { transform: none; } 50% { transform: rotate(10deg); } }
+
 .hamster.eating .hm-body { animation: hm-lunge 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
 .hamster.eating .hm-paws { animation: hm-grab 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
 .hamster.eating .hm-treat { animation: hm-gulp 0.42s ease-in forwards; }
