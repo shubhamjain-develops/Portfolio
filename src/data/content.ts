@@ -149,10 +149,10 @@ export const experience: Job[] = [
     location: "Bengaluru, India",
     period: "Aug 2021 — May 2023",
     summary:
-      "Built foundational Kaveri 2.0 workflow screens from the ground up, integrating statewide land-record systems like Bhoomi and e-Aasthi. Also designed and shipped an internal 360° Feedback product solo, end to end, for 500+ users — the work that earned two promotions.",
+      "Built foundational Kaveri 2.0 workflow screens from the ground up, integrating statewide land-record systems like Bhoomi and e-Aasthi. Also designed and shipped an internal 360° Feedback product solo, end to end, for 500+ users.",
     points: [
       "Built Kaveri 2.0 modules from the ground up, delivering complex workflow screens such as fee calculation and integrating multiple statewide land and property record systems, including Bhoomi and e-Aasthi.",
-      "Single-handedly designed and launched the in-house 360° Feedback application (.NET Core MVC, Angular, MySQL, Entity Framework) with role-based authentication, enabling peer and upward feedback for 500+ users — work that earned two promotions.",
+      "Single-handedly designed and launched the in-house 360° Feedback application (.NET Core MVC, Angular, MySQL, Entity Framework) with role-based authentication, enabling peer and upward feedback for 500+ users.",
     ],
     tech: [".NET Core MVC", "Angular", "MySQL", "Entity Framework"],
   },
@@ -247,12 +247,11 @@ export const projects: Project[] = [
   {
     slug: "feedback-360",
     title: "360° Feedback Platform",
-    tagline: "Designed, built and launched solo for 500+ users. Earned two promotions.",
+    tagline: "Designed, built and launched solo for 500+ users.",
     context: "Center for Smart Governance · Internal product",
     metrics: [
       { value: "500+", label: "Users" },
       { value: "1", label: "Engineer" },
-      { value: "2", label: "Promotions earned" },
     ],
     problem:
       "The organisation had no structured way to run peer and upward feedback, and no budget line for a vendor tool.",
@@ -262,7 +261,7 @@ export const projects: Project[] = [
       "Took it from proposal to launch alone, including rollout to 500+ staff.",
     ],
     result:
-      "Shipped and adopted across the organisation. The work directly earned two promotions.",
+      "Shipped and adopted across the organisation.",
     tech: [".NET Core MVC", "Angular", "MySQL", "RBAC"],
     confidential: true,
   },
