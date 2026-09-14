@@ -44,9 +44,16 @@ export function Experience() {
     const measure = () => {
       const height = track.offsetHeight || 1;
       setStops(
-        itemRefs.current.map((el) =>
-          el ? (el.offsetTop + NODE_CENTRE - RAIL_TOP) / height : 1
-        )
+        itemRefs.current.map((el) => {
+          if (!el) return 1;
+          // While an item's Reveal wrapper is still transformed it becomes the
+          // item's offsetParent, so add up offsets until reaching the track.
+          let top = 0;
+          for (let n: HTMLElement | null = el; n && n !== track; n = n.offsetParent as HTMLElement | null) {
+            top += n.offsetTop;
+          }
+          return (top + NODE_CENTRE - RAIL_TOP) / height;
+        })
       );
     };
     measure();
