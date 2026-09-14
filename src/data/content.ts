@@ -317,6 +317,58 @@ export const skills: SkillGroup[] = [
 
 export const languages = ["C#", "Java", "Node.js", "SQL", "TypeScript", "Python"];
 
+/**
+ * Skills that are used together. Hovering one skill on the site keeps its
+ * partners lit and dims the rest. Both names must match an item in `skills`.
+ */
+export const skillLinks: [string, string][] = [
+  ["C#", ".NET Core"],
+  ["C#", "ASP.NET Core"],
+  [".NET Core", "ASP.NET Core"],
+  [".NET Core", "Entity Framework"],
+  [".NET Core", "Azure"],
+  ["ASP.NET Core", "REST APIs"],
+  ["REST APIs", "Swagger"],
+  ["REST APIs", "Idempotency"],
+  ["REST APIs", "Microservices"],
+  ["Microservices", "Distributed Systems"],
+  ["Microservices", "Docker"],
+  ["Microservices", "Redis"],
+  ["Distributed Systems", "System Design & Architecture"],
+  ["System Design & Architecture", "Multi-Tenant Architecture"],
+  ["Multi-Tenant Architecture", "Row-Level Security"],
+  ["Row-Level Security", "PostgreSQL"],
+  ["PostgreSQL", "Entity Framework"],
+  ["PostgreSQL", "Query Optimisation"],
+  ["PostgreSQL", "Indexing"],
+  ["MySQL", "Entity Framework"],
+  ["MySQL", "Query Optimisation"],
+  ["MongoDB", "Indexing"],
+  ["Query Optimisation", "Indexing"],
+  ["Redis", "Rate Limiting"],
+  ["Rate Limiting", "Schema Validation"],
+  ["JWT", "RBAC"],
+  ["JWT", "SSO"],
+  ["RBAC", "Multi-Tenant Architecture"],
+  ["Azure", "Azure OCR"],
+  ["Azure", "Azure DevOps"],
+  ["Azure DevOps", "CI/CD"],
+  ["CI/CD", "Git"],
+  ["CI/CD", "Docker"],
+  ["CI/CD", "Playwright"],
+  ["Angular", "AngularJS"],
+  ["Angular", "TypeScript"],
+  ["Angular", "Reactive Forms"],
+  ["Angular", "HTML"],
+  ["HTML", "CSS"],
+  ["Claude Code", "AI Agent Orchestration"],
+  ["Claude Code", "Prompt Engineering"],
+  ["Claude Code", "Code Review Automation"],
+  ["GitHub Copilot", "Code Review Automation"],
+  ["Cursor IDE", "Prompt Engineering"],
+  ["AI Agent Orchestration", "Prompt Engineering"],
+];
+
 export type Credential = {
   title: string;
   org: string;
