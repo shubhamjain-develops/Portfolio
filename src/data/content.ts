@@ -23,7 +23,7 @@ export const site = {
   /** Free Vercel subdomain — swap for a custom domain later if you buy one. */
   url: "https://shubhamjain-develops.vercel.app",
 
-  resumePath: "/Shubham_Jain_Resume.pdf",
+  resumePath: "/Shubham_Jain_General.pdf",
 
   intro:
     "Full-stack engineer with five years across statewide government infrastructure and early-stage startup engineering — specialising in .NET, Angular and PostgreSQL, and in directing AI coding agents inside a human-in-the-loop workflow.",
