@@ -2,7 +2,8 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { skills } from "@/data/content";
-import { Reveal, StaggerGroup, staggerChild } from "./Reveal";
+import { StaggerGroup, staggerChild } from "./Reveal";
+import { SectionHeading } from "./Section";
 import {
   AngularIcon,
   AngularJSIcon,
@@ -68,12 +69,7 @@ export function Skills() {
   return (
     <section id="skills" className="relative scroll-mt-20 py-20 sm:py-24 lg:py-28">
       <div className="shell">
-        <Reveal>
-          <p className="eyebrow">Skills</p>
-          <h2 className="mt-3 text-[clamp(1.65rem,3.6vw,2.35rem)] leading-[1.15]">
-            What I build with
-          </h2>
-        </Reveal>
+        <SectionHeading eyebrow="Skills" title="What I build with" />
 
         <StaggerGroup className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {skills.map((group) => {

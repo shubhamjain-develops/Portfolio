@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useReducedMotion, useScroll, useSpring } from "framer-motion";
 import { experience } from "@/data/content";
 import { Reveal } from "./Reveal";
+import { SectionHeading } from "./Section";
 
 export function Experience() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -23,12 +24,7 @@ export function Experience() {
   return (
     <section id="experience" className="scroll-mt-20 py-20 sm:py-24 lg:py-28">
       <div className="shell">
-        <Reveal>
-          <p className="eyebrow">Experience</p>
-          <h2 className="mt-3 text-[clamp(1.65rem,3.6vw,2.35rem)] leading-[1.15]">
-            Where I&rsquo;ve built things
-          </h2>
-        </Reveal>
+        <SectionHeading eyebrow="Experience" title="Where I’ve built things" />
 
         <div ref={trackRef} className="relative mt-12 max-w-4xl pl-7 sm:pl-9">
           {/* static rail */}

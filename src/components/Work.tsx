@@ -6,6 +6,7 @@ import { projects, site, type Project } from "@/data/content";
 import { SpotlightCard } from "./SpotlightCard";
 import { CaseStudyModal } from "./CaseStudyModal";
 import { StaggerGroup, staggerChild, Reveal } from "./Reveal";
+import { SectionHeading } from "./Section";
 import { ArrowIcon, GitHubIcon, LockIcon } from "./Icons";
 
 export function Work() {
@@ -15,17 +16,17 @@ export function Work() {
   return (
     <section id="work" className="relative scroll-mt-20 py-20 sm:py-24 lg:py-28">
       <div className="shell">
-        <Reveal>
-          <p className="eyebrow">Selected work</p>
-          <h2 className="mt-3 text-[clamp(1.65rem,3.6vw,2.35rem)] leading-[1.15]">
-            A few things worth a closer look
-          </h2>
-          <p className="mt-4 max-w-[54ch] text-[1rem] text-dim">
-            Most of this ran in regulated environments, so the code isn&rsquo;t
-            public. Open any card for the problem, the decisions and what
-            actually came out the other side.
-          </p>
-        </Reveal>
+        <SectionHeading
+          eyebrow="Selected work"
+          title="A few things worth a closer look"
+          lead={
+            <>
+              Most of this ran in regulated environments, so the code isn&rsquo;t
+              public. Open any card for the problem, the decisions and what
+              actually came out the other side.
+            </>
+          }
+        />
 
         <StaggerGroup className="mt-12 grid gap-5 md:grid-cols-2">
           {projects.map((project) => (
