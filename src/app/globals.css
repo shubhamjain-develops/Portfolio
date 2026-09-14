@@ -172,6 +172,17 @@
 }
 
 /* ------------------------------------------------------------------ *
+ * Theme switch. ThemeToggle reveals the new theme with a circular clip
+ * on ::view-transition-new(root), so the View Transition's default
+ * cross-fade is switched off here.
+ * ------------------------------------------------------------------ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* ------------------------------------------------------------------ *
  * Hamster, fixed bottom-left. The illustration keeps its own colours;
  * the only palette colour it uses is coral (--c-warm) for the counter
  * and hearts. Sits under the nav (z-50) and case-study modal (z-70).
