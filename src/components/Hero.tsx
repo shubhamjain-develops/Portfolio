@@ -57,7 +57,8 @@ export function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
             </span>
-            {site.location} · {site.availability}
+            {site.location}
+            {site.availability && ` · ${site.availability}`}
           </p>
         </Reveal>
 

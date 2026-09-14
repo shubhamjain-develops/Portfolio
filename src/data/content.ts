@@ -8,7 +8,8 @@ export const site = {
   initials: "SJ",
   role: "Full-Stack Engineer | AI-Native Engineering",
   location: "Bengaluru, India",
-  availability: "Open to remote",
+  /** Shown after the location in the hero. Set to "" to show the location alone. */
+  availability: "",
   email: "shubhamjainiiitb@gmail.com",
   phone: "+91 94069 00025",
   phoneHref: "tel:+919406900025",
@@ -397,5 +398,5 @@ export const education: Credential[] = [
 
 export const contact = {
   heading: "Let's talk about what you're building.",
-  body: "Based in Bengaluru and open to remote. Email is the fastest way to reach me — I read everything.",
+  body: "Based in Bengaluru. Email is the fastest way to reach me — I read everything.",
 };
