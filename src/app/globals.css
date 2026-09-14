@@ -172,6 +172,160 @@
 }
 
 /* ------------------------------------------------------------------ *
+ * Hamster, fixed bottom-left. The illustration keeps its own colours;
+ * the only palette colour it uses is coral (--c-warm) for the counter
+ * and hearts. Sits under the nav (z-50) and case-study modal (z-70).
+ * ------------------------------------------------------------------ */
+.hamster-dock {
+  position: fixed;
+  left: max(16px, env(safe-area-inset-left));
+  bottom: 12px;
+  z-index: 40;
+  display: grid;
+  justify-items: start;
+}
+
+.hamster-fed {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  margin-left: 16px;
+  padding: 0 10px;
+  border: 1px solid rgb(var(--c-warm) / 0.35);
+  border-radius: 999px;
+  background: rgb(var(--c-surface) / 0.92);
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: rgb(var(--c-dim));
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+.hamster-fed svg {
+  width: 12px;
+  height: 12px;
+  color: rgb(var(--c-warm));
+}
+.hamster-fed b {
+  display: inline-block;
+  font-weight: 600;
+  color: rgb(var(--c-text));
+}
+.hamster-fed b.bump {
+  animation: hamster-bump 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hamster-plus {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgb(var(--c-warm));
+  pointer-events: none;
+  animation: hamster-plus 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.hamster {
+  position: relative;
+  display: block;
+  width: 150px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.hamster > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+@media (max-width: 640px) {
+  .hamster {
+    width: 116px;
+  }
+}
+.hamster-heart {
+  position: absolute;
+  left: 43%;
+  top: 12%;
+  width: 15px;
+  height: 15px;
+  color: rgb(var(--c-warm));
+  pointer-events: none;
+  animation: hamster-heart 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hamster-heart svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.hm-shadow { fill: rgb(0 0 0 / 0.16); }
+.hm-shell { fill: #46434e; stroke: rgb(var(--c-text) / 0.3); stroke-width: 1; }
+.hm-body,
+.hm-cheek,
+.hm-paws,
+.hm-ear,
+.hm-eye,
+.hm-nose,
+.hm-treat,
+.hm-twinkle,
+.hm-crumbs circle {
+  transform-box: fill-box;
+}
+.hm-treat > g { display: none; }
+.hm-treat > g.on { display: inline; }
+.hm-body { transform-origin: 40% 100%; animation: hm-reach 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.hm-paws { animation: hm-paws-reach 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.hm-ear { transform-origin: 50% 100%; animation: hm-ear-twitch 3.6s ease-in-out infinite; }
+.hm-ear.r { animation-delay: 0.15s; }
+.hm-nose { transform-origin: center; animation: hm-sniff 0.9s ease-in-out infinite; }
+.hamster:hover .hm-nose { animation-duration: 0.4s; }
+.hm-eye { transform-origin: center; animation: hm-blink 4.6s infinite; }
+.hm-treat { transform-origin: 50% 100%; animation: hm-wobble 3.6s ease-in-out infinite; }
+.hm-twinkle { fill: rgb(var(--c-warm)); transform-origin: center; animation: hm-twinkle 1.8s ease-in-out infinite; }
+.hm-cheek { transform-origin: center; }
+.hm-crumbs circle { opacity: 0; transform-origin: center; }
+
+.hamster.eating .hm-body { animation: hm-lunge 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+.hamster.eating .hm-paws { animation: hm-grab 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+.hamster.eating .hm-treat { animation: hm-gulp 0.42s ease-in forwards; }
+.hamster.eating .hm-twinkle { opacity: 0; animation: none; }
+.hamster.eating .hm-cheek { animation: hm-chew 1.2s ease-in-out; }
+.hamster.eating .hm-eye { animation: hm-happy 1.2s; }
+.hamster.eating .hm-crumbs circle { animation: hm-crumb 0.8s 0.42s ease-out both; }
+.hamster.eating .hm-crumbs circle:nth-child(2) { animation-delay: 0.54s; }
+.hamster.eating .hm-crumbs circle:nth-child(3) { animation-delay: 0.66s; }
+.hamster.eating .hm-crumbs circle:nth-child(4) { animation-delay: 0.78s; }
+.hm-treat.drop { animation: hm-drop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.hamster.full .hm-cheek { transform: scale(1.36); }
+
+@keyframes hamster-bump { 40% { transform: translateY(-3px) scale(1.3); color: rgb(var(--c-warm)); } }
+@keyframes hamster-plus { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+@keyframes hamster-heart { 0% { opacity: 0; transform: translate(0, 10px) scale(0.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--hx), -52px) scale(1.05) rotate(var(--hr)); } }
+@keyframes hm-reach { 0%, 14%, 100% { transform: none; } 36%, 52% { transform: translateX(4px) rotate(5deg); } 44% { transform: translateX(5px) rotate(6deg); } 64% { transform: none; } 72% { transform: translateY(-4px); } 80% { transform: none; } }
+@keyframes hm-paws-reach { 0%, 16%, 100% { transform: none; } 36%, 52% { transform: translate(8px, -4px); } 44% { transform: translate(10px, -5px); } 64% { transform: none; } }
+@keyframes hm-ear-twitch { 0%, 74%, 100% { transform: none; } 80% { transform: rotate(-12deg); } 86% { transform: rotate(7deg); } }
+@keyframes hm-sniff { 0%, 60%, 100% { transform: none; } 70% { transform: scale(1.18, 0.82); } 80% { transform: scale(0.92, 1.1); } }
+@keyframes hm-blink { 0%, 94%, 100% { transform: none; } 96% { transform: scaleY(0.1); } }
+@keyframes hm-wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes hm-twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.45); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
+@keyframes hm-lunge { 0% { transform: none; } 28% { transform: translateX(12px) rotate(8deg); } 46%, 100% { transform: none; } }
+@keyframes hm-grab { 0% { transform: none; } 28% { transform: translate(14px, -4px); } 46%, 86% { transform: translate(0, -16px); } 100% { transform: none; } }
+@keyframes hm-gulp { 0% { transform: none; } 100% { opacity: 0; transform: translate(-62px, -46px) scale(0.2); } }
+@keyframes hm-chew { 0%, 34% { transform: none; } 44% { transform: scale(1.45); } 54% { transform: scale(1.32, 1.48); } 64% { transform: scale(1.5, 1.34); } 74% { transform: scale(1.32, 1.48); } 86% { transform: scale(1.42); } 100% { transform: scale(1.08); } }
+@keyframes hm-happy { 0%, 32% { transform: none; } 40%, 88% { transform: scaleY(0.18); } 100% { transform: none; } }
+@keyframes hm-crumb { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--cx), 15px); } }
+@keyframes hm-drop { 0% { opacity: 0; transform: translateY(-64px) rotate(-35deg); } 45% { opacity: 1; } 70% { transform: rotate(10deg); } 85% { transform: translateY(-5px) rotate(-4deg); } 100% { transform: none; } }
+
+/* ------------------------------------------------------------------ *
  * Motion safety. Framer Motion components read useReducedMotion(), and
  * this catches every CSS transition/animation that isn't JS-driven.
  * ------------------------------------------------------------------ */
