@@ -113,7 +113,7 @@ export const experience: Job[] = [
     tech: [".NET", "Angular", "PostgreSQL", "Azure", "Playwright"],
   },
   {
-    title: "Software Engineer",
+    title: "Software Engineer 3",
     company: "Center for Smart Governance",
     location: "Bengaluru, India",
     period: "Apr 2025 — Apr 2026",
@@ -129,7 +129,7 @@ export const experience: Job[] = [
     tech: [".NET Core", "PostgreSQL", "Redis", "Swagger", "Microservices"],
   },
   {
-    title: "Associate Software Engineer",
+    title: "Software Engineer 2",
     company: "Center for Smart Governance",
     location: "Bengaluru, India",
     period: "Jun 2023 — Mar 2025",
@@ -143,7 +143,7 @@ export const experience: Job[] = [
     tech: ["Angular", "Reactive Forms", "Azure DevOps", "CI/CD"],
   },
   {
-    title: "Junior Software Engineer",
+    title: "Software Engineer 1",
     company: "Center for Smart Governance",
     location: "Bengaluru, India",
     period: "Aug 2021 — May 2023",
