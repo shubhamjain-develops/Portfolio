@@ -2,11 +2,18 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useReducedMotion } from "framer-motion";
+import { CHEEK_CAPACITY, cheekLevel, isAsleep, isStashFeed } from "@/lib/hamsterCount";
 import { feedHamster, useHamsterCount } from "@/lib/useHamsterCount";
 
 const TREATS = ["seed", "strawberry", "blueberry"] as const;
 const CHEW_MS = 1200;
 const DROP_MS = 680;
+const YAWN_MS = 900;
+const STASH_MS = 1800;
+/** Feeds are at least this far apart, even when a key is held or motion is reduced. */
+const MIN_FEED_GAP_MS = 400;
+/** How often to re-check the clock and the idle timer for sleep. */
+const SLEEP_CHECK_MS = 5_000;
 
 /** The SVG's viewBox width, for turning screen pixels into SVG units. */
 const VIEWBOX_WIDTH = 180;
@@ -33,7 +40,12 @@ type Heart = { id: number; x: number; r: number; delay: number };
  * A hamster in the bottom-left corner that eats when clicked and shows how many
  * times it was fed today. The count lives only in the visitor's browser, per
  * local calendar day. It renders after mount because the server can't know
- * what's in localStorage, and a guessed count would flash on hydration.
+ * what's in localStorage or the visitor's clock, and a guess would flash on
+ * hydration.
+ *
+ * Its day: each feed puffs its cheeks, and the fifth sends it off to stash the
+ * food. Between 23:00 and 06:00 it sleeps; a click wakes it with a yawn, and it
+ * stays up while the visitor is active on the page.
  *
  * It also watches the cursor: its eyes follow it anywhere on the page, its body
  * leans gently after it, and it gets excited when the cursor comes close. With
@@ -48,9 +60,16 @@ export function Hamster() {
   const [eating, setEating] = useState(false);
   const [dropping, setDropping] = useState(false);
   const [full, setFull] = useState(false);
+  const [asleep, setAsleep] = useState(false);
+  const [yawning, setYawning] = useState(false);
+  const [stashing, setStashing] = useState(false);
   const [hearts, setHearts] = useState<Heart[]>([]);
   const [feeds, setFeeds] = useState(0);
   const busy = useRef(false);
+  const asleepRef = useRef(false);
+  /** Last time the visitor did anything while it was awake; null until then. */
+  const lastActivity = useRef<number | null>(null);
+  const lastFeedAt = useRef(-Infinity);
   const timers = useRef<number[]>([]);
 
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -74,6 +93,38 @@ export function Hamster() {
   useEffect(() => {
     if (!busy.current) setTreat(count % TREATS.length);
   }, [count]);
+
+  // Sleep follows the visitor's clock. Activity only keeps an awake hamster
+  // awake — nothing but a click wakes a sleeping one.
+  useEffect(() => {
+    const check = () => {
+      const next = !busy.current && isAsleep(new Date(), lastActivity.current);
+      asleepRef.current = next;
+      setAsleep(next);
+    };
+    let marked = -Infinity;
+    const onActivity = () => {
+      // Throttle on the monotonic clock: a wall clock can jump backwards.
+      const tick = performance.now();
+      if (asleepRef.current || tick - marked < 1000) return;
+      marked = tick;
+      lastActivity.current = Date.now();
+    };
+    const onVisible = () => {
+      if (!document.hidden) check();
+    };
+
+    check();
+    const tick = window.setInterval(check, SLEEP_CHECK_MS);
+    const events = ["scroll", "pointermove", "keydown", "focusin"] as const;
+    events.forEach((type) => window.addEventListener(type, onActivity, { passive: true }));
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(tick);
+      events.forEach((type) => window.removeEventListener(type, onActivity));
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
 
   // Eyes and body follow the cursor. One rAF loop eases toward a target and
   // writes straight to the SVG, so pointer moves never re-render React.
@@ -108,7 +159,7 @@ export function Hamster() {
       const reach = Math.min(1, distance / FULL_TURN_AT);
       target.x = (dx / distance) * reach;
       target.y = (dy / distance) * reach;
-      button.classList.toggle("hm-excited", distance < EXCITED_WITHIN);
+      button.classList.toggle("hm-excited", distance < EXCITED_WITHIN && !asleepRef.current);
     };
 
     const frame = (now: number) => {
@@ -147,11 +198,31 @@ export function Hamster() {
     };
   }, [mounted, reduce]);
 
-  // One treat at a time: clicks while it is still chewing are ignored.
+  // One thing at a time: clicks while it yawns, chews or stashes are ignored.
   function feed() {
-    if (busy.current) return;
+    // Monotonic, so a clock set back (DST, a manual change) can't lock feeding out for hours.
+    const tick = performance.now();
+    if (busy.current || tick - lastFeedAt.current < MIN_FEED_GAP_MS) return;
     busy.current = true;
+    lastFeedAt.current = tick;
+    lastActivity.current = Date.now();
 
+    if (asleepRef.current) {
+      asleepRef.current = false;
+      setAsleep(false);
+      if (!reduce) {
+        setYawning(true);
+        later(() => {
+          setYawning(false);
+          eat();
+        }, YAWN_MS);
+        return;
+      }
+    }
+    eat();
+  }
+
+  function eat() {
     const next = feedHamster();
     setFeeds((f) => f + 1);
 
@@ -176,20 +247,40 @@ export function Hamster() {
       }))
     );
     later(() => setHearts([]), 1900);
-    later(() => {
-      setEating(false);
+
+    const serveNext = () => {
       setTreat(next % TREATS.length);
       setDropping(true);
       later(() => {
         setDropping(false);
         busy.current = false;
       }, DROP_MS);
+    };
+
+    later(() => {
+      setEating(false);
+      if (!isStashFeed(next)) return serveNext();
+      // Full cheeks: off to stash the food, back with them empty.
+      setStashing(true);
+      later(() => {
+        setStashing(false);
+        serveNext();
+      }, STASH_MS);
     }, CHEW_MS);
   }
 
   if (!mounted) return null;
 
   const unit = count === 1 ? "time" : "times";
+  // The count already reads empty on the fifth feed; keep the cheeks stuffed until it has stashed.
+  const cheeks = stashing || (eating && isStashFeed(count)) ? CHEEK_CAPACITY : cheekLevel(count);
+  const states = [
+    eating && "eating",
+    full && "full",
+    asleep && "asleep",
+    yawning && "yawning",
+    stashing && "stashing",
+  ].filter(Boolean);
 
   return (
     <div className="hamster-dock">
@@ -210,8 +301,13 @@ export function Hamster() {
         ref={buttonRef}
         type="button"
         onClick={feed}
-        aria-label={`Feed the hamster. Fed ${count} ${unit} today.`}
-        className={`hamster${eating ? " eating" : ""}${full ? " full" : ""}`}
+        onKeyDown={(e) => {
+          // A held key would otherwise repeat clicks as fast as the OS allows.
+          if (e.repeat && (e.key === "Enter" || e.key === " ")) e.preventDefault();
+        }}
+        aria-label={`${asleep ? "Wake and feed" : "Feed"} the hamster. Fed ${count} ${unit} today.`}
+        className={["hamster", ...states].join(" ")}
+        style={{ "--hm-cheeks": cheeks } as CSSProperties}
       >
         <HamsterArt
           svgRef={svgRef}
@@ -220,7 +316,8 @@ export function Hamster() {
           sparkleRefs={sparkleRefs}
           treat={treat}
           dropping={dropping}
-          hideTreat={full}
+          hideTreat={full || asleep || stashing}
+          asleep={asleep}
         />
         {hearts.map((h) => (
           <span
@@ -293,6 +390,7 @@ function HamsterArt({
   treat,
   dropping,
   hideTreat,
+  asleep,
 }: {
   svgRef: React.RefObject<SVGSVGElement | null>;
   lookRef: React.RefObject<SVGGElement | null>;
@@ -301,6 +399,7 @@ function HamsterArt({
   treat: number;
   dropping: boolean;
   hideTreat: boolean;
+  asleep: boolean;
 }) {
   const on = (name: (typeof TREATS)[number]) =>
     TREATS[treat] === name ? "on" : undefined;
@@ -358,6 +457,7 @@ function HamsterArt({
 
       <g className="hm-body">
         <g ref={lookRef} className="hm-look">
+          <ellipse className="hm-tail" cx="126" cy="104" rx="8" ry="5.5" fill="#dd8a44" />
           <g className="hm-ear l">
             <circle cx="49" cy="31" r="12.5" fill="#f0a45c" />
             <circle cx="49" cy="32" r="7.2" fill="#f7b1c1" />
@@ -367,31 +467,44 @@ function HamsterArt({
             <circle cx="109" cy="32" r="7.2" fill="#f7b1c1" />
           </g>
           <ellipse cx="79" cy="89" rx="48" ry="31" fill="#f0a45c" />
-          <ellipse cx="79" cy="59" rx="42" ry="35" fill="#f0a45c" />
-          <path d="M69 26Q74 14 79 24Q83 15 90 26Z" fill="#f0a45c" />
+          <ellipse cx="79" cy="58" rx="42" ry="36" fill="#f0a45c" />
+          <path d="M69 25Q74 13 79 23Q83 14 90 25Z" fill="#f0a45c" />
           <ellipse
             cx="64"
-            cy="37"
+            cy="36"
             rx="10"
             ry="4.5"
-            transform="rotate(-18 64 37)"
+            transform="rotate(-18 64 36)"
             fill="#f8c48e"
-            opacity=".75"
+            opacity=".7"
           />
           <path
             d="M38 67C38 53 52 49 62 57C70 51 88 51 96 57C106 49 120 53 120 67C122 88 118 117 79 118C40 117 36 88 38 67Z"
             fill="#fff4e6"
           />
           <g className="hm-cheek l">
-            <ellipse cx="50" cy="72" rx="12" ry="11" fill="#fff4e6" />
-            <ellipse cx="52" cy="67" rx="7" ry="4.2" fill="#ff9db3" opacity=".65" />
+            <ellipse cx="50" cy="72" rx="13" ry="11.5" fill="#fff4e6" />
+            <ellipse cx="52" cy="67" rx="7" ry="4.2" fill="#ff9db3" opacity=".7" />
           </g>
           <g className="hm-cheek r">
-            <ellipse cx="108" cy="72" rx="12" ry="11" fill="#fff4e6" />
-            <ellipse cx="106" cy="67" rx="7" ry="4.2" fill="#ff9db3" opacity=".65" />
+            <ellipse cx="108" cy="72" rx="13" ry="11.5" fill="#fff4e6" />
+            <ellipse cx="106" cy="67" rx="7" ry="4.2" fill="#ff9db3" opacity=".7" />
           </g>
-          <Eye cx={62} index={0} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
-          <Eye cx={96} index={1} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
+          {asleep ? (
+            <path
+              className="hm-closed"
+              d="M55 51q7 6 14 0M89 51q7 6 14 0"
+              fill="none"
+              stroke="#2a1b16"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+            />
+          ) : (
+            <>
+              <Eye cx={62} index={0} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
+              <Eye cx={96} index={1} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
+            </>
+          )}
           <path className="hm-nose" d="M76.4 59.6Q79 57.2 81.6 59.6Q79 63.2 76.4 59.6Z" fill="#ee7f95" />
           <path
             d="M74.6 64Q76.8 67 79 64Q81.2 67 83.4 64"
@@ -400,6 +513,7 @@ function HamsterArt({
             strokeWidth="1.4"
             strokeLinecap="round"
           />
+          <ellipse className="hm-yawn" cx="79" cy="67" rx="3.4" ry="4.4" fill="#7a3b3a" />
           <path
             d="M57 63l-15-2.5M57 66.5l-15 2M101 63l15-2.5M101 66.5l15 2"
             fill="none"
@@ -422,6 +536,11 @@ function HamsterArt({
       </g>
       <ellipse cx="60" cy="118" rx="9.5" ry="4.6" fill="#f5a9b8" />
       <ellipse cx="98" cy="118" rx="9.5" ry="4.6" fill="#f5a9b8" />
+      <g className="hm-zzz" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M118 36h7l-7 8h7" />
+        <path d="M131 22h9l-9 10h9" />
+        <path d="M146 5h11l-11 12h11" />
+      </g>
     </svg>
   );
 }
