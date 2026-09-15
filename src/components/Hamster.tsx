@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useReducedMotion } from "framer-motion";
+import { useTheme } from "next-themes";
+import { site } from "@/data/content";
 import { CHEEK_CAPACITY, cheekLevel, isAsleep, isStashFeed } from "@/lib/hamsterCount";
+import { useActiveSection } from "@/lib/useActiveSection";
 import { feedHamster, useHamsterCount } from "@/lib/useHamsterCount";
 
 const TREATS = ["seed", "strawberry", "blueberry"] as const;
@@ -33,8 +36,27 @@ const MAX_TILT = 7;
 const FULL_TURN_AT = 80;
 /** The cursor counts as "close" within this many screen pixels of the face. */
 const EXCITED_WITHIN = 220;
+/** A tap focuses the link it lands on; focus this soon after a touch isn't a keyboard visit. */
+const TOUCH_FOCUS_GRACE_MS = 600;
 
 type Heart = { id: number; x: number; r: number; delay: number };
+type Headwear = "nightcap" | "hardhat" | "sunglasses";
+type Held = "laptop" | "envelope";
+
+/** Links that thrill it: any email link, and any link to the résumé. */
+function isCheerLink(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return false;
+  const link = target.closest("a[href]");
+  // Under the case-study modal or inside the terminal's output, it can't see the link.
+  if (!link || link.closest('[role="dialog"], [data-terminal-log]')) return false;
+  const href = link.getAttribute("href") ?? "";
+  if (href.startsWith("mailto:")) return true;
+  try {
+    return new URL(href, window.location.href).pathname === site.resumePath;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * A hamster in the bottom-left corner that eats when clicked and shows how many
@@ -63,6 +85,9 @@ export function Hamster() {
   const [asleep, setAsleep] = useState(false);
   const [yawning, setYawning] = useState(false);
   const [stashing, setStashing] = useState(false);
+  const [thrilled, setThrilled] = useState(false);
+  const { resolvedTheme } = useTheme();
+  const section = useActiveSection();
   const [hearts, setHearts] = useState<Heart[]>([]);
   const [feeds, setFeeds] = useState(0);
   const busy = useRef(false);
@@ -126,6 +151,46 @@ export function Hamster() {
     };
   }, []);
 
+  // Thrilled while the visitor points at, or tabs to, an email or résumé link.
+  useEffect(() => {
+    let lastTouch = -Infinity;
+    const onPointerOver = (e: PointerEvent) => {
+      if (e.pointerType !== "touch") setThrilled(isCheerLink(e.target));
+    };
+    const onPointerOut = (e: PointerEvent) => {
+      // Moving from an icon to the text inside the same link isn't leaving it.
+      if (e.pointerType !== "touch" && !isCheerLink(e.relatedTarget)) setThrilled(false);
+    };
+    const onPointerDown = (e: PointerEvent) => {
+      if (e.pointerType === "touch") lastTouch = performance.now();
+    };
+    const onFocusIn = (e: FocusEvent) => {
+      if (performance.now() - lastTouch > TOUCH_FOCUS_GRACE_MS) setThrilled(isCheerLink(e.target));
+    };
+    const onFocusOut = (e: FocusEvent) => {
+      if (!isCheerLink(e.relatedTarget)) setThrilled(false);
+    };
+    // Back from a mail app or a download, nothing is being pointed at any more.
+    const calmDown = () => setThrilled(false);
+
+    document.addEventListener("pointerover", onPointerOver);
+    document.addEventListener("pointerout", onPointerOut);
+    document.addEventListener("pointerdown", onPointerDown, { passive: true });
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+    document.addEventListener("visibilitychange", calmDown);
+    window.addEventListener("pagehide", calmDown);
+    return () => {
+      document.removeEventListener("pointerover", onPointerOver);
+      document.removeEventListener("pointerout", onPointerOut);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+      document.removeEventListener("visibilitychange", calmDown);
+      window.removeEventListener("pagehide", calmDown);
+    };
+  }, []);
+
   // Eyes and body follow the cursor. One rAF loop eases toward a target and
   // writes straight to the SVG, so pointer moves never re-render React.
   useEffect(() => {
@@ -183,10 +248,17 @@ export function Hamster() {
     const onLeaveWindow = (e: MouseEvent) => {
       if (!e.relatedTarget) pointer = null;
     };
+    // Keyboard visitors get the eye movement too: it glances at whatever takes focus.
+    const onFocus = (e: FocusEvent) => {
+      if (!(e.target instanceof Element) || e.target === document.body) return;
+      const r = e.target.getBoundingClientRect();
+      pointer = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    };
 
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("pointerdown", onMove, { passive: true });
     document.addEventListener("mouseout", onLeaveWindow);
+    document.addEventListener("focusin", onFocus);
     raf = requestAnimationFrame(frame);
 
     return () => {
@@ -194,6 +266,7 @@ export function Hamster() {
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerdown", onMove);
       document.removeEventListener("mouseout", onLeaveWindow);
+      document.removeEventListener("focusin", onFocus);
       button.classList.remove("hm-excited");
     };
   }, [mounted, reduce]);
@@ -274,12 +347,31 @@ export function Hamster() {
   const unit = count === 1 ? "time" : "times";
   // The count already reads empty on the fifth feed; keep the cheeks stuffed until it has stashed.
   const cheeks = stashing || (eating && isStashFeed(count)) ? CHEEK_CAPACITY : cheekLevel(count);
+  // One thing on its head: sleep beats the section, and the section beats the theme.
+  const headwear: Headwear | null = asleep
+    ? "nightcap"
+    : section === "experience"
+      ? "hardhat"
+      : resolvedTheme === "light"
+        ? "sunglasses"
+        : null;
+  // Its paws are busy with food while eating, and empty while asleep or off stashing.
+  const held: Held | null =
+    asleep || yawning || eating || stashing
+      ? null
+      : section === "skills"
+        ? "laptop"
+        : section === "contact"
+          ? "envelope"
+          : null;
   const states = [
     eating && "eating",
     full && "full",
     asleep && "asleep",
     yawning && "yawning",
     stashing && "stashing",
+    thrilled && !asleep && !stashing && "thrilled",
+    held && "holding",
   ].filter(Boolean);
 
   return (
@@ -318,6 +410,8 @@ export function Hamster() {
           dropping={dropping}
           hideTreat={full || asleep || stashing}
           asleep={asleep}
+          headwear={headwear}
+          held={held}
         />
         {hearts.map((h) => (
           <span
@@ -382,6 +476,61 @@ function Eye({
   );
 }
 
+/** On its head. Sunglasses sit pushed up, clear of the eyes the visitor is watching. */
+function HeadwearArt({ kind }: { kind: Headwear }) {
+  if (kind === "nightcap") {
+    return (
+      <g className="hm-headwear">
+        <path className="hm-cap" d="M47 33C52 13 93 3 113 23L141 12C132 26 121 33 111 34Z" />
+        <path d="M45 34Q79 18 114 33L114 38Q79 24 45 40Z" fill="#fff4e6" />
+        <circle cx="142" cy="12" r="5.5" fill="#fff4e6" />
+      </g>
+    );
+  }
+  if (kind === "hardhat") {
+    return (
+      <g className="hm-headwear">
+        <path className="hm-hat" d="M51 32Q52 6 79 5Q106 6 107 32Z" />
+        <path className="hm-hat-ridge" d="M79 6V31" strokeWidth="3" />
+        <rect className="hm-hat-brim" x="42" y="29" width="74" height="6.5" rx="3.2" />
+      </g>
+    );
+  }
+  return (
+    <g className="hm-headwear">
+      <rect x="54" y="23" width="21" height="11" rx="5.5" fill="#222a35" />
+      <rect x="83" y="23" width="21" height="11" rx="5.5" fill="#222a35" />
+      <path d="M75 27.5q4-3 8 0" fill="none" stroke="#222a35" strokeWidth="2.2" />
+      <rect x="57.5" y="25.3" width="7" height="2.4" rx="1.2" fill="#fff" opacity=".45" />
+      <rect x="86.5" y="25.3" width="7" height="2.4" rx="1.2" fill="#fff" opacity=".45" />
+    </g>
+  );
+}
+
+/** In its paws: a laptop on Skills, an envelope on Contact. */
+function HeldArt({ kind }: { kind: Held }) {
+  if (kind === "laptop") {
+    return (
+      <g className="hm-held">
+        <rect x="55" y="68" width="48" height="29" rx="3" fill="#2d3440" />
+        <rect className="hm-screen" x="59" y="72" width="40" height="21" rx="2" />
+        <path d="M64 78h9M64 82h17M64 86h7" stroke="#e9fffb" strokeWidth="1.7" strokeLinecap="round" opacity=".85" />
+        <path d="M49 97h60l-4 5H53z" fill="#434c5a" />
+      </g>
+    );
+  }
+  return (
+    <g className="hm-held">
+      <rect x="56" y="77" width="46" height="29" rx="3" fill="#fff4e6" stroke="#dccab0" strokeWidth="1.2" />
+      <path d="M56.6 78.5 79 93l22.4-14.5" fill="none" stroke="#dccab0" strokeWidth="1.5" />
+      <path
+        className="hm-seal"
+        d="M79 91.5c-1.8-2.6-6.2-1.8-5.3 1.6.8 2.7 5.3 4.7 5.3 4.7s4.5-2 5.3-4.7c.9-3.4-3.5-4.2-5.3-1.6z"
+      />
+    </g>
+  );
+}
+
 function HamsterArt({
   svgRef,
   lookRef,
@@ -391,6 +540,8 @@ function HamsterArt({
   dropping,
   hideTreat,
   asleep,
+  headwear,
+  held,
 }: {
   svgRef: React.RefObject<SVGSVGElement | null>;
   lookRef: React.RefObject<SVGGElement | null>;
@@ -400,6 +551,8 @@ function HamsterArt({
   dropping: boolean;
   hideTreat: boolean;
   asleep: boolean;
+  headwear: Headwear | null;
+  held: Held | null;
 }) {
   const on = (name: (typeof TREATS)[number]) =>
     TREATS[treat] === name ? "on" : undefined;
@@ -528,6 +681,8 @@ function HamsterArt({
             <circle cx="75" cy="72" r="1" style={{ "--cx": "-4px" } as CSSProperties} />
             <circle cx="83" cy="71" r="1.2" style={{ "--cx": "11px" } as CSSProperties} />
           </g>
+          {headwear && <HeadwearArt kind={headwear} />}
+          {held && <HeldArt kind={held} />}
           <g className="hm-paws" fill="#f7b8c2" stroke="#e99aaa" strokeWidth=".8">
             <ellipse cx="70" cy="88" rx="6.8" ry="5.2" />
             <ellipse cx="88" cy="88" rx="6.8" ry="5.2" />
@@ -540,6 +695,11 @@ function HamsterArt({
         <path d="M118 36h7l-7 8h7" />
         <path d="M131 22h9l-9 10h9" />
         <path d="M146 5h11l-11 12h11" />
+      </g>
+      <g className="hm-sparks">
+        <path d="M26 20l1.6 4.4 4.4 1.6-4.4 1.6L26 32l-1.6-4.4-4.4-1.6 4.4-1.6Z" />
+        <path d="M136 40l1.2 3.4 3.4 1.2-3.4 1.2-1.2 3.4-1.2-3.4-3.4-1.2 3.4-1.2Z" />
+        <path d="M16 64l1 2.8 2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1Z" />
       </g>
     </svg>
   );

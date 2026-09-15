@@ -373,6 +373,40 @@
 }
 @keyframes hm-unstuff { 0%, 40% { transform: scale(1.35); } 56%, 100% { transform: scale(1); } }
 
+/* What it wears and holds (Hamster.tsx picks one of each). Only ink, teal
+   and the hamster's coral: the props must not bring the rainbow back. */
+.hm-cap { fill: #3a4452; }
+.hm-hat,
+.hm-hat-brim { fill: rgb(var(--c-warm)); }
+.hm-hat-brim { filter: brightness(0.82); }
+.hm-hat-ridge { fill: none; stroke: rgb(0 0 0 / 0.16); }
+.hm-screen { fill: rgb(var(--c-accent)); }
+.hm-seal { fill: rgb(var(--c-warm)); }
+.hm-held { transform-box: fill-box; transform-origin: 50% 100%; animation: hm-prop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.hamster.holding .hm-paws { animation: none; transform: translateY(9px); }
+@keyframes hm-prop-in { from { opacity: 0; transform: translateY(8px) scale(0.9); } }
+
+/* Thrilled: an Email or Résumé link has the visitor's attention. No words, just joy. */
+.hm-sparks { fill: rgb(var(--c-warm)); }
+.hm-sparks path { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.hamster.thrilled:not(.eating) .hm-body { animation: hm-thrill 0.55s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.hamster.thrilled:not(.eating) .hm-ear { animation: hm-ear-perk 0.55s ease-in-out infinite; }
+.hamster.thrilled:not(.eating) .hm-ear.r { animation-name: hm-ear-perk-r; }
+.hamster.thrilled .hm-sparks path { animation: hm-spark 0.9s ease-out infinite; }
+.hamster.thrilled .hm-sparks path:nth-child(2) { animation-delay: 0.3s; }
+.hamster.thrilled .hm-sparks path:nth-child(3) { animation-delay: 0.6s; }
+@keyframes hm-thrill { 0%, 100% { transform: none; } 25% { transform: translateY(-7px) rotate(-5deg); } 50% { transform: none; } 75% { transform: translateY(-7px) rotate(5deg); } }
+@keyframes hm-spark { 0% { opacity: 0; transform: scale(0.3); } 40% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.6) translateY(-8px); } }
+
+/* On a phone the dock would sit over a text field and the keyboard; step aside while typing. */
+@media (max-width: 640px) {
+  body:has(input:focus, textarea:focus) .hamster-dock {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0s 0.2s;
+  }
+}
+
 @keyframes hamster-bump { 40% { transform: translateY(-3px) scale(1.3); color: rgb(var(--c-warm)); } }
 @keyframes hamster-plus { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
 @keyframes hamster-heart { 0% { opacity: 0; transform: translate(0, 10px) scale(0.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--hx), -52px) scale(1.05) rotate(var(--hr)); } }
@@ -408,7 +442,8 @@
     scroll-behavior: auto !important;
   }
   /* The z's only show by animating in, so give the sleeping hamster still ones. */
-  .hamster.asleep .hm-zzz path {
+  .hamster.asleep .hm-zzz path,
+  .hamster.thrilled .hm-sparks path {
     opacity: 0.8;
   }
 }
