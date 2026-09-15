@@ -429,7 +429,7 @@ export const playful = {
     notFound: "command not found — try help",
     noCurrentRole: "no current role",
     noSkillMatch: "no skills match that term",
-    hamsterAsleep: "asleep — click it to wake it",
+    hamsterFed: { one: "fed 1 time today", many: "fed {n} times today" },
   },
   status: {
     headline: "All critical systems operational",

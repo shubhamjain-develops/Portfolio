@@ -327,11 +327,12 @@ export function HeroCanvas() {
     };
 
     // The canvas sits behind the hero text, so clicks are caught on the whole
-    // hero section. Clicking a link or button just does that, with no burst.
+    // hero section. Clicking a link or button just does that, with no burst,
+    // and neither does anything inside the terminal (typing, selecting output).
     const clickArea = host.closest("section") ?? host;
     const onPointerDown = (e: PointerEvent) => {
       if (reduce || !particles.length) return;
-      if (e.target instanceof Element && e.target.closest("a, button")) return;
+      if (e.target instanceof Element && e.target.closest("a, button, input, [data-no-burst]")) return;
       const rect = host.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
