@@ -524,6 +524,29 @@ The A3 trade-off that awake and asleep share a nightcap in dark mode no longer e
 
 **Wake time: 06:00.** Offered as the default and not objected to.
 
+**W1 height gate failed and went to the owner (2026-09-15).**
+
+Measured in the browser at the 608px desktop card width, before the decision:
+
+| Layout | Height | vs old card |
+|---|---|---|
+| Old thesis card | 93px | — |
+| Terminal as built, at rest (`$ whoami` label, prompt row, example chips) | 190px | +97px |
+| The same terminal after the first command (output log open) | 285px | +192px |
+| Compact: thesis plus prompt row only | 125px | +32px |
+
+The gate was +24px, so per the cycle 3 amendment the build stopped here and asked.
+
+**Layout: owner chose "Compact; chips on phones".**
+- The `$ whoami` label is dropped; the prompt row stays.
+- The tap-to-run chips show only below 640px.
+
+**Output area: owner chose "Open on first command".**
+- The log is zero-height until the visitor runs a command. It then opens once (about 94px) and scrolls inside a fixed height.
+- Page load never shifts. A shift caused by the visitor's own input doesn't count toward CLS.
+
+The owner accepted +32px on desktop over the +24px gate. As built: 121px at rest on desktop (+28px); a 360px phone card with the one-row scrolling chips is +89px; the log adds 94px after the first command and clear collapses it again.
+
 
 ### Doubt cycle
 
@@ -640,7 +663,7 @@ Cycles run: 3
 | S2 | Shared module-level stores: `useActiveSection` (Nav moved onto it) and `useHamsterCount` (Hamster moved onto it, behaviour unchanged) | 2 | 72 → **76** (95426a3): visible-tab run shows the nav pill tracking about/experience/work/skills/contact, none over the hero, contact at page bottom; a 300px layout shift with no scroll moved the pill and back; feed, mid-chew ignore, other-tab storage event and stale day all correct; no console errors; lint/build green. Unknown: blocked site data not yet exercised | S1 |
 | S3 | Hamster direction A redesign, state priority, H1 sleep, H2 cheeks/stash, 400ms feed floor, state-aware label | 2 | 64 → **72** (32425df): visible tab with the Date forced: opens asleep at 23:30 (closed eyes, z, label "Wake and feed"), click yawns then eats, clicks during yawn/stash ignored, re-sleeps after 2 idle min, activity keeps it awake, awake at 14:00; cheeks 1-4, fifth feed chews full then stashes and returns empty; repeated Enter prevented. Found and fixed: a wall clock set back locked feeding out (now monotonic), regression re-run passes. Screenshot of the sleeping pose checked. Unknowns: reduced motion and phone width not yet run; idle time advanced by clock, not waited | S2 |
 | S4 | Hamster H3 props, H4 thrill, headwear rule, eyes on focus/tap, dock hide on narrow input focus | 2 | 66 → **70** (5c58f6d): owner checked props, headwear and the Email/Résumé reaction in their browser ("I checked it is working."). Automated in a background tab: mail and résumé hover thrill; icon-to-text inside one link stays thrilled; leaving, touch hover, other links and a mailto inside role=dialog do not; synthetic focusin thrills, focusout clears, focus within 600ms of a tap ignored; visibilitychange clears. Native focus events do not fire in an unfocused window, so keyboard focus was exercised through the handler, not the browser. lint/tsc/build green, 182 kB. Unknowns: section props and night-over-hard-hat not re-run by me; phone-width dock hide unrun | S3 |
-| S5 | W1 hero terminal (pinned thesis, log, chips) plus HeroCanvas burst filter | 2 | 68 | S1, S2 |
+| S5 | W1 hero terminal (pinned thesis, log, chips) plus HeroCanvas burst filter | 2 | 68 → **72** (890732c): check-terminal.mts 21/21 on real content, 3 mutants killed (case folding, input echo, RegExp grep); server HTML contains the full thesis sentence; in the browser → completion, case-insensitive commands, ↑ recall, 60-row cap, log scrolled to end, typed markup rendered as text, clear keeps the thesis, contact links carry target/rel. Height gate failed (+97px) and went to the owner; compact layout shipped at +28px desktop / +89px phone. Unknowns: burst suppression not observed at runtime (background tab pauses the canvas), phone keyboard and real touch not run | S1, S2 |
 | S6 | W2 status block in the footer | 2 | 78 | S2 |
 | S7 | W4 Experience Timeline / git log toggle | 2 | 74 | S1 |
 | S8 | W6 postmortem toggle, Kaveri only | 2 | 80 | S1 |
