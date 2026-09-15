@@ -6,7 +6,7 @@ confidence_post: 70
 repo: Portfolio
 base: origin/feat/portfolio-motion-pass @ f9bb2c2 (rebase --onto origin/main after PR #2 merges)
 branch: feat/portfolio-personality-pass
-phase: scored
+phase: pushed
 created: 2026-09-15
 ---
 
