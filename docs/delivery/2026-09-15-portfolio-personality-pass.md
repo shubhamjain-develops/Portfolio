@@ -52,7 +52,6 @@ Decisions given by the owner:
 - It pushes sunglasses up in light mode; the nightcap is reserved for sleeping.
 - The hero thesis is the resting output of a small terminal that answers from the site's own content.
 - The footer opens with a status-page joke.
-- Experience can be read as `git log`.
 - The Kaveri case study can be read as a postmortem.
 
 ## 3. Where it touches
@@ -69,7 +68,6 @@ Decisions given by the owner:
 | `src/components/Hero.tsx` | Thesis card replaced by `<Terminal />` with an SSR resting state | W1 |
 | `src/components/StatusBoard.tsx` (new) | Status rows | W2 |
 | `src/components/Contact.tsx` | Renders StatusBoard above the copyright row; narrow-screen bottom padding | W2 |
-| `src/components/Experience.tsx` | View toggle, `git log` list | W4 |
 | `src/components/CaseStudyModal.tsx` | Case study / Postmortem toggle | W6 |
 | `src/components/HeroCanvas.tsx` | Burst filter also ignores `input, [data-no-burst]` | Terminal clicks must not burst |
 | `docs/portfolio-internals.html` | Architecture notes updated | The owner's interview prep stays true |
@@ -79,7 +77,6 @@ Decisions given by the owner:
 - The nav scroll-spy (refactored).
 - The existing localStorage key (read by three consumers now).
 - The hero's first screen, as seen by crawlers and link previews (SSR resting output must still contain the thesis).
-- The Experience timeline's stop measurement (remount after toggle).
 - The case-study modal focus trap (toggle inside it).
 - Footer layout with the fixed hamster.
 
@@ -703,23 +700,17 @@ The tree builds and lints after every slice. S5-S8 don't depend on the hamster s
 8. **Status footer.**
    - "All critical systems operational" with Availability, Location, Hamster and Coffee rows, each a dot plus text, and no bars.
    - The hamster row updates in the same tab on a feed.
-9. **Git log view.**
-   - Experience has a Timeline | git log toggle.
-   - The log shows four linear commits, newest first. HEAD is on Founding Software Engineer, in ink text with a coral dot.
-   - The degree is the root commit.
-   - Hashes are hidden from screen readers.
-   - Timeline nodes still light correctly after switching back.
-10. **Postmortem view.**
+9. **Postmortem view.**
     - The Kaveri modal has a Case study | Postmortem toggle: Impact = metrics + result, Root cause = problem, Fix = approach, all verbatim.
     - The other three modals have no toggle.
-11. **Quality floor.**
+10. **Quality floor.**
     - With reduced motion on, everything listed in A3 and the cycle 3 amendments is static.
     - The page renders and counts with site data blocked.
     - No hydration warnings or console errors.
     - New coloured text is ≥4.5:1 in both themes.
     - `/` first-load JS is ≤190 kB.
     - Lint and build are green.
-12. **Architecture notes.** `docs/portfolio-internals.html` describes the new hero, footer, hooks and hamster state priority.
+11. **Architecture notes.** `docs/portfolio-internals.html` describes the new hero, footer, hooks and hamster state priority.
 
 ## 6. How it is verified
 
@@ -728,15 +719,14 @@ The tree builds and lints after every slice. S5-S8 don't depend on the hamster s
 | 1 | §5.1 | `node scratchpad/check-hamster-state.mts` (isAsleep across hours 22:59/23:00/05:59/06:00 and idle windows), mutation: drop the hour guard | All pass; mutated run fails |
 | 2 | §5.1 | Chrome with a new-document `Date` override set to 23:30, then reload; click; idle 2 minutes; override to 14:00 | Asleep, then yawn and chew, then asleep again; never sleeps at 14:00 |
 | 3 | §5.2 | node check `cheekLevel` and `readCount` (>9999 → 0), mutation; browser: 5 feeds, reload at 5, hold Enter 3s | Cheek levels 1-4; stash after chew; empty after reload; ≤8 feeds in 3s |
-| 4 | §5.3 | Scroll through all sections in the browser, comparing the nav pill and the hamster prop; toggle git log mid-page | Always agree |
+| 4 | §5.3 | Scroll through all sections in the browser, comparing the nav pill and the hamster prop | Always agree |
 | 5 | §5.4 | Real hover and Tab to hero/nav/contact Email and Résumé; synthetic touch pointer; open modal and hover links | Thrilled on, cleared on leave; no stick; no reaction in modal or log |
 | 6 | §5.5, §5.6 | Screenshot light/dark awake, asleep, Experience; focus a CTA; tap event | Correct headwear; eyes visible and displaced toward the target |
 | 7 | §5.7 | `curl` the built page and grep the thesis; `node check-terminal.mts` (command table vs content exports, case, errors don't echo input), mutation; browser: →, ↑, clear; canvas burst probe on terminal click; measure hero height against PR #2 at 400/1440 | Thesis in HTML; checks pass/fail as expected; no burst; height delta ≤24px |
 | 8 | §5.8 | Browser: feed, read the footer row without reload | Row increments immediately |
-| 9 | §5.9 | `node check-commit-hash.mts` (uniqueness), mutation; browser: toggle, read the accessibility tree, toggle back and scroll | Unique; hashes absent from the tree; nodes light |
-| 10 | §5.10 | Open all four modals | Toggle only on Kaveri; text identical to content.ts |
-| 11 | §5.11 | Chrome emulate reduced motion; block site data and reload; console read; contrast computed from tokens; `npm run build` size line; `npm run lint` | Static; no errors; ≥4.5:1; ≤190 kB; green |
-| 12 | §5.12 | Diff review of the docs file against the final code | Every changed component described |
+| 9 | §5.9 | Open all four modals | Toggle only on Kaveri; text identical to content.ts |
+| 10 | §5.10 | Chrome emulate reduced motion; block site data and reload; console read; contrast computed from tokens; `npm run build` size line; `npm run lint` | Static; no errors; ≥4.5:1; ≤190 kB; green |
+| 11 | §5.11 | Diff review of the docs file against the final code | Every changed component described |
 
 ## 7. Risks and rollback
 
@@ -826,17 +816,33 @@ Floor: tier 3. The design-time threat model is in A6. The security-floor checks 
 **What is still unknown (why this isn't higher):**
 - **Reduced motion:** verified by reading the CSS and JS branches, not at runtime.
 - **Phones:** 400px width, the dock hiding while an input has focus, and real touch were not run.
-- **Background-tab gaps:** two things need a visible tab. One is the hero burst staying quiet for terminal clicks. The other is timeline nodes re-lighting after the git-log toggle. The automation tab stayed in the background, where Chrome pauses rAF and scrolling.
+- **Background-tab gap:** the hero burst staying quiet for terminal clicks needs a visible tab to observe live; the automation tab stayed in the background, where Chrome pauses rAF and scrolling.
 - **S4 (props, headwear, Email/Résumé reaction):** confirmed by the owner in their own browser and by handler-level events, not by a scripted visible-tab run.
 
 **Deviations from the approved design** (all recorded above):
 - **Terminal height gate:** the owner chose the compact layout, +28px on desktop.
-- **Git-log toggle:** the timeline is hidden, not remounted, when switching views.
 - **Feed count sync:** there is no `hamster:fed` CustomEvent; the module-level store makes it unnecessary.
 - **Reduced motion:** the 700ms feed puff from PR #2 stays, and the 400ms floor still applies.
 - **Unused copy:** `hamsterAsleep` was removed.
 
+## 11. Post-approval change: W4 removed
+
+After PR #2 merged and this branch was rebased onto `origin/main`, the owner reviewed the built site and asked to remove the Experience `git log` toggle (W4) entirely — quoted: "i donot like this git log thing... remove it."
+
+**What was removed:**
+- The Timeline | git log toggle and the `GitLog`/`Commit` components in `src/components/Experience.tsx`, restoring it to the pre-S7 version (verified identical to the rebased pre-slice-7 diff).
+- `src/lib/commitHash.ts` (now unused).
+- The `playful.experienceView` copy block in `src/data/content.ts`.
+- The "git log view" bullet in `docs/portfolio-internals.html` §12.
+
+**What this does to the record above:**
+- §2, §3, §5 and §6 above have already been edited to describe the site as it now ships, with W4 removed.
+- The **S7 row in the slice table** (§4, Phase B) is left as-is: it is an accurate historical record of what was built and verified at the time, not a description of what ships now.
+- **Confidence is unaffected.** S7's score (74) was never the minimum; S4 (70) still is. Overall post-implementation confidence stays **70/100**.
+- **Security and rollback are unaffected.** No new storage, no new external input; the change only removes a client-side view.
+- `npm run lint`, `npx tsc --noEmit` and `npm run build` were re-run clean after the removal (see the commit for evidence).
+
 **Push gate:**
 - **Score:** 70 meets the threshold.
-- **Owner decision:** push only after PR #2 merges. PR #2 was still open on 2026-09-15.
-- **Next steps:** once it merges, run `git rebase --onto origin/main f9bb2c2`, rebuild and re-run lint, then push and open one PR against `main`.
+- **Owner decision:** push after PR #2 merges and this removal. PR #2 merged 2026-09-15; the branch was rebased with `git rebase --onto origin/main f9bb2c2`, rebuilt and re-linted clean before this removal.
+- **Next steps:** commit the removal, rebuild/re-lint once more, then push and open one PR against `main`.
