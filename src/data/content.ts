@@ -399,3 +399,61 @@ export const contact = {
   heading: "Let's talk about what you're building.",
   body: "Based in Bengaluru. Email is the fastest way to reach me — I read everything.",
 };
+
+/**
+ * The site's jokes: the hero terminal, the status footer, the git-log and
+ * postmortem views. Only labels and punchlines live here — every fact they
+ * show (roles, skills, projects, availability, location) is read from the
+ * exports above, so there is still one place to change it.
+ */
+export const playful = {
+  terminal: {
+    title: "shubham@portfolio: ~",
+    placeholder: "type help",
+    inputLabel: "Terminal command",
+    hint: "Type help. Right arrow completes a command, up arrow recalls the last one.",
+    logLabel: "Terminal output",
+    examplesLabel: "Example commands",
+    examples: ["help", "experience --current", "skills | grep postgres", "hamster"],
+    help: [
+      ["whoami", "who I am, in one line"],
+      ["experience [--current]", "roles, newest first"],
+      ["skills [| grep term]", "what I build with"],
+      ["projects", "selected work"],
+      ["contact", "how to reach me"],
+      ["resume", "download my résumé"],
+      ["hamster", "how the hamster is doing"],
+      ["clear", "clear this output"],
+    ],
+    // Errors never repeat what was typed.
+    notFound: "command not found — try help",
+    noCurrentRole: "no current role",
+    noSkillMatch: "no skills match that term",
+    hamsterAsleep: "asleep — click it to wake it",
+  },
+  status: {
+    headline: "All critical systems operational",
+    availability: "Availability",
+    location: "Location",
+    hamster: "Hamster",
+    coffee: "Coffee",
+    coffeeState: "Degraded",
+  },
+  experienceView: {
+    label: "Experience view",
+    timeline: "Timeline",
+    gitLog: "git log",
+    headRef: "HEAD -> main",
+    rootRef: "root",
+  },
+  postmortem: {
+    /** Only projects whose problem was a production incident read naturally as postmortems. */
+    projects: ["kaveri"],
+    label: "Case study view",
+    caseStudy: "Case study",
+    postmortem: "Postmortem",
+    impact: "Impact",
+    rootCause: "Root cause",
+    fix: "Fix",
+  },
+};
