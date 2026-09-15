@@ -3,43 +3,19 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { nav, site } from "@/data/content";
+import { useActiveSection } from "@/lib/useActiveSection";
 import { ThemeToggle } from "./ThemeToggle";
 import { ScrollProgress } from "./ScrollProgress";
 
 export function Nav() {
-  const [active, setActive] = useState<string>("");
+  /* Scroll-spy, shared with the hamster so its props follow the same section. */
+  const active = useActiveSection();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const reduce = useReducedMotion();
 
-  /* Scroll-spy: the last section whose top has passed the nav wins. */
   useEffect(() => {
-    const sections = nav
-      .map((n) => document.getElementById(n.id))
-      .filter((el): el is HTMLElement => Boolean(el));
-
-    const onScroll = () => {
-      setScrolled(window.scrollY > 12);
-
-      // A section counts as active once its top crosses a third of the way
-      // down the viewport — matches where the eye actually is.
-      const line = window.scrollY + window.innerHeight * 0.32;
-      let current = "";
-      for (const section of sections) {
-        if (section.offsetTop <= line) current = section.id;
-      }
-
-      // At the very bottom, the last section is the one being read even if
-      // its top never crossed the line.
-      const atBottom =
-        window.innerHeight + window.scrollY >=
-        document.documentElement.scrollHeight - 4;
-      if (atBottom) current = nav[nav.length - 1].id;
-
-      // keep the pill off while the hero still fills the screen
-      setActive(window.scrollY < 120 ? "" : current);
-    };
-
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);

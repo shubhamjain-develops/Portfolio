@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useReducedMotion } from "framer-motion";
-import { HAMSTER_KEY, localDay, readCount, recordFeed } from "@/lib/hamsterCount";
+import { feedHamster, useHamsterCount } from "@/lib/useHamsterCount";
 
 const TREATS = ["seed", "strawberry", "blueberry"] as const;
 const CHEW_MS = 1200;
@@ -29,14 +29,6 @@ const EXCITED_WITHIN = 220;
 
 type Heart = { id: number; x: number; r: number; delay: number };
 
-function readStored(): string | null {
-  try {
-    return localStorage.getItem(HAMSTER_KEY);
-  } catch {
-    return null;
-  }
-}
-
 /**
  * A hamster in the bottom-left corner that eats when clicked and shows how many
  * times it was fed today. The count lives only in the visitor's browser, per
@@ -51,7 +43,7 @@ function readStored(): string | null {
 export function Hamster() {
   const reduce = useReducedMotion();
   const [mounted, setMounted] = useState(false);
-  const [count, setCount] = useState(0);
+  const count = useHamsterCount();
   const [treat, setTreat] = useState(0);
   const [eating, setEating] = useState(false);
   const [dropping, setDropping] = useState(false);
@@ -59,7 +51,6 @@ export function Hamster() {
   const [hearts, setHearts] = useState<Heart[]>([]);
   const [feeds, setFeeds] = useState(0);
   const busy = useRef(false);
-  const day = useRef("");
   const timers = useRef<number[]>([]);
 
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -73,30 +64,16 @@ export function Hamster() {
   };
 
   useEffect(() => {
-    const sync = () => {
-      const today = localDay();
-      if (today === day.current) return;
-      day.current = today;
-      const n = readCount(readStored(), today);
-      setCount(n);
-      setTreat(n % TREATS.length);
-    };
-    sync();
     setMounted(true);
-
-    // A tab left open past midnight starts the new day at zero.
-    const onVisible = () => {
-      if (!document.hidden) sync();
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    const tick = window.setInterval(sync, 60_000);
     const pending = timers.current;
-    return () => {
-      document.removeEventListener("visibilitychange", onVisible);
-      window.clearInterval(tick);
-      pending.forEach((id) => window.clearTimeout(id));
-    };
+    return () => pending.forEach((id) => window.clearTimeout(id));
   }, []);
+
+  // The count can change without a feed here (midnight, another tab). Serve
+  // the matching treat, but never swap it out from under a meal in progress.
+  useEffect(() => {
+    if (!busy.current) setTreat(count % TREATS.length);
+  }, [count]);
 
   // Eyes and body follow the cursor. One rAF loop eases toward a target and
   // writes straight to the SVG, so pointer moves never re-render React.
@@ -175,24 +152,14 @@ export function Hamster() {
     if (busy.current) return;
     busy.current = true;
 
-    // If storage is blocked, keep counting in memory for this visit.
-    const fallback = JSON.stringify({ day: day.current, count });
-    const today = localDay();
-    day.current = today;
-    const next = recordFeed(readStored() ?? fallback, today);
-    try {
-      localStorage.setItem(HAMSTER_KEY, JSON.stringify(next));
-    } catch {
-      // Private mode or blocked storage: the count still shows for this visit.
-    }
-    setCount(next.count);
+    const next = feedHamster();
     setFeeds((f) => f + 1);
 
     if (reduce) {
       setFull(true);
       later(() => {
         setFull(false);
-        setTreat(next.count % TREATS.length);
+        setTreat(next % TREATS.length);
         busy.current = false;
       }, 700);
       return;
@@ -211,7 +178,7 @@ export function Hamster() {
     later(() => setHearts([]), 1900);
     later(() => {
       setEating(false);
-      setTreat(next.count % TREATS.length);
+      setTreat(next % TREATS.length);
       setDropping(true);
       later(() => {
         setDropping(false);
