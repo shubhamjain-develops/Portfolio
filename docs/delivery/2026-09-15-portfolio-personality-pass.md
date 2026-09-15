@@ -636,7 +636,7 @@ Cycles run: 3
 
 | Slice | What it does | Tier | Own pre-score | Depends on |
 |---|---|---|---|---|
-| S1 | Content `playful` block; `hamsterCount` rejects >9999, adds `cheekLevel` and `isAsleep`; `commitHash`; node checks | 2 | 80 | — |
+| S1 | Content `playful` block; `hamsterCount` rejects >9999, adds `cheekLevel` and `isAsleep`; `commitHash`; node checks | 2 | 80 → **82** (967c052): 20 state + 9 count + 5 hash checks pass; 5 mutants killed (idle re-sleep, ceiling, hour guard, cheek modulus, hash separator); lint/build green, 180 kB. Unknown: the copy block is unused until S5-S8 | — |
 | S2 | Shared module-level stores: `useActiveSection` (Nav moved onto it) and `useHamsterCount` (Hamster moved onto it, behaviour unchanged) | 2 | 72 | S1 |
 | S3 | Hamster direction A redesign, state priority, H1 sleep, H2 cheeks/stash, 400ms feed floor, state-aware label | 2 | 64 | S2 |
 | S4 | Hamster H3 props, H4 thrill, headwear rule, eyes on focus/tap, dock hide on narrow input focus | 2 | 66 | S3 |
