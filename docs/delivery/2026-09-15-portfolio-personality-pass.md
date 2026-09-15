@@ -2,11 +2,11 @@
 slug: portfolio-personality-pass
 tier: 3
 confidence_pre: 64
-confidence_post: null
+confidence_post: 70
 repo: Portfolio
 base: origin/feat/portfolio-motion-pass @ f9bb2c2 (rebase --onto origin/main after PR #2 merges)
 branch: feat/portfolio-personality-pass
-phase: branched
+phase: scored
 created: 2026-09-15
 ---
 
@@ -750,7 +750,15 @@ The tree builds and lints after every slice. S5-S8 don't depend on the hamster s
   - After merge: `git revert -m 1 <merge>` for a merge commit, or `git revert <squash>` for a squash merge, via a PR, then Vercel redeploys.
   - The revert leaves the localStorage key and shape as PR #2 wrote them.
   - Reverting PR #2 requires reverting this PR first.
-- **Rehearsal (Phase D):** to be executed and recorded here before the push gate.
+- **Rehearsal (Phase D), executed 2026-09-15:**
+  - **What ran:** in a detached temporary worktree at `d6c6afd`, `git revert --no-edit f9bb2c2..HEAD` reverted all 17 commits.
+  - **Result:** `git diff f9bb2c2 HEAD` came back empty, so the rolled-back tree is identical to the fork point that PR #2 already built and verified.
+  - **Security floor item 17 (does the revert leave anything behind?):**
+    - After the rollback, the hamster storage key `portfolio-hamster-fed-daily` and its `{day, count}` shape are unchanged.
+    - None of the six new files remain.
+    - There is no feature flag or new stored state that could leave a new code path live.
+  - **Cleanup:** the temporary worktree was removed, and the branch head was not touched.
+  - **Not rehearsed:** reverting the actual merge commit on main, because this PR is not merged yet. Both revert commands are listed above.
 
 ## 8. Confidence
 
@@ -776,14 +784,59 @@ Floor: tier 3. The design-time threat model is in A6. The security-floor checks 
 
 | # | Check | Result | Note |
 |---|---|---|---|
-| 13 | Threat model: terminal input, localStorage, clock, link hrefs, content | designed | Verify there are no `dangerouslySetInnerHTML` or `innerHTML` sinks; the grep for `new RegExp(` must come back empty |
+| 1 | Secret scan | pass | Across the 2,212-line branch diff, the only matches are this score file's own words ("Secrets", "Scan the diff") |
+| 2 | Personal-data guard | pass | No email addresses or phone numbers added under `src` |
+| 3 | Permission diff | pass | No `.claude`, Next/Tailwind/TS config, `.github`, Vercel or env paths changed |
+| 4 | Manifest / lockfile | pass | `package.json` and `package-lock.json` unchanged |
+| 5 | Repo guards | pass | `npm run lint` and `npm run build` green after every slice; final `/` first-load JS 186 kB (budget 190) |
+| 6 | No hook bypass | pass | No `--no-verify` in any of the 17 commits |
+| 7 | Input-trust review | pass | See the note below the table |
+| 8 | Dependency review | n/a | No dependency added |
+| 9 | Authorization touchpoints | n/a | No auth surface |
+| 10 | Logging and output | pass | No `console.*` added; terminal errors never echo the input |
+| 11 | Egress | pass | No fetch/XHR/beacon calls or new external URLs under `src` |
+| 12 | `/security-review` | substituted | The skill reviews the main checkout's working tree, not this worktree. Instead, every changed `src` file was grepped for `dangerouslySetInnerHTML`, `innerHTML`, `new RegExp(`, `eval(` and `new Function(`, with no matches |
+| 13 | Threat model | pass | A6 as designed; its one load-bearing assumption (no HTML sinks) verified by the grep in item 12 |
 | 14 | Identity / tenancy | n/a | — |
-| 15 | Data lifecycle | designed | No new storage keys |
-| 16 | Secrets | pending | Scan the diff |
-| 17 | Rollback safety | pending | Phase D rehearsal |
+| 15 | Data lifecycle | pass | No new storage keys; only the existing hamster key is read and written |
+| 16 | Secret handling | pass | None handled |
+| 17 | Rollback safety | pass | Rehearsal executed, see §7 |
+| 18 | Per-slice re-check | pass | Lint, tsc and build per slice; each slice row records its evidence |
 
-**Open findings:** none yet.
+**Item 7, input-trust review:**
+- **Terminal input:** matched against a fixed command table; grep is `includes()` on lowercased text; output is rendered as React text only.
+- **localStorage:** read inside try/catch, and counts above 9999 are rejected.
+- **Link hrefs:** parsed with `URL`; no CSS selector is built from content.
+- **Tests:** mutants show `check-terminal.mts` catches both input echo and a RegExp-based grep.
+
+**Open findings:** none.
 
 ## 10. Post-implementation
 
-_Appended after verification runs. Do not fill in before._
+**Post-implementation confidence: 70/100** (pre was 64, delta +6). This is the minimum across slices, set by S4.
+
+**Slice post-scores:** S1 82 · S2 76 · S3 72 · S4 70 · S5 72 · S6 80 · S7 74 · S8 82 · S9 80.
+
+**What moved it:**
+- **S3, the pre-score floor.** A foreground browser run with the clock forced to 23:30 proved the night sequence, the stash and the feed spacing. It also found a real defect: a wall clock set back locked feeding out. That is fixed, and the run was repeated.
+- **S5's height gate.** It was measured instead of guessed. It failed, went to the owner, and shipped at the size they chose.
+- **Pure logic.** 46 Node checks across three scripts (20 sleep and cheek, 5 hash, 21 terminal), plus the count check from PR #2. All 8 deliberate mutants were caught.
+- **Rollback and security.** The rollback rehearsal was executed, and the security floor is clean.
+
+**What is still unknown (why this isn't higher):**
+- **Reduced motion:** verified by reading the CSS and JS branches, not at runtime.
+- **Phones:** 400px width, the dock hiding while an input has focus, and real touch were not run.
+- **Background-tab gaps:** two things need a visible tab. One is the hero burst staying quiet for terminal clicks. The other is timeline nodes re-lighting after the git-log toggle. The automation tab stayed in the background, where Chrome pauses rAF and scrolling.
+- **S4 (props, headwear, Email/Résumé reaction):** confirmed by the owner in their own browser and by handler-level events, not by a scripted visible-tab run.
+
+**Deviations from the approved design** (all recorded above):
+- **Terminal height gate:** the owner chose the compact layout, +28px on desktop.
+- **Git-log toggle:** the timeline is hidden, not remounted, when switching views.
+- **Feed count sync:** there is no `hamster:fed` CustomEvent; the module-level store makes it unnecessary.
+- **Reduced motion:** the 700ms feed puff from PR #2 stays, and the 400ms floor still applies.
+- **Unused copy:** `hamsterAsleep` was removed.
+
+**Push gate:**
+- **Score:** 70 meets the threshold.
+- **Owner decision:** push only after PR #2 merges. PR #2 was still open on 2026-09-15.
+- **Next steps:** once it merges, run `git rebase --onto origin/main f9bb2c2`, rebuild and re-run lint, then push and open one PR against `main`.
