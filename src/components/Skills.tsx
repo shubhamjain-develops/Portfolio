@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
-import { skills } from "@/data/content";
-import { Reveal, StaggerGroup, staggerChild } from "./Reveal";
+import { skillLinks, skills } from "@/data/content";
+import { StaggerGroup, staggerChild } from "./Reveal";
+import { SectionHeading } from "./Section";
 import {
   AngularIcon,
   AngularJSIcon,
@@ -62,69 +64,91 @@ const skillIcons: Record<string, SkillIcon> = {
   JWT: JwtIcon,
 };
 
+const PILL =
+  "rounded-md border border-line bg-surface2 text-[0.8rem] text-dim transition-[opacity,background-color,border-color,color] duration-200 hover:border-accent/40 hover:text-ink";
+
 export function Skills() {
   const reduce = useReducedMotion();
+  // Hovering a skill keeps the skills it is used with lit and dims the rest.
+  const [active, setActive] = useState<string | null>(null);
+
+  const partners = useMemo(() => {
+    const map = new Map<string, Set<string>>();
+    for (const [a, b] of skillLinks) {
+      if (!map.has(a)) map.set(a, new Set());
+      if (!map.has(b)) map.set(b, new Set());
+      map.get(a)!.add(b);
+      map.get(b)!.add(a);
+    }
+    return map;
+  }, []);
+
+  const highlight = (item: string) => {
+    if (!active) return "";
+    if (item === active) return "!border-transparent !bg-accent !text-accent-ink";
+    if (partners.get(active)?.has(item)) return "!border-accent/55 !bg-accent/10 !text-ink";
+    return "opacity-35";
+  };
 
   return (
     <section id="skills" className="relative scroll-mt-20 py-20 sm:py-24 lg:py-28">
       <div className="shell">
-        <Reveal>
-          <p className="eyebrow">Skills</p>
-          <h2 className="mt-3 text-[clamp(1.65rem,3.6vw,2.35rem)] leading-[1.15]">
-            What I build with
-          </h2>
-        </Reveal>
+        <SectionHeading eyebrow="Skills" title="What I build with" />
 
-        <StaggerGroup className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {skills.map((group) => {
-            const iconItems = group.items.filter((item) => skillIcons[item]);
-            const plainItems = group.items.filter((item) => !skillIcons[item]);
+        <div onPointerLeave={() => setActive(null)}>
+          <StaggerGroup className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {skills.map((group) => {
+              const iconItems = group.items.filter((item) => skillIcons[item]);
+              const plainItems = group.items.filter((item) => !skillIcons[item]);
 
-            return (
-              <motion.div
-                key={group.title}
-                variants={reduce ? undefined : staggerChild}
-                className="group rounded-xl border border-line card-surface p-5 transition-colors duration-300 hover:border-accent/40"
-              >
-                <h3 className="font-mono text-[0.74rem] font-semibold uppercase tracking-[0.13em] text-accent">
-                  {group.title}
-                </h3>
+              return (
+                <motion.div
+                  key={group.title}
+                  variants={reduce ? undefined : staggerChild}
+                  className="group rounded-xl border border-line card-surface p-5 transition-colors duration-300 hover:border-accent/40"
+                >
+                  <h3 className="font-mono text-[0.74rem] font-semibold uppercase tracking-[0.13em] text-accent">
+                    {group.title}
+                  </h3>
 
-                {iconItems.length > 0 && (
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {iconItems.map((item) => {
-                      const Icon = skillIcons[item];
-                      return (
+                  {iconItems.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {iconItems.map((item) => {
+                        const Icon = skillIcons[item];
+                        return (
+                          <span
+                            key={item}
+                            onPointerEnter={() => setActive(item)}
+                            className={`inline-flex items-center gap-1.5 py-1 pl-1.5 pr-2.5 ${PILL} ${highlight(item)}`}
+                          >
+                            <Icon size={16} className="shrink-0 opacity-80" />
+                            {item}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {plainItems.length > 0 && (
+                    <div
+                      className={`flex flex-wrap gap-1.5 ${iconItems.length > 0 ? "mt-1.5 border-t border-dashed border-line/70 pt-3" : "mt-4"}`}
+                    >
+                      {plainItems.map((item) => (
                         <span
                           key={item}
-                          className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface2 py-1 pl-1.5 pr-2.5 text-[0.8rem] text-dim transition-colors duration-200 hover:border-accent/40 hover:text-ink"
+                          onPointerEnter={() => setActive(item)}
+                          className={`px-2.5 py-1 ${PILL} ${highlight(item)}`}
                         >
-                          <Icon size={16} className="shrink-0 opacity-80" />
                           {item}
                         </span>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {plainItems.length > 0 && (
-                  <div
-                    className={`flex flex-wrap gap-1.5 ${iconItems.length > 0 ? "mt-1.5 border-t border-dashed border-line/70 pt-3" : "mt-4"}`}
-                  >
-                    {plainItems.map((item) => (
-                      <span
-                        key={item}
-                        className="rounded-md border border-line bg-surface2 px-2.5 py-1 text-[0.8rem] text-dim transition-colors duration-200 hover:border-accent/40 hover:text-ink"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </StaggerGroup>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </StaggerGroup>
+        </div>
       </div>
     </section>
   );

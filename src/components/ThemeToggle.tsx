@@ -8,6 +8,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
  * Light/dark switch. Renders a neutral placeholder until mounted so the server
  * and client markup agree — next-themes can't know the resolved theme on the
  * server, and a mismatch here would throw a hydration warning.
+ *
+ * Where the browser supports View Transitions, the new theme spreads out as a
+ * circle from the button; elsewhere, and under reduced motion, it switches
+ * instantly as before.
  */
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false);
@@ -18,10 +22,59 @@ export function ThemeToggle() {
 
   const isDark = resolvedTheme === "dark";
 
+  function toggle(e: React.MouseEvent<HTMLButtonElement>) {
+    const next = isDark ? "light" : "dark";
+
+    if (reduce || !("startViewTransition" in document)) {
+      setTheme(next);
+      return;
+    }
+
+    const root = document.documentElement;
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = left + width / 2;
+    const y = top + height / 2;
+    const radius = Math.hypot(
+      Math.max(x, window.innerWidth - x),
+      Math.max(y, window.innerHeight - y)
+    );
+
+    // next-themes applies the class in an effect after setTheme, which is too
+    // late for the transition's "new" snapshot. So the class is switched here,
+    // the same way next-themes does it, and setTheme then stores the choice.
+    const apply = () => {
+      root.classList.remove("light", "dark");
+      root.classList.add(next);
+      root.style.colorScheme = next;
+      setTheme(next);
+    };
+
+    document
+      .startViewTransition(apply)
+      .ready.then(() => {
+        root.animate(
+          {
+            clipPath: [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${radius}px at ${x}px ${y}px)`,
+            ],
+          },
+          {
+            duration: 560,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+            pseudoElement: "::view-transition-new(root)",
+          }
+        );
+      })
+      .catch(() => {
+        // The transition was skipped (e.g. another one started); the theme still switched.
+      });
+  }
+
   return (
     <button
       type="button"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
+      onClick={toggle}
       aria-label={
         mounted ? `Switch to ${isDark ? "light" : "dark"} theme` : "Switch theme"
       }

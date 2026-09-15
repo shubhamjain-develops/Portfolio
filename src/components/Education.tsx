@@ -2,17 +2,13 @@
 
 import { education } from "@/data/content";
 import { Reveal } from "./Reveal";
+import { SectionHeading } from "./Section";
 
 export function Education() {
   return (
     <section id="education" className="scroll-mt-20 pb-8 pt-20 sm:pt-24">
       <div className="shell">
-        <Reveal>
-          <p className="eyebrow">Education &amp; certifications</p>
-          <h2 className="mt-3 text-[clamp(1.65rem,3.6vw,2.35rem)] leading-[1.15]">
-            Credentials
-          </h2>
-        </Reveal>
+        <SectionHeading eyebrow="Education & certifications" title="Credentials" />
 
         <div className="mt-10">
           {education.map((item, i) => (

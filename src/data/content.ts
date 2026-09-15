@@ -8,7 +8,8 @@ export const site = {
   initials: "SJ",
   role: "Full-Stack Engineer | AI-Native Engineering",
   location: "Bengaluru, India",
-  availability: "Open to remote",
+  /** Shown after the location in the hero. Set to "" to show the location alone. */
+  availability: "",
   email: "shubhamjainiiitb@gmail.com",
   phone: "+91 94069 00025",
   phoneHref: "tel:+919406900025",
@@ -23,7 +24,7 @@ export const site = {
   /** Free Vercel subdomain — swap for a custom domain later if you buy one. */
   url: "https://shubhamjain-develops.vercel.app",
 
-  resumePath: "/Shubham_Jain_Resume.pdf",
+  resumePath: "/Shubham_Jain_General.pdf",
 
   intro:
     "Full-stack engineer with five years across statewide government infrastructure and early-stage startup engineering — specialising in .NET, Angular and PostgreSQL, and in directing AI coding agents inside a human-in-the-loop workflow.",
@@ -113,7 +114,7 @@ export const experience: Job[] = [
     tech: [".NET", "Angular", "PostgreSQL", "Azure", "Playwright"],
   },
   {
-    title: "Software Engineer",
+    title: "Software Engineer 3",
     company: "Center for Smart Governance",
     location: "Bengaluru, India",
     period: "Apr 2025 — Apr 2026",
@@ -129,7 +130,7 @@ export const experience: Job[] = [
     tech: [".NET Core", "PostgreSQL", "Redis", "Swagger", "Microservices"],
   },
   {
-    title: "Associate Software Engineer",
+    title: "Software Engineer 2",
     company: "Center for Smart Governance",
     location: "Bengaluru, India",
     period: "Jun 2023 — Mar 2025",
@@ -143,15 +144,15 @@ export const experience: Job[] = [
     tech: ["Angular", "Reactive Forms", "Azure DevOps", "CI/CD"],
   },
   {
-    title: "Junior Software Engineer",
+    title: "Software Engineer 1",
     company: "Center for Smart Governance",
     location: "Bengaluru, India",
     period: "Aug 2021 — May 2023",
     summary:
-      "Built foundational Kaveri 2.0 workflow screens from the ground up, integrating statewide land-record systems like Bhoomi and e-Aasthi. Also designed and shipped an internal 360° Feedback product solo, end to end, for 500+ users — the work that earned two promotions.",
+      "Built foundational Kaveri 2.0 workflow screens from the ground up, integrating statewide land-record systems like Bhoomi and e-Aasthi. Also designed and shipped an internal 360° Feedback product solo, end to end, for 500+ users.",
     points: [
       "Built Kaveri 2.0 modules from the ground up, delivering complex workflow screens such as fee calculation and integrating multiple statewide land and property record systems, including Bhoomi and e-Aasthi.",
-      "Single-handedly designed and launched the in-house 360° Feedback application (.NET Core MVC, Angular, MySQL, Entity Framework) with role-based authentication, enabling peer and upward feedback for 500+ users — work that earned two promotions.",
+      "Single-handedly designed and launched the in-house 360° Feedback application (.NET Core MVC, Angular, MySQL, Entity Framework) with role-based authentication, enabling peer and upward feedback for 500+ users.",
     ],
     tech: [".NET Core MVC", "Angular", "MySQL", "Entity Framework"],
   },
@@ -246,12 +247,11 @@ export const projects: Project[] = [
   {
     slug: "feedback-360",
     title: "360° Feedback Platform",
-    tagline: "Designed, built and launched solo for 500+ users. Earned two promotions.",
+    tagline: "Designed, built and launched solo for 500+ users.",
     context: "Center for Smart Governance · Internal product",
     metrics: [
       { value: "500+", label: "Users" },
       { value: "1", label: "Engineer" },
-      { value: "2", label: "Promotions earned" },
     ],
     problem:
       "The organisation had no structured way to run peer and upward feedback, and no budget line for a vendor tool.",
@@ -261,7 +261,7 @@ export const projects: Project[] = [
       "Took it from proposal to launch alone, including rollout to 500+ staff.",
     ],
     result:
-      "Shipped and adopted across the organisation. The work directly earned two promotions.",
+      "Shipped and adopted across the organisation.",
     tech: [".NET Core MVC", "Angular", "MySQL", "RBAC"],
     confidential: true,
   },
@@ -317,6 +317,58 @@ export const skills: SkillGroup[] = [
 
 export const languages = ["C#", "Java", "Node.js", "SQL", "TypeScript", "Python"];
 
+/**
+ * Skills that are used together. Hovering one skill on the site keeps its
+ * partners lit and dims the rest. Both names must match an item in `skills`.
+ */
+export const skillLinks: [string, string][] = [
+  ["C#", ".NET Core"],
+  ["C#", "ASP.NET Core"],
+  [".NET Core", "ASP.NET Core"],
+  [".NET Core", "Entity Framework"],
+  [".NET Core", "Azure"],
+  ["ASP.NET Core", "REST APIs"],
+  ["REST APIs", "Swagger"],
+  ["REST APIs", "Idempotency"],
+  ["REST APIs", "Microservices"],
+  ["Microservices", "Distributed Systems"],
+  ["Microservices", "Docker"],
+  ["Microservices", "Redis"],
+  ["Distributed Systems", "System Design & Architecture"],
+  ["System Design & Architecture", "Multi-Tenant Architecture"],
+  ["Multi-Tenant Architecture", "Row-Level Security"],
+  ["Row-Level Security", "PostgreSQL"],
+  ["PostgreSQL", "Entity Framework"],
+  ["PostgreSQL", "Query Optimisation"],
+  ["PostgreSQL", "Indexing"],
+  ["MySQL", "Entity Framework"],
+  ["MySQL", "Query Optimisation"],
+  ["MongoDB", "Indexing"],
+  ["Query Optimisation", "Indexing"],
+  ["Redis", "Rate Limiting"],
+  ["Rate Limiting", "Schema Validation"],
+  ["JWT", "RBAC"],
+  ["JWT", "SSO"],
+  ["RBAC", "Multi-Tenant Architecture"],
+  ["Azure", "Azure OCR"],
+  ["Azure", "Azure DevOps"],
+  ["Azure DevOps", "CI/CD"],
+  ["CI/CD", "Git"],
+  ["CI/CD", "Docker"],
+  ["CI/CD", "Playwright"],
+  ["Angular", "AngularJS"],
+  ["Angular", "TypeScript"],
+  ["Angular", "Reactive Forms"],
+  ["Angular", "HTML"],
+  ["HTML", "CSS"],
+  ["Claude Code", "AI Agent Orchestration"],
+  ["Claude Code", "Prompt Engineering"],
+  ["Claude Code", "Code Review Automation"],
+  ["GitHub Copilot", "Code Review Automation"],
+  ["Cursor IDE", "Prompt Engineering"],
+  ["AI Agent Orchestration", "Prompt Engineering"],
+];
+
 export type Credential = {
   title: string;
   org: string;
@@ -345,5 +397,5 @@ export const education: Credential[] = [
 
 export const contact = {
   heading: "Let's talk about what you're building.",
-  body: "Based in Bengaluru and open to remote. Email is the fastest way to reach me — I read everything.",
+  body: "Based in Bengaluru. Email is the fastest way to reach me — I read everything.",
 };

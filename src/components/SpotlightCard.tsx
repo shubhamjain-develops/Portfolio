@@ -2,6 +2,7 @@
 
 import {
   motion,
+  useAnimationFrame,
   useMotionTemplate,
   useMotionValue,
   useReducedMotion,
@@ -19,11 +20,18 @@ type SpotlightCardProps = {
   ariaLabel?: string;
 };
 
+/** Keeps only the 1.5px padding ring of the element, so a gradient reads as a border. */
+const EDGE_MASK = "linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)";
+
+/** Degrees per millisecond: one lap of the edge light every ~2.6s. */
+const TRACE_SPEED = 360 / 2600;
+
 /**
  * A surface that tracks the cursor twice over:
  *  - a radial "spotlight" gradient follows the pointer across the card face
  *  - the card tilts a couple of degrees toward the pointer, on a spring
- * Both effects are pointer-only and both switch off under reduced motion.
+ * While it is hovered or keyboard-focused, a thin teal light also circles its
+ * edge. All three switch off under reduced motion.
  */
 export function SpotlightCard({
   children,
@@ -45,6 +53,14 @@ export function SpotlightCard({
 
   const spotlight = useMotionTemplate`radial-gradient(340px circle at ${mx}px ${my}px, rgb(var(--glow) / 0.13), transparent 72%)`;
 
+  // Only turn the edge light while someone is on the card; a ref, so no re-renders per frame.
+  const tracing = useRef(false);
+  const angle = useMotionValue(0);
+  useAnimationFrame((_, delta) => {
+    if (tracing.current) angle.set((angle.get() + delta * TRACE_SPEED) % 360);
+  });
+  const edgeLight = useMotionTemplate`conic-gradient(from ${angle}deg, transparent 0 58%, rgb(var(--c-accent) / 0.12) 72%, rgb(var(--c-accent)) 92%, transparent 97%)`;
+
   function handleMove(e: React.PointerEvent<HTMLElement>) {
     if (reduce || e.pointerType !== "mouse") return;
     const el = ref.current;
@@ -61,6 +77,7 @@ export function SpotlightCard({
   }
 
   function handleLeave() {
+    tracing.current = false;
     mx.set(-9999);
     my.set(-9999);
     rx.set(0);
@@ -72,8 +89,17 @@ export function SpotlightCard({
   return (
     <MotionTag
       ref={ref as never}
+      onPointerEnter={() => {
+        tracing.current = true;
+      }}
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
+      onFocus={() => {
+        tracing.current = true;
+      }}
+      onBlur={() => {
+        tracing.current = false;
+      }}
       onClick={onClick}
       aria-label={ariaLabel}
       style={
@@ -93,6 +119,19 @@ export function SpotlightCard({
         />
       )}
       {children}
+      {!reduce && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-[inherit] p-[1.5px] opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100"
+          style={{
+            background: edgeLight,
+            WebkitMask: EDGE_MASK,
+            WebkitMaskComposite: "xor",
+            mask: EDGE_MASK,
+            maskComposite: "exclude",
+          }}
+        />
+      )}
     </MotionTag>
   );
 }

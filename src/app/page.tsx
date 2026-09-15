@@ -8,6 +8,7 @@ import { Education } from "@/components/Education";
 import { Contact } from "@/components/Contact";
 import { Divider } from "@/components/Section";
 import { JsonLd } from "@/components/JsonLd";
+import { Hamster } from "@/components/Hamster";
 
 export default function Home() {
   return (
@@ -27,6 +28,7 @@ export default function Home() {
         <Education />
         <Contact />
       </main>
+      <Hamster />
     </>
   );
 }

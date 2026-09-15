@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { about, availability, languages, stats } from "@/data/content";
 import { CountUp } from "./CountUp";
 import { Reveal, StaggerGroup, staggerChild } from "./Reveal";
+import { SectionHeading } from "./Section";
 
 export function About() {
   const reduce = useReducedMotion();
@@ -12,12 +13,7 @@ export function About() {
     <section id="about" className="scroll-mt-20 py-20 sm:py-24 lg:py-28">
       <div className="shell grid gap-14 lg:grid-cols-[1.25fr_1fr] lg:gap-16">
         <div>
-          <Reveal>
-            <p className="eyebrow">About</p>
-            <h2 className="mt-3 text-[clamp(1.65rem,3.6vw,2.35rem)] leading-[1.15]">
-              {about.heading}
-            </h2>
-          </Reveal>
+          <SectionHeading eyebrow="About" title={about.heading} />
 
           <div className="mt-6 space-y-5">
             {about.paragraphs.map((p, i) => (
