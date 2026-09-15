@@ -302,7 +302,12 @@
 .hm-eye { transform-origin: center; animation: hm-blink 4.6s infinite; }
 .hm-treat { transform-origin: 50% 100%; animation: hm-wobble 3.6s ease-in-out infinite; }
 .hm-twinkle { fill: rgb(var(--c-warm)); transform-origin: center; animation: hm-twinkle 1.8s ease-in-out infinite; }
-.hm-cheek { transform-origin: center; }
+/* Hamster.tsx sets --hm-cheeks to 0-5 from today's count: each feed puffs a little more. */
+.hm-cheek {
+  transform-origin: center;
+  transform: scale(calc(1 + var(--hm-cheeks, 0) * 0.07));
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
 .hm-crumbs circle { opacity: 0; transform-origin: center; }
 
 /* Following the cursor: Hamster.tsx tilts .hm-look and moves the eyes.
@@ -330,6 +335,77 @@
 .hamster.eating .hm-crumbs circle:nth-child(4) { animation-delay: 0.78s; }
 .hm-treat.drop { animation: hm-drop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .hamster.full .hm-cheek { transform: scale(1.36); }
+
+/* Its day. Asleep (23:00-06:00): curled low, eyes shut, z's drifting up.
+   A click yawns it awake; the fifth feed sends it off to stash. */
+.hm-zzz { display: none; stroke: rgb(var(--c-dim)); }
+.hm-zzz path { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.hm-yawn { opacity: 0; transform-box: fill-box; transform-origin: 50% 0; }
+.hamster.asleep .hm-zzz { display: inline; }
+.hamster.asleep .hm-zzz path { animation: hm-z 2.7s ease-in infinite; }
+.hamster.asleep .hm-zzz path:nth-child(2) { animation-delay: 0.9s; }
+.hamster.asleep .hm-zzz path:nth-child(3) { animation-delay: 1.8s; }
+.hamster.asleep .hm-body { transform-origin: 45% 100%; animation: hm-doze 4.8s ease-in-out infinite; }
+.hamster.asleep .hm-paws,
+.hamster.asleep .hm-ear,
+.hamster.asleep .hm-nose { animation: none; }
+.hamster.asleep .hm-twinkle { opacity: 0; animation: none; }
+.hamster.yawning .hm-body { animation: hm-stretch 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+.hamster.yawning .hm-yawn { animation: hm-yawn 0.9s ease-in-out; }
+.hamster.stashing > svg { animation: hm-stash 1.8s ease-in-out; }
+.hamster.stashing .hm-cheek { animation: hm-unstuff 1.8s ease-in-out forwards; }
+.hamster.stashing .hm-twinkle { opacity: 0; animation: none; }
+
+@keyframes hm-z { 0% { opacity: 0; transform: translate(0, 6px) scale(0.6); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translate(10px, -14px) scale(1.1); } }
+@keyframes hm-doze { 0%, 100% { transform: translateY(5px) scale(1.04, 0.9); } 50% { transform: translateY(4px) scale(1.06, 0.87); } }
+@keyframes hm-stretch { 0%, 100% { transform: none; } 45% { transform: translateY(-3px) scale(1.03, 1.07); } }
+@keyframes hm-yawn { 0%, 100% { opacity: 0; transform: scaleY(0.2); } 30%, 70% { opacity: 1; transform: none; } }
+/* Waddles right toward the treat spot, turns, and waddles home; never leaves the screen. */
+@keyframes hm-stash {
+  0% { transform: none; }
+  14% { transform: translateX(8px) rotate(4deg); }
+  28% { transform: translateX(18px) rotate(-4deg); }
+  42% { transform: translateX(26px) scaleX(-1); }
+  58% { transform: translateX(18px) scaleX(-1) rotate(4deg); }
+  76% { transform: translateX(8px) scaleX(-1) rotate(-4deg); }
+  90% { transform: scaleX(-1); }
+  100% { transform: none; }
+}
+@keyframes hm-unstuff { 0%, 40% { transform: scale(1.35); } 56%, 100% { transform: scale(1); } }
+
+/* What it wears and holds (Hamster.tsx picks one of each). Only ink, teal
+   and the hamster's coral: the props must not bring the rainbow back. */
+.hm-cap { fill: #3a4452; }
+.hm-hat,
+.hm-hat-brim { fill: rgb(var(--c-warm)); }
+.hm-hat-brim { filter: brightness(0.82); }
+.hm-hat-ridge { fill: none; stroke: rgb(0 0 0 / 0.16); }
+.hm-screen { fill: rgb(var(--c-accent)); }
+.hm-seal { fill: rgb(var(--c-warm)); }
+.hm-held { transform-box: fill-box; transform-origin: 50% 100%; animation: hm-prop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.hamster.holding .hm-paws { animation: none; transform: translateY(9px); }
+@keyframes hm-prop-in { from { opacity: 0; transform: translateY(8px) scale(0.9); } }
+
+/* Thrilled: an Email or Résumé link has the visitor's attention. No words, just joy. */
+.hm-sparks { fill: rgb(var(--c-warm)); }
+.hm-sparks path { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.hamster.thrilled:not(.eating) .hm-body { animation: hm-thrill 0.55s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.hamster.thrilled:not(.eating) .hm-ear { animation: hm-ear-perk 0.55s ease-in-out infinite; }
+.hamster.thrilled:not(.eating) .hm-ear.r { animation-name: hm-ear-perk-r; }
+.hamster.thrilled .hm-sparks path { animation: hm-spark 0.9s ease-out infinite; }
+.hamster.thrilled .hm-sparks path:nth-child(2) { animation-delay: 0.3s; }
+.hamster.thrilled .hm-sparks path:nth-child(3) { animation-delay: 0.6s; }
+@keyframes hm-thrill { 0%, 100% { transform: none; } 25% { transform: translateY(-7px) rotate(-5deg); } 50% { transform: none; } 75% { transform: translateY(-7px) rotate(5deg); } }
+@keyframes hm-spark { 0% { opacity: 0; transform: scale(0.3); } 40% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.6) translateY(-8px); } }
+
+/* On a phone the dock would sit over a text field and the keyboard; step aside while typing. */
+@media (max-width: 640px) {
+  body:has(input:focus, textarea:focus) .hamster-dock {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s, visibility 0s 0.2s;
+  }
+}
 
 @keyframes hamster-bump { 40% { transform: translateY(-3px) scale(1.3); color: rgb(var(--c-warm)); } }
 @keyframes hamster-plus { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
@@ -364,5 +440,10 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+  /* The z's only show by animating in, so give the sleeping hamster still ones. */
+  .hamster.asleep .hm-zzz path,
+  .hamster.thrilled .hm-sparks path {
+    opacity: 0.8;
   }
 }

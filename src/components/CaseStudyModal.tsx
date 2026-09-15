@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import type { Project } from "@/data/content";
+import { playful, type Project } from "@/data/content";
 import { CloseIcon, ExternalIcon, GitHubIcon, LockIcon } from "./Icons";
 
 type Props = {
@@ -14,6 +14,15 @@ export function CaseStudyModal({ project, onClose }: Props) {
   const reduce = useReducedMotion();
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const [view, setView] = useState<"case" | "postmortem">("case");
+
+  // Every case study opens in its normal view.
+  useEffect(() => setView("case"), [project?.slug]);
+
+  // Only projects whose problem was a production incident offer the postmortem view.
+  const pm = playful.postmortem;
+  const canPostmortem = !!project && pm.projects.includes(project.slug);
+  const postmortem = canPostmortem && view === "postmortem";
 
   /* Escape to close, and keep Tab inside the dialog while it's open. */
   useEffect(() => {
@@ -110,46 +119,97 @@ export function CaseStudyModal({ project, onClose }: Props) {
             </div>
 
             <div className="px-6 py-7 sm:px-8">
-              <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
-                {project.metrics.map((m) => (
-                  <div key={m.label} className="bg-surface2 px-4 py-3.5">
-                    <div className="font-mono text-[1.05rem] font-semibold text-accent">
-                      {m.value}
-                    </div>
-                    <div className="mt-0.5 text-[0.75rem] leading-tight text-faint">
-                      {m.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <Block title="The problem">
-                <p className="text-[0.97rem] leading-relaxed text-dim">
-                  {project.problem}
-                </p>
-              </Block>
-
-              <Block title="What I did">
-                <ul className="space-y-3">
-                  {project.approach.map((step, i) => (
-                    <li
-                      key={i}
-                      className="relative pl-7 text-[0.95rem] leading-relaxed text-dim"
+              {canPostmortem && (
+                <div
+                  role="group"
+                  aria-label={pm.label}
+                  className="mb-6 inline-flex gap-1 rounded-lg border border-line bg-surface2 p-1"
+                >
+                  {(["case", "postmortem"] as const).map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      aria-pressed={view === option}
+                      onClick={() => setView(option)}
+                      className={`rounded-md px-3 py-1.5 font-mono text-[0.76rem] transition-colors ${
+                        view === option ? "bg-surface text-ink shadow-sm" : "text-dim hover:text-ink"
+                      }`}
                     >
-                      <span className="absolute left-0 top-0 font-mono text-[0.78rem] text-accent/70">
-                        {String(i + 1).padStart(2, "0")}
-                      </span>
-                      {step}
-                    </li>
+                      {option === "case" ? pm.caseStudy : pm.postmortem}
+                    </button>
                   ))}
-                </ul>
-              </Block>
+                </div>
+              )}
 
-              <Block title="Outcome">
-                <p className="rounded-lg border-l-2 border-accent bg-accent/[0.06] px-4 py-3 text-[0.97rem] leading-relaxed">
-                  {project.result}
-                </p>
-              </Block>
+              {postmortem ? (
+                // The same words as the case study, under postmortem headings:
+                // Impact is the outcome, Root cause the problem, Fix what I did.
+                <>
+                  <Block title={pm.impact} first>
+                    <Metrics project={project} />
+                    <p className="mt-3 rounded-lg border-l-2 border-accent bg-accent/[0.06] px-4 py-3 text-[0.97rem] leading-relaxed">
+                      {project.result}
+                    </p>
+                  </Block>
+
+                  <Block title={pm.rootCause}>
+                    <p className="text-[0.97rem] leading-relaxed text-dim">
+                      {project.problem}
+                    </p>
+                  </Block>
+
+                  <Block title={pm.fix}>
+                    <ul className="space-y-3">
+                      {project.approach.map((step, i) => (
+                        <li
+                          key={i}
+                          className="relative pl-8 text-[0.95rem] leading-relaxed text-dim"
+                        >
+                          <span
+                            aria-hidden
+                            className="absolute left-0 top-[0.2em] grid h-[18px] w-[18px] place-items-center rounded border border-accent/50 bg-accent/[0.08] font-mono text-[0.68rem] font-semibold text-accent"
+                          >
+                            ✓
+                          </span>
+                          {step}
+                        </li>
+                      ))}
+                    </ul>
+                  </Block>
+                </>
+              ) : (
+                <>
+                  <Metrics project={project} />
+
+                  <Block title="The problem">
+                    <p className="text-[0.97rem] leading-relaxed text-dim">
+                      {project.problem}
+                    </p>
+                  </Block>
+
+                  <Block title="What I did">
+                    <ul className="space-y-3">
+                      {project.approach.map((step, i) => (
+                        <li
+                          key={i}
+                          className="relative pl-7 text-[0.95rem] leading-relaxed text-dim"
+                        >
+                          <span className="absolute left-0 top-0 font-mono text-[0.78rem] text-accent/70">
+                            {String(i + 1).padStart(2, "0")}
+                          </span>
+                          {step}
+                        </li>
+                      ))}
+                    </ul>
+                  </Block>
+
+                  <Block title="Outcome">
+                    <p className="rounded-lg border-l-2 border-accent bg-accent/[0.06] px-4 py-3 text-[0.97rem] leading-relaxed">
+                      {project.result}
+                    </p>
+                  </Block>
+                </>
+              )}
 
               <div className="mt-7 flex flex-wrap gap-1.5">
                 {project.tech.map((t) => (
@@ -200,9 +260,34 @@ export function CaseStudyModal({ project, onClose }: Props) {
   );
 }
 
-function Block({ title, children }: { title: string; children: React.ReactNode }) {
+function Metrics({ project }: { project: Project }) {
   return (
-    <div className="mt-7">
+    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
+      {project.metrics.map((m) => (
+        <div key={m.label} className="bg-surface2 px-4 py-3.5">
+          <div className="font-mono text-[1.05rem] font-semibold text-accent">
+            {m.value}
+          </div>
+          <div className="mt-0.5 text-[0.75rem] leading-tight text-faint">
+            {m.label}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Block({
+  title,
+  first,
+  children,
+}: {
+  title: string;
+  first?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={first ? undefined : "mt-7"}>
       <h4 className="font-mono text-[0.74rem] uppercase tracking-[0.14em] text-faint">
         {title}
       </h4>

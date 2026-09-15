@@ -7,6 +7,7 @@ import { HeroCanvas } from "./HeroCanvas";
 import { ScrambleText } from "./ScrambleText";
 import { MagneticButton } from "./MagneticButton";
 import { Reveal } from "./Reveal";
+import { Terminal } from "./Terminal";
 import {
   ArrowIcon,
   DownloadIcon,
@@ -82,23 +83,7 @@ export function Hero() {
         </Reveal>
 
         <Reveal immediate delay={0.38}>
-          <div className="relative mt-8 max-w-[38rem] overflow-hidden rounded-xl border border-line card-surface p-5 pl-6">
-            <span
-              aria-hidden
-              className="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-accent to-accent-2"
-            />
-            <p className="text-[0.98rem] leading-relaxed">
-              {site.thesis.before}
-              {site.thesis.highlights.map((h) => (
-                <span key={h.value}>
-                  <strong className="font-mono font-semibold text-accent">
-                    {h.value}
-                  </strong>
-                  {h.after}
-                </span>
-              ))}
-            </p>
-          </div>
+          <Terminal />
         </Reveal>
 
         <Reveal immediate delay={0.46}>

@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { contact, site } from "@/data/content";
 import { MagneticButton } from "./MagneticButton";
 import { Reveal } from "./Reveal";
+import { StatusBoard } from "./StatusBoard";
 import {
   DownloadIcon,
   GitHubIcon,
@@ -28,7 +29,9 @@ export function Contact() {
   }
 
   return (
-    <footer id="contact" className="scroll-mt-20 pb-14 pt-16 sm:pt-20">
+    // Until the side gutter is wider than the fixed hamster (2xl), leave room
+    // below the last row so the hamster never sits on top of it.
+    <footer id="contact" className="scroll-mt-20 pb-44 pt-16 sm:pt-20 2xl:pb-14">
       <div className="shell">
         <Reveal>
           <div className="relative isolate overflow-hidden rounded-2xl border border-line card-surface px-6 py-12 text-center sm:px-12 sm:py-16">
@@ -87,7 +90,9 @@ export function Contact() {
           </div>
         </Reveal>
 
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-3 font-mono text-[0.75rem] text-faint">
+        <StatusBoard />
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 font-mono text-[0.75rem] text-faint">
           <span>
             © {new Date().getFullYear()} {site.name}
           </span>

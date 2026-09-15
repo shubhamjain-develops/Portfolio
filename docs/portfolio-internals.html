@@ -216,7 +216,7 @@
     </div>
     <div class="meta">
       <span><b>Route model</b> — fully static</span>
-      <span><b>First load JS</b> — 162 kB</span>
+      <span><b>First load JS</b> — 186 kB</span>
       <span><b>Server work</b> — none</span>
     </div>
   </div>
@@ -236,7 +236,9 @@
           <li><a href="#a11y"><span class="num">08</span>Accessibility</a></li>
           <li><a href="#perf"><span class="num">09</span>Performance</a></li>
           <li><a href="#seo"><span class="num">10</span>SEO</a></li>
-          <li><a href="#qa"><span class="num">11</span>Interview Q&amp;A</a></li>
+          <li><a href="#stores"><span class="num">11</span>Shared stores, hamster</a></li>
+          <li><a href="#terminal"><span class="num">12</span>Terminal &amp; views</a></li>
+          <li><a href="#qa"><span class="num">13</span>Interview Q&amp;A</a></li>
         </ol>
       </div>
     </nav>
@@ -249,7 +251,7 @@
         <div class="term">
           <div class="term-bar"><span>npm run build</span><span class="term-dots"><span></span><span></span><span></span></span></div>
           <pre><code>Route (app)                     Size  First Load JS
-<span class="tk">┌ ○ /</span>                        59.3 kB         162 kB
+<span class="tk">┌ ○ /</span>                        83.7 kB         186 kB
 <span class="tc">○  (Static)  prerendered as static content</span></code></pre>
         </div>
         <p>That <code class="inline">○ (Static)</code> marker means Next.js runs every component <strong>once, at build time</strong>, and writes finished HTML to disk. A visitor's browser gets a file from a CDN — no server executes React per request, no database is touched. This is <strong>SSG</strong> (Static Site Generation).</p>
@@ -273,7 +275,7 @@
           </div>
         </div>
         <h3>Hydration — where static and interactive meet</h3>
-        <p>The static HTML isn't the whole payload. React also ships a JS bundle (the 162 kB above) that boots in the browser and attaches event handlers to the DOM that's already there — that's <strong>hydration</strong>. The rule it enforces: the server's HTML and the client's first render must match exactly, or React discards the mismatch and warns. Two real fixes for that rule live in <a href="#theming">§04</a>.</p>
+        <p>The static HTML isn't the whole payload. React also ships a JS bundle (the 186 kB above) that boots in the browser and attaches event handlers to the DOM that's already there — that's <strong>hydration</strong>. The rule it enforces: the server's HTML and the client's first render must match exactly, or React discards the mismatch and warns. Two real fixes for that rule live in <a href="#theming">§04</a>.</p>
       </section>
 
       <section class="doc" id="components">
@@ -415,12 +417,15 @@ mo.observe(document.documentElement, { attributes: <span class="tk">true</span>,
         <div class="sec-head"><span class="sec-num">07</span><h2>Scroll-spy and the sliding pill</h2></div>
         <h3>Which section am I reading</h3>
         <div class="term">
-          <div class="term-bar"><span>src/components/Nav.tsx</span></div>
+          <div class="term-bar"><span>src/lib/useActiveSection.ts</span></div>
           <pre><code><span class="tk">const</span> line = window.scrollY + window.innerHeight * <span class="ts">0.32</span>;
-<span class="tk">for</span> (<span class="tk">const</span> section <span class="tk">of</span> sections)
-  <span class="tk">if</span> (section.offsetTop &lt;= line) current = section.id;</code></pre>
+<span class="tk">let</span> current = <span class="ts">""</span>;
+<span class="tk">for</span> (<span class="tk">const</span> section <span class="tk">of</span> sections) {
+  <span class="tk">if</span> (section.offsetTop &lt;= line) current = section.id;
+}</code></pre>
         </div>
-        <p>An imaginary line a third of the way down the viewport — tuned to where a reader's eye actually sits, not the top edge. Two edge cases are handled explicitly, which is what separates a working implementation from a demo: at the very bottom of the page the last section is forced active (its top may never cross the line), and inside the hero nothing is marked active at all, so the pill doesn't cling to the first item. The listener is also registered <code class="inline">{'{ passive: true }'}</code>, promising the browser it won't call <code class="inline">preventDefault()</code> — scrolling never waits on it.</p>
+        <p>An imaginary line a third of the way down the viewport — tuned to where a reader's eye actually sits, not the top edge. Two edge cases are handled explicitly, which is what separates a working implementation from a demo: at the very bottom of the page the last section is forced active (its top may never cross the line), and inside the hero nothing is marked active at all, so the pill doesn't cling to the first item. The scroll listener is registered <code class="inline">{'{ passive: true }'}</code>, promising the browser it won't call <code class="inline">preventDefault()</code> — scrolling never waits on it.</p>
+        <p>This logic used to live inside <span class="filepath">Nav.tsx</span>. It moved into a module-level store (§11) once the hamster needed to know the section too: two separate listeners could disagree about which section is being read, one store can't. Measurements are coalesced to one per animation frame, and a <code class="inline">ResizeObserver</code> on <code class="inline">&lt;main&gt;</code> re-runs it when a section changes height with no scroll — switching Experience to its git-log view, or opening the terminal's output.</p>
         <h3>The pill itself: a shared layout animation</h3>
         <div class="term">
           <div class="term-bar"><span>src/components/Nav.tsx</span></div>
@@ -457,7 +462,7 @@ setTimeout(<span class="tk">() =&gt;</span> closeRef.current?.focus(), <span cla
           <li><strong><code class="inline">once: true</code></strong> everywhere an observer is used — nothing keeps watching after it fires.</li>
           <li><strong>Passive scroll listener</strong> in the nav — never blocks the browser's scroll thread.</li>
           <li><strong>Bounded canvas cost</strong> — DPR capped at 2, particles capped at 76 (§06).</li>
-          <li><strong>Server Components for non-interactive parts</strong> — <code class="inline">JsonLd</code>, <code class="inline">Section</code>, <code class="inline">Icons</code> ship no JS at all (§02).</li>
+          <li><strong>Server Components for non-interactive parts</strong> — <code class="inline">JsonLd</code> and <code class="inline">Icons</code> ship no JS at all (§02).</li>
         </ul>
       </section>
 
@@ -468,19 +473,84 @@ setTimeout(<span class="tk">() =&gt;</span> closeRef.current?.focus(), <span cla
         <p><span class="filepath">JsonLd.tsx</span> emits schema.org <code class="inline">Person</code> structured data — <code class="inline">worksFor</code>, <code class="inline">alumniOf</code>, <code class="inline">knowsAbout</code> built straight from the skills array — so Google can render a rich result on a name search. It's a Server Component, so it costs zero client-side bytes (§02).</p>
       </section>
 
+      <section class="doc" id="stores">
+        <div class="sec-head"><span class="sec-num">11</span><h2>Shared stores and the hamster's day</h2></div>
+        <h3>Two tiny external stores, not Context</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/lib/useHamsterCount.ts</span></div>
+          <pre><code><span class="tc">/** How many times the hamster has been fed today, in this browser. 0 on the server. */</span>
+<span class="tk">export function</span> useHamsterCount(): number {
+  <span class="tk">return</span> useSyncExternalStore(subscribe, <span class="tk">() =&gt;</span> count, <span class="tk">() =&gt;</span> <span class="ts">0</span>);
+}</code></pre>
+        </div>
+        <p>The feed count is shown in three places — the hamster's pill, the status footer and the terminal's <code class="inline">hamster</code> command — and they must agree the instant a feed happens. The obvious tool, the <code class="inline">storage</code> event, <strong>never fires in the tab that did the writing</strong>, so each consumer reading <code class="inline">localStorage</code> itself would lag. Instead one module holds the value and a set of listeners; <code class="inline">useSyncExternalStore</code> subscribes each component, and the third argument is the server snapshot, so the static HTML renders <code class="inline">0</code> without a hydration mismatch. The store also keeps a mirror of the last value it read or wrote, because in a browser with site data blocked even <em>reading</em> <code class="inline">localStorage</code> throws — the count still works for that visit. <span class="filepath">useActiveSection.ts</span> is the same pattern for the scroll-spy.</p>
+        <p>Why not React Context? Context would force a provider high in the tree and re-render its subtree on every change. These are two primitive values read by a handful of leaf components — an external store is the smaller tool.</p>
+
+        <h3>Sleep as a pure function</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/lib/hamsterCount.ts</span></div>
+          <pre><code><span class="tk">export function</span> isAsleep(now: Date, lastActivity: number | <span class="tk">null</span>): boolean {
+  <span class="tk">if</span> (!isNightHour(now)) <span class="tk">return false</span>;
+  <span class="tk">return</span> lastActivity === <span class="tk">null</span> || now.getTime() - lastActivity &gt;= AWAKE_IDLE_MS;
+}</code></pre>
+        </div>
+        <p>Between 23:00 and 06:00 in the visitor's own timezone the hamster opens asleep; only a click wakes it, and any activity on the page then keeps it up until two idle minutes pass. Keeping the rule free of React and of <code class="inline">new Date()</code> means it was checked with plain Node scripts at 22:59, 23:00, 05:59 and 06:00 — and each check was proven able to fail by breaking the function on purpose.</p>
+
+        <h3>A bug the verification found: wall clocks go backwards</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/Hamster.tsx</span></div>
+          <pre><code><span class="tc">// Monotonic, so a clock set back (DST, a manual change) can't lock feeding out for hours.</span>
+<span class="tk">const</span> tick = performance.now();
+<span class="tk">if</span> (busy.current || tick - lastFeedAt.current &lt; MIN_FEED_GAP_MS) <span class="tk">return</span>;</code></pre>
+        </div>
+        <p>Feeds are spaced at least 400ms apart so a held Enter key can't flood the count. The first version measured that gap with <code class="inline">Date.now()</code>; a browser test that moved the clock from 23:30 back to 14:00 then found the hamster refused to eat — the "last feed" was nine hours in the future. <code class="inline">performance.now()</code> only ever increases, so it's the right clock for <em>intervals</em>; wall-clock time is still used where it means something (is it night?).</p>
+
+        <h3>One state machine, explicit priorities</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/components/Hamster.tsx</span></div>
+          <pre><code><span class="tc">// One thing on its head: sleep beats the section, and the section beats the theme.</span>
+<span class="tk">const</span> headwear: Headwear | <span class="tk">null</span> = asleep
+  ? <span class="ts">"nightcap"</span>
+  : section === <span class="ts">"experience"</span>
+    ? <span class="ts">"hardhat"</span>
+    : resolvedTheme === <span class="ts">"light"</span>
+      ? <span class="ts">"sunglasses"</span>
+      : <span class="tk">null</span>;</code></pre>
+        </div>
+        <p>Sleep, chewing, the every-fifth-feed stash walk, section props, theme accessories and the "thrilled" reaction to Email/Résumé links all compete for one small drawing. Writing the priority down as a single expression is what stops impossible combinations — a hard hat on a sleeping hamster, a laptop held while it eats. The Email/Résumé detection ignores touch (a tap has no <code class="inline">pointerout</code>, so the state would stick), ignores links under the modal, and compares the parsed URL's pathname rather than building a CSS selector from content. Sunglasses sit pushed up on the forehead so they never cover the eyes that follow the cursor — and, for keyboard users, follow focus.</p>
+      </section>
+
+      <section class="doc" id="terminal">
+        <div class="sec-head"><span class="sec-num">12</span><h2>The whoami terminal and the alternate views</h2></div>
+        <h3>A terminal that can't be injected</h3>
+        <div class="term">
+          <div class="term-bar"><span>src/lib/terminal.ts</span></div>
+          <pre><code><span class="tc">// A plain substring match: what's typed is never turned into a RegExp.</span>
+<span class="tk">const</span> grep = command.match(<span class="ts">/^skills ?\| ?grep (.+)$/</span>);</code></pre>
+        </div>
+        <p>The hero's thesis card doubles as a terminal: <code class="inline">whoami</code>, <code class="inline">experience --current</code>, <code class="inline">skills | grep postgres</code> and friends. <code class="inline">runCommand</code> is a pure function of the content file that returns text parts — never HTML — and React renders them as text, so typed markup comes back as literal characters. Unknown commands never echo the input (so nobody can screenshot the site "saying" something), commands match case-insensitively because phones capitalise the first letter, and <kbd>→</kbd> completes while <kbd>Tab</kbd> keeps its normal job of moving focus.</p>
+        <p>The thesis stays pinned above the prompt and is part of the server HTML, so crawlers, link previews and anyone who never types read exactly what the card said before. The design rule was "at most +24px taller than the old card"; the first build measured +97px, so it went back to the owner, who chose a compact layout: +28px on desktop, tap-to-run example chips only on phones, and an output area that opens on the first command rather than reserving empty space at page load.</p>
+
+        <h3>Views that reuse facts instead of inventing them</h3>
+        <ul>
+          <li><strong>Status footer</strong> (<span class="filepath">StatusBoard.tsx</span>) — "All critical systems operational" over rows that are facts already on the site (availability, location), the hamster's live count, and coffee: degraded. No uptime bars: varied bars would be made-up history.</li>
+          <li><strong>Postmortem view</strong> of the Kaveri case study only — the one project whose problem was a production slowdown. Impact is the outcome, Root cause the problem, Fix the steps taken, all word for word; no invented timeline or lessons.</li>
+        </ul>
+      </section>
+
       <section class="doc" id="qa">
-        <div class="sec-head"><span class="sec-num">11</span><h2>Questions to be ready for</h2></div>
+        <div class="sec-head"><span class="sec-num">13</span><h2>Questions to be ready for</h2></div>
         <details class="qa" open>
           <summary>Why Next.js, not plain React (Vite / CRA)?</summary>
           <div class="a"><p>Static prerendering, file-based routing, built-in metadata/sitemap APIs, <code class="inline">next/font</code> optimisation, zero-config Vercel deploys. Plain React would ship a near-empty HTML shell and render everything client-side — worse for SEO and slower first paint on a content-first site like this.</p></div>
         </details>
         <details class="qa">
           <summary>Why not just plain HTML and CSS, then?</summary>
-          <div class="a"><p>Fair pushback, worth partly conceding. Componentisation plus one typed content file is what makes the case-study modal, the theme system and the scroll interactions maintainable — by hand that's a lot more code. But it's a real trade: 162 kB of JS for what is fundamentally a document. The counter is that the HTML renders and is fully readable before any of that JS ever arrives.</p></div>
+          <div class="a"><p>Fair pushback, worth partly conceding. Componentisation plus one typed content file is what makes the case-study modal, the theme system and the scroll interactions maintainable — by hand that's a lot more code. But it's a real trade: 186 kB of JS for what is fundamentally a document. The counter is that the HTML renders and is fully readable before any of that JS ever arrives.</p></div>
         </details>
         <details class="qa">
           <summary>What's the biggest weakness of this site?</summary>
-          <div class="a"><p>Bundle size for a document; an O(n²) canvas loop that only works because of a hard particle cap; no tests; no CI. Naming a real weakness lands better than claiming there isn't one.</p></div>
+          <div class="a"><p>Bundle size for a document; an O(n²) canvas loop that only works because of a hard particle cap; no test runner (the logic is checked by one-off Node scripts, not a suite); no CI. Naming a real weakness lands better than claiming there isn't one.</p></div>
         </details>
         <details class="qa">
           <summary>Walk me through what happens when someone visits.</summary>
@@ -488,7 +558,7 @@ setTimeout(<span class="tk">() =&gt;</span> closeRef.current?.focus(), <span cla
         </details>
         <details class="qa">
           <summary>Where does state actually live?</summary>
-          <div class="a"><p>Deliberately minimal and local. <code class="inline">Work</code> holds <code class="inline">selected: Project | null</code> for the modal; <code class="inline">Nav</code> holds <code class="inline">active</code>/<code class="inline">scrolled</code>/<code class="inline">open</code>. Theme lives in <code class="inline">next-themes</code>'s own context. No Redux, no Zustand, no custom Context — nothing here is shared across distant parts of the tree, so a state library would be solving a problem that doesn't exist.</p></div>
+          <div class="a"><p>Mostly minimal and local. <code class="inline">Work</code> holds <code class="inline">selected: Project | null</code> for the modal; <code class="inline">Nav</code> holds <code class="inline">scrolled</code>/<code class="inline">open</code>; the terminal keeps its output and history in component state. Theme lives in <code class="inline">next-themes</code>'s own context. Exactly two values are shared across distant parts of the tree — the section being read (nav pill and hamster props) and today's feed count (hamster, footer, terminal) — and each is a tiny module-level store read through <code class="inline">useSyncExternalStore</code> (§11). No Redux, no Zustand, no custom Context: two primitives don't justify a state library.</p></div>
         </details>
         <details class="qa">
           <summary>How would you add a blog to this?</summary>
