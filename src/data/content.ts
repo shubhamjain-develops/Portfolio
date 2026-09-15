@@ -438,6 +438,7 @@ export const playful = {
     hamster: "Hamster",
     coffee: "Coffee",
     coffeeState: "Degraded",
+    hamsterFed: { one: "Fed 1 time today", many: "Fed {n} times today" },
   },
   experienceView: {
     label: "Experience view",
