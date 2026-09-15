@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useMotionValueEvent,
@@ -8,8 +8,7 @@ import {
   useScroll,
   useSpring,
 } from "framer-motion";
-import { education, experience, playful } from "@/data/content";
-import { commitHash } from "@/lib/commitHash";
+import { experience } from "@/data/content";
 import { EASE, Reveal } from "./Reveal";
 import { SectionHeading } from "./Section";
 
@@ -22,8 +21,6 @@ export function Experience() {
   const trackRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLElement | null)[]>([]);
   const reduce = useReducedMotion();
-  const [view, setView] = useState<"timeline" | "git">("timeline");
-  const labels = playful.experienceView;
 
   // The spine draws itself as the timeline passes through the viewport.
   const { scrollYProgress } = useScroll({
@@ -81,29 +78,7 @@ export function Experience() {
       <div className="shell">
         <SectionHeading eyebrow="Experience" title="Where I’ve built things" />
 
-        <div
-          role="group"
-          aria-label={labels.label}
-          className="mt-8 inline-flex gap-1 rounded-lg border border-line bg-surface2 p-1"
-        >
-          {(["timeline", "git"] as const).map((option) => (
-            <button
-              key={option}
-              type="button"
-              aria-pressed={view === option}
-              onClick={() => setView(option)}
-              className={`rounded-md px-3 py-1.5 font-mono text-[0.78rem] transition-colors ${
-                view === option ? "bg-surface text-ink shadow-sm" : "text-dim hover:text-ink"
-              }`}
-            >
-              {option === "timeline" ? labels.timeline : labels.gitLog}
-            </button>
-          ))}
-        </div>
-
-        {/* Hidden rather than unmounted, so the scroll-drawn rail keeps its
-            binding and its lit nodes; the ResizeObserver re-measures on return. */}
-        <div ref={trackRef} hidden={view !== "timeline"} className="relative mt-10 max-w-4xl pl-7 sm:pl-9">
+        <div ref={trackRef} className="relative mt-12 max-w-4xl pl-7 sm:pl-9">
           {/* static rail */}
           <div aria-hidden className="absolute left-0 top-1 h-full w-px bg-line" />
           {/* drawn rail */}
@@ -216,122 +191,7 @@ export function Experience() {
             })}
           </div>
         </div>
-
-        {view === "git" && <GitLog />}
       </div>
     </section>
-  );
-}
-
-/**
- * The same roles as a linear `git log --graph`, newest first, with the degree
- * as the root commit. One straight line: a branch and merge would claim
- * parallel work that never happened. The hashes are decorative.
- */
-function GitLog() {
-  const labels = playful.experienceView;
-  const head = experience.find((job) => job.current) ?? experience[0];
-  const degree = education[0];
-
-  return (
-    <div className="mt-10 max-w-4xl overflow-x-auto rounded-xl border border-line bg-surface2/60 px-5 py-4 font-mono text-[0.8rem] leading-[1.75]">
-      <p aria-hidden className="text-dim">
-        $ git log --graph
-      </p>
-      <ol className="mt-2 min-w-[32rem]">
-        {experience.map((job) => (
-          <Commit
-            key={`${job.company}-${job.period}`}
-            hash={commitHash(job.title, job.company, job.period)}
-            refLabel={job === head ? labels.headRef : undefined}
-            srNote={job === head ? "current role" : undefined}
-            isHead={job === head}
-            title={job.title}
-            detail={`${job.company} · ${job.period}`}
-            tech={job.tech}
-          />
-        ))}
-        <Commit
-          root
-          hash={commitHash(degree.title, degree.org, degree.period)}
-          refLabel={labels.rootRef}
-          srNote="education"
-          title={degree.title}
-          detail={`${degree.org} · ${degree.period}`}
-        />
-      </ol>
-    </div>
-  );
-}
-
-function Commit({
-  hash,
-  refLabel,
-  srNote,
-  isHead,
-  root,
-  title,
-  detail,
-  tech,
-}: {
-  hash: string;
-  refLabel?: string;
-  srNote?: string;
-  isHead?: boolean;
-  root?: boolean;
-  title: string;
-  detail: string;
-  tech?: string[];
-}) {
-  // The graph column: `*` on the commit line, `|` down to the next commit.
-  const rail = (glyph: string) => (
-    <span aria-hidden className="text-accent">
-      {glyph}
-    </span>
-  );
-
-  return (
-    <li className="grid grid-cols-[1.5ch_minmax(0,1fr)] gap-x-3">
-      {rail("*")}
-      <span>
-        <span aria-hidden className="text-accent-2">
-          {hash}{" "}
-        </span>
-        {refLabel && (
-          <span aria-hidden className="text-ink">
-            (
-            {isHead && (
-              <span className="mx-1 inline-block h-2 w-2 rounded-full bg-warm align-middle" />
-            )}
-            {refLabel}){" "}
-          </span>
-        )}
-        <span className="font-semibold text-ink">{title}</span>
-        {srNote && <span className="sr-only"> ({srNote})</span>}
-      </span>
-      {rail(root ? " " : "|")}
-      <span className="text-dim">{detail}</span>
-      {tech && (
-        <>
-          {rail("|")}
-          <span className="text-dim">
-            {tech.map((t) => (
-              <Fragment key={t}>
-                <span aria-hidden className="text-accent">
-                  +
-                </span>{" "}
-                <span className="mr-3">{t}</span>
-              </Fragment>
-            ))}
-          </span>
-        </>
-      )}
-      {!root && (
-        <>
-          {rail("|")}
-          <span aria-hidden />
-        </>
-      )}
-    </li>
   );
 }

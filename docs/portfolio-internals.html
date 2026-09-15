@@ -534,7 +534,6 @@ setTimeout(<span class="tk">() =&gt;</span> closeRef.current?.focus(), <span cla
         <h3>Views that reuse facts instead of inventing them</h3>
         <ul>
           <li><strong>Status footer</strong> (<span class="filepath">StatusBoard.tsx</span>) — "All critical systems operational" over rows that are facts already on the site (availability, location), the hamster's live count, and coffee: degraded. No uptime bars: varied bars would be made-up history.</li>
-          <li><strong>git log view</strong> of Experience — one straight line of commits, newest first, degree as the root. A branch and merge would have claimed parallel work that never happened. Hashes are a stable FNV-1a of each role's words (identical on server and client) and <code class="inline">aria-hidden</code>, so a screen reader hears title, company, period, tech. The timeline is <em>hidden</em> rather than unmounted while git log shows, so Framer's <code class="inline">useScroll</code> keeps its target and the drawn rail survives the round trip.</li>
           <li><strong>Postmortem view</strong> of the Kaveri case study only — the one project whose problem was a production slowdown. Impact is the outcome, Root cause the problem, Fix the steps taken, all word for word; no invented timeline or lessons.</li>
         </ul>
       </section>

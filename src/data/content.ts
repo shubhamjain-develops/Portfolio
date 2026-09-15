@@ -440,13 +440,6 @@ export const playful = {
     coffeeState: "Degraded",
     hamsterFed: { one: "Fed 1 time today", many: "Fed {n} times today" },
   },
-  experienceView: {
-    label: "Experience view",
-    timeline: "Timeline",
-    gitLog: "git log",
-    headRef: "HEAD -> main",
-    rootRef: "root",
-  },
   postmortem: {
     /** Only projects whose problem was a production incident read naturally as postmortems. */
     projects: ["kaveri"],
