@@ -71,6 +71,17 @@ export function Skills() {
   const reduce = useReducedMotion();
   // Hovering a skill keeps the skills it is used with lit and dims the rest.
   const [active, setActive] = useState<string | null>(null);
+  // Groups longer than their `headline` count start collapsed behind a "+N more" toggle.
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (title: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(title)) next.delete(title);
+      else next.add(title);
+      return next;
+    });
+  };
 
   const partners = useMemo(() => {
     const map = new Map<string, Set<string>>();
@@ -98,8 +109,12 @@ export function Skills() {
         <div onPointerLeave={() => setActive(null)}>
           <StaggerGroup className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {skills.map((group) => {
-              const iconItems = group.items.filter((item) => skillIcons[item]);
-              const plainItems = group.items.filter((item) => !skillIcons[item]);
+              const headlineCount = group.headline ?? group.items.length;
+              const isExpanded = expanded.has(group.title);
+              const visibleItems = isExpanded ? group.items : group.items.slice(0, headlineCount);
+              const hiddenCount = group.items.length - headlineCount;
+              const iconItems = visibleItems.filter((item) => skillIcons[item]);
+              const plainItems = visibleItems.filter((item) => !skillIcons[item]);
 
               return (
                 <motion.div
@@ -143,6 +158,17 @@ export function Skills() {
                         </span>
                       ))}
                     </div>
+                  )}
+
+                  {hiddenCount > 0 && (
+                    <button
+                      type="button"
+                      aria-expanded={isExpanded}
+                      onClick={() => toggleGroup(group.title)}
+                      className="mt-3 font-mono text-[0.72rem] text-dim transition-colors hover:text-accent"
+                    >
+                      {isExpanded ? "Show less" : `+${hiddenCount} more`}
+                    </button>
                   )}
                 </motion.div>
               );

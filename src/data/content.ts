@@ -269,24 +269,30 @@ export const projects: Project[] = [
   },
 ];
 
-export type SkillGroup = { title: string; items: string[] };
+export type SkillGroup = {
+  title: string;
+  items: string[];
+  /** How many of `items` (in order) show by default before a "+N more" toggle reveals the rest. */
+  headline?: number;
+};
 
 export const skills: SkillGroup[] = [
   {
     title: "Backend & Architecture",
+    headline: 8,
     items: [
       "C#",
       ".NET Core",
       "ASP.NET Core",
       "Entity Framework",
-      "Dapper",
-      "LINQ",
       "REST APIs",
-      "SOAP",
-      "Swagger",
       "Microservices",
       "Distributed Systems",
       "System Design & Architecture",
+      "Dapper",
+      "LINQ",
+      "SOAP",
+      "Swagger",
       "Multi-Tenant Architecture",
       "Idempotency",
       "SOLID Principles",
@@ -301,13 +307,14 @@ export const skills: SkillGroup[] = [
   },
   {
     title: "Data & Caching",
+    headline: 5,
     items: [
       "PostgreSQL",
-      "Row-Level Security",
       "MySQL",
       "MongoDB",
       "Redis",
       "Query Optimisation",
+      "Row-Level Security",
       "Indexing",
       "Schema Design",
       "Transaction Management",
@@ -315,9 +322,10 @@ export const skills: SkillGroup[] = [
   },
   {
     title: "AI-Native Engineering",
+    headline: 4,
     items: [
-      "AI Agent Orchestration",
       "Claude Code",
+      "AI Agent Orchestration",
       "GitHub Copilot",
       "Cursor IDE",
       "Prompt Engineering",
@@ -327,23 +335,26 @@ export const skills: SkillGroup[] = [
   },
   {
     title: "Cloud & DevOps",
-    items: ["Azure", "Azure Functions", "Azure OCR", "Azure DevOps", "CI/CD", "Application Insights", "Docker", "Git"],
+    headline: 5,
+    items: ["Azure", "Azure DevOps", "CI/CD", "Docker", "Git", "Azure Functions", "Azure OCR", "Application Insights"],
   },
   {
     title: "Frontend",
-    items: ["Angular", "AngularJS", "TypeScript", "Reactive Forms", "HTML", "CSS"],
+    headline: 4,
+    items: ["Angular", "TypeScript", "HTML", "CSS", "AngularJS", "Reactive Forms"],
   },
   {
     title: "Testing & Security",
+    headline: 5,
     items: [
       "Playwright",
-      "Unit Testing",
-      "Integration Testing",
       "JWT",
       "RBAC",
       "SSO",
-      "OAuth2",
       "Rate Limiting",
+      "Unit Testing",
+      "Integration Testing",
+      "OAuth2",
       "Schema Validation",
     ],
   },
