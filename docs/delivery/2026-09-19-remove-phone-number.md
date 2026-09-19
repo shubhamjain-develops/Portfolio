@@ -2,11 +2,11 @@
 slug: remove-phone-number
 tier: 2
 confidence_pre: 68
-confidence_post: null
+confidence_post: 72
 repo: Portfolio
 base: origin/main
 branch: chore/remove-phone-number
-phase: branched
+phase: scored
 created: 2026-09-19
 ---
 
@@ -86,6 +86,18 @@ Not claimed: that the number is gone from the internet, from git history, or fro
 
 **Mutation check (no test file, approved):** rows 1 and 3 are run against `origin/main` first and must report the number; then against the branch and must report none. The failing output from main is pasted in section 10 after it is run.
 
+### Observed (run 2026-09-19, production build served on port 3111)
+
+| # | Observed | Matches expected |
+|---|---|---|
+| 1 | **origin/main `src/`:** rendered `/` (117,127 bytes) contained the number 4 times (3 spaced, 1 unbroken), 1 `tel:` link and 2 `telephone` matches. **Branch:** 116,131 bytes, 0 matches for any of them. JSON-LD keys on the branch: `@context @type address alumniOf description email hasCredential jobTitle knowsAbout name sameAs url worksFor`, no `telephone`. Email, LinkedIn, `Shubham_Jain_General.pdf` and the JSON-LD script are still rendered | yes |
+| 2 | **Wide desktop** (the window resize did not take, so `innerWidth` was 2552, not 1440): one row of email, Copy, Résumé, LinkedIn, GitHub; 0 `tel:` links. **400px** (a 400px-wide iframe, since the window would not resize): three centred rows (email / Copy + Résumé / LinkedIn + GitHub), no orphan, no horizontal overflow (scrollWidth 385) | yes, at those two widths only |
+| 3 | branch: digits-only `git grep` exit 1, no matches. Word-level grep (`tel:`, `telephone`) matches only prose in this file. main: `content.ts` lines 14-15 and `JsonLd.tsx:14` | yes |
+| 4 | `npm run lint`: no warnings or errors. `npx tsc --noEmit`: exit 0. `npm run build`: compiled, 7/7 pages, exit 0 | yes |
+| 5 | `git diff --stat origin/main...HEAD -- public/`: empty | yes (PDFs untouched, as scoped) |
+
+The baseline run used `git checkout origin/main -- src`, built and served it, then `git checkout HEAD -- src`; `git status` was clean afterwards.
+
 ## 7. Risks and rollback
 
 - **Risk:** the removal reads as complete when it is not (PDFs, history, caches) → **Mitigation:** stated in §2, §3 and §5 and repeated under "Open items before merge" in the PR.
@@ -111,13 +123,31 @@ Not claimed: that the number is gone from the internet, from git history, or fro
 
 ## 9. Security
 
-Floor: tier 2. Results per `08-security.md`, filled after implementation.
+Floor: tier 2. Results per `08-security.md`. Run on the clean tree before implementing and again on the final diff.
 
 | # | Check | Result | Note |
 |---|---|---|---|
+| 1 | Secret scan | pass | added lines: this file plus deletions; no key headers, tokens or credentialed URLs |
+| 2 | Personal-data guard | pass | no phone digits or email address in added lines; the change removes personal data and touches no ignore rule |
+| 3 | Permission diff | pass | changed paths: this file and four files under `src/` |
+| 4 | Manifest / lockfile | pass | `package.json` and `package-lock.json` unchanged; `npm install` in the worktree left the tree clean |
+| 5 | Repo guards | n/a | `verify.security` is null and the repo has no guard script |
+| 6 | No hook bypass | pass | no `--no-verify`, no force |
+| 7 | Input-trust | n/a | no input path touched; only static constants and one rendered link removed |
+| 8 | Dependency review | n/a | no dependency added |
+| 9 | Authorization touchpoints | n/a | the site has no auth |
+| 10 | Logging and output | pass | the change reduces personal data in page output and JSON-LD; nothing new is logged |
+| 11 | Egress | n/a | no new outbound call |
+| 12 | `/security-review` | no findings | the skill's embedded diff was of an earlier, already-merged commit (the skills "+N more" toggle), not this branch, so this branch's diff was reviewed inline with no sub-agents. It is 13 deleted lines plus a docs file |
 
-**Open findings:** not yet run.
+**Open findings:** none.
 
 ## 10. Post-implementation
 
-_Appended after verification runs. Do not fill in before._
+**Post-implementation confidence: 72/100** (pre was 68, delta +4)
+
+**What moved it:** the verification that was only designed at pre-score now ran on the real path. The identical check found the number 4 times, a `tel:` link and the `telephone` key on `origin/main` and none of them on the branch, so the check can tell fixed from unfixed. The footer was measured at wide desktop and 400px, and lint, type-check and build pass. Removing `site.phone` also means a missed consumer would have failed type-checking, and none did.
+
+**What is still unknown:** the issue said "completely". Both résumé PDFs served from `public/` still print the number, so it stays downloadable from every Résumé button until replacement PDFs are supplied. That gap is why the score is 72 and not higher. The number also remains in public git history, and in forks, search-engine caches and any archive that already captured it. Not checked: the other five `docs/*.png` screenshots, phone width through a real window (an iframe stood in), and the deployed site after redeploy.
+
+**Owner override:** none needed. Post-score 72 clears the push threshold of 70; the owner directed the push on 2026-09-19 after seeing slice 1 and before seeing this verification.
