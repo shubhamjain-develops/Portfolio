@@ -6,7 +6,7 @@ confidence_post: 72
 repo: Portfolio
 base: origin/main
 branch: chore/remove-phone-number
-phase: scored
+phase: pushed
 created: 2026-09-19
 ---
 
