@@ -11,8 +11,6 @@ export const site = {
   /** Shown after the location in the hero. Set to "" to show the location alone. */
   availability: "",
   email: "shubhamjainiiitb@gmail.com",
-  phone: "+91 94069 00025",
-  phoneHref: "tel:+919406900025",
   linkedin: "https://linkedin.com/in/shubham-jain-developer",
 
   /** Set to "" to hide every GitHub link on the site. */

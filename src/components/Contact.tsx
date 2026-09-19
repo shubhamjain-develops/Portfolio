@@ -11,7 +11,6 @@ import {
   GitHubIcon,
   LinkedInIcon,
   MailIcon,
-  PhoneIcon,
 } from "./Icons";
 
 export function Contact() {
@@ -83,9 +82,6 @@ export function Contact() {
                   <GitHubIcon /> GitHub
                 </MagneticButton>
               )}
-              <MagneticButton href={site.phoneHref} variant="quiet">
-                <PhoneIcon /> {site.phone}
-              </MagneticButton>
             </div>
           </div>
         </Reveal>
