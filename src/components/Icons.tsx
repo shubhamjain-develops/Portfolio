@@ -53,14 +53,6 @@ export function GitHubIcon({ className, size = 16 }: IconProps) {
   );
 }
 
-export function PhoneIcon({ className, size = 16 }: IconProps) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base}>
-      <path d="M6.5 3h3l1.5 4.5-2 1.4a12.5 12.5 0 0 0 6.1 6.1l1.4-2L21 14.5v3a2.5 2.5 0 0 1-2.7 2.5A16.8 16.8 0 0 1 3.5 5.7 2.5 2.5 0 0 1 6 3Z" />
-    </svg>
-  );
-}
-
 export function CloseIcon({ className, size = 18 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" className={className} {...base} strokeWidth={2}>

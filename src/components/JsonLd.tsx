@@ -11,7 +11,6 @@ export function JsonLd() {
     name: site.name,
     jobTitle: site.role,
     email: `mailto:${site.email}`,
-    telephone: site.phone,
     url: site.url,
     address: {
       "@type": "PostalAddress",
