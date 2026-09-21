@@ -2,28 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { availability, playful, site } from "@/data/content";
-import { useHamsterCount } from "@/lib/useHamsterCount";
+import { useCatCount } from "@/lib/useCatCount";
 
 type Row = { label: string; state: string; ok: boolean };
 
 /**
  * A status-page joke above the footer's copyright line. Every state is a fact
- * already on the site (availability, location) or the hamster's live count,
+ * already on the site (availability, location) or the cat's live count,
  * plus the one thing allowed to be degraded. No uptime bars: made-up history
  * would be an invented claim, and identical bars would be clutter.
  */
 export function StatusBoard() {
-  const count = useHamsterCount();
+  const count = useCatCount();
   // The count lives in this browser only, so the server renders a placeholder.
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const copy = playful.status;
-  const fed = count === 1 ? copy.hamsterFed.one : copy.hamsterFed.many.replace("{n}", String(count));
+  const fed = count === 1 ? copy.catFed.one : copy.catFed.many.replace("{n}", String(count));
   const rows: Row[] = [
     ...(availability.status ? [{ label: copy.availability, state: availability.status, ok: true }] : []),
     { label: copy.location, state: site.location, ok: true },
-    { label: copy.hamster, state: mounted ? fed : "—", ok: true },
+    { label: copy.cat, state: mounted ? fed : "—", ok: true },
     { label: copy.coffee, state: copy.coffeeState, ok: false },
   ];
 

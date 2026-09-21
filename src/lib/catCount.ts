@@ -1,9 +1,9 @@
 /**
- * The hamster's feed count belongs to one calendar day in the visitor's own
+ * The cat's feed count belongs to one calendar day in the visitor's own
  * timezone. It is stored together with its date and reads back as 0 once that
  * date has passed, so the counter resets at local midnight with no server.
  */
-export const HAMSTER_KEY = "portfolio-hamster-fed-daily";
+export const CAT_KEY = "portfolio-cat-fed-daily";
 
 /**
  * No visitor feeds this often in a day (feeds are at least 400ms apart and
@@ -11,10 +11,10 @@ export const HAMSTER_KEY = "portfolio-hamster-fed-daily";
  */
 export const MAX_DAILY_COUNT = 9999;
 
-/** Every fifth feed fills the cheeks and the hamster goes off to stash. */
+/** Every fifth feed fills the cheeks and the cat does zoomies. */
 export const CHEEK_CAPACITY = 5;
 
-/** Visitor-local hours the hamster sleeps through: 23:00 up to 06:00. */
+/** Visitor-local hours the cat sleeps through: 23:00 up to 06:00. */
 export const SLEEP_FROM_HOUR = 23;
 export const WAKE_AT_HOUR = 6;
 
@@ -54,12 +54,12 @@ export function cheekLevel(count: number): number {
   return count > 0 ? count % CHEEK_CAPACITY : 0;
 }
 
-/** True for the feed that fills the cheeks, which sends the hamster off to stash. */
-export function isStashFeed(count: number): boolean {
+/** True for the feed that fills the cheeks, which sets off the zoomies. */
+export function isZoomiesFeed(count: number): boolean {
   return count > 0 && count % CHEEK_CAPACITY === 0;
 }
 
-/** Whether the visitor's local clock is in the hamster's sleeping hours. */
+/** Whether the visitor's local clock is in the cat's sleeping hours. */
 export function isNightHour(date: Date): boolean {
   const hour = date.getHours();
   return hour >= SLEEP_FROM_HOUR || hour < WAKE_AT_HOUR;
@@ -68,7 +68,7 @@ export function isNightHour(date: Date): boolean {
 /**
  * Asleep during night hours unless the page has been active recently.
  * `lastActivity` is null until the visitor wakes it, so a night-time visit
- * opens on a sleeping hamster; outside night hours it is never asleep.
+ * opens on a sleeping cat; outside night hours it is never asleep.
  */
 export function isAsleep(now: Date, lastActivity: number | null): boolean {
   if (!isNightHour(now)) return false;

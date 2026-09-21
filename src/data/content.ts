@@ -484,7 +484,7 @@ export const playful = {
     hint: "Type help. Right arrow completes a command, up arrow recalls the last one.",
     logLabel: "Terminal output",
     examplesLabel: "Example commands",
-    examples: ["help", "experience --current", "skills | grep postgres", "hamster"],
+    examples: ["help", "experience --current", "skills | grep postgres", "cat"],
     help: [
       ["whoami", "who I am, in one line"],
       ["experience [--current]", "roles, newest first"],
@@ -492,23 +492,23 @@ export const playful = {
       ["projects", "selected work"],
       ["contact", "how to reach me"],
       ["resume", "download my résumé"],
-      ["hamster", "how the hamster is doing"],
+      ["cat", "how the cat is doing"],
       ["clear", "clear this output"],
     ],
     // Errors never repeat what was typed.
     notFound: "command not found — try help",
     noCurrentRole: "no current role",
     noSkillMatch: "no skills match that term",
-    hamsterFed: { one: "fed 1 time today", many: "fed {n} times today" },
+    catFed: { one: "fed 1 time today", many: "fed {n} times today" },
   },
   status: {
     headline: "All critical systems operational",
     availability: "Availability",
     location: "Location",
-    hamster: "Hamster",
+    cat: "Cat",
     coffee: "Coffee",
     coffeeState: "Degraded",
-    hamsterFed: { one: "Fed 1 time today", many: "Fed {n} times today" },
+    catFed: { one: "Fed 1 time today", many: "Fed {n} times today" },
   },
   postmortem: {
     /** Only projects whose problem was a production incident read naturally as postmortems. */

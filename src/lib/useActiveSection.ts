@@ -5,7 +5,7 @@ import { nav } from "@/data/content";
 
 /*
  * Which nav section the visitor is reading. One module-level store, so the
- * nav pill and the hamster's props can never disagree about it.
+ * nav pill and the cat's props can never disagree about it.
  */
 
 let active = "";

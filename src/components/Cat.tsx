@@ -4,15 +4,15 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { useReducedMotion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { site } from "@/data/content";
-import { CHEEK_CAPACITY, cheekLevel, isAsleep, isStashFeed } from "@/lib/hamsterCount";
+import { CHEEK_CAPACITY, cheekLevel, isAsleep, isZoomiesFeed } from "@/lib/catCount";
 import { useActiveSection } from "@/lib/useActiveSection";
-import { feedHamster, useHamsterCount } from "@/lib/useHamsterCount";
+import { feedCat, useCatCount } from "@/lib/useCatCount";
 
 const TREATS = ["seed", "strawberry", "blueberry"] as const;
 const CHEW_MS = 1200;
 const DROP_MS = 680;
 const YAWN_MS = 900;
-const STASH_MS = 1800;
+const ZOOM_MS = 1800;
 /** Feeds are at least this far apart, even when a key is held or motion is reduced. */
 const MIN_FEED_GAP_MS = 400;
 /** How often to re-check the clock and the idle timer for sleep. */
@@ -59,7 +59,7 @@ function isCheerLink(target: EventTarget | null): boolean {
 }
 
 /**
- * A hamster in the bottom-left corner that eats when clicked and shows how many
+ * A cat in the bottom-left corner that eats when clicked and shows how many
  * times it was fed today. The count lives only in the visitor's browser, per
  * local calendar day. It renders after mount because the server can't know
  * what's in localStorage or the visitor's clock, and a guess would flash on
@@ -74,17 +74,17 @@ function isCheerLink(target: EventTarget | null): boolean {
  * no cursor it glances around on its own. All of that is off under reduced
  * motion.
  */
-export function Hamster() {
+export function Cat() {
   const reduce = useReducedMotion();
   const [mounted, setMounted] = useState(false);
-  const count = useHamsterCount();
+  const count = useCatCount();
   const [treat, setTreat] = useState(0);
   const [eating, setEating] = useState(false);
   const [dropping, setDropping] = useState(false);
   const [full, setFull] = useState(false);
   const [asleep, setAsleep] = useState(false);
   const [yawning, setYawning] = useState(false);
-  const [stashing, setStashing] = useState(false);
+  const [zooming, setZooming] = useState(false);
   const [thrilled, setThrilled] = useState(false);
   const { resolvedTheme } = useTheme();
   const section = useActiveSection();
@@ -119,7 +119,7 @@ export function Hamster() {
     if (!busy.current) setTreat(count % TREATS.length);
   }, [count]);
 
-  // Sleep follows the visitor's clock. Activity only keeps an awake hamster
+  // Sleep follows the visitor's clock. Activity only keeps an awake cat
   // awake — nothing but a click wakes a sleeping one.
   useEffect(() => {
     const check = () => {
@@ -209,7 +209,7 @@ export function Hamster() {
     const aim = (now: number) => {
       if (!pointer) {
         // No cursor (touch screen, or it left the window): glance around.
-        button.classList.remove("hm-excited");
+        button.classList.remove("cat-excited");
         if (now < nextGlance) return;
         target.x = (Math.floor(Math.random() * 3) - 1) * 0.85; // left, ahead or right
         target.y = (Math.random() - 0.5) * 0.9;
@@ -224,7 +224,7 @@ export function Hamster() {
       const reach = Math.min(1, distance / FULL_TURN_AT);
       target.x = (dx / distance) * reach;
       target.y = (dy / distance) * reach;
-      button.classList.toggle("hm-excited", distance < EXCITED_WITHIN && !asleepRef.current);
+      button.classList.toggle("cat-excited", distance < EXCITED_WITHIN && !asleepRef.current);
     };
 
     const frame = (now: number) => {
@@ -267,7 +267,7 @@ export function Hamster() {
       window.removeEventListener("pointerdown", onMove);
       document.removeEventListener("mouseout", onLeaveWindow);
       document.removeEventListener("focusin", onFocus);
-      button.classList.remove("hm-excited");
+      button.classList.remove("cat-excited");
     };
   }, [mounted, reduce]);
 
@@ -296,7 +296,7 @@ export function Hamster() {
   }
 
   function eat() {
-    const next = feedHamster();
+    const next = feedCat();
     setFeeds((f) => f + 1);
 
     if (reduce) {
@@ -332,13 +332,13 @@ export function Hamster() {
 
     later(() => {
       setEating(false);
-      if (!isStashFeed(next)) return serveNext();
+      if (!isZoomiesFeed(next)) return serveNext();
       // Full cheeks: off to stash the food, back with them empty.
-      setStashing(true);
+      setZooming(true);
       later(() => {
-        setStashing(false);
+        setZooming(false);
         serveNext();
-      }, STASH_MS);
+      }, ZOOM_MS);
     }, CHEW_MS);
   }
 
@@ -346,7 +346,7 @@ export function Hamster() {
 
   const unit = count === 1 ? "time" : "times";
   // The count already reads empty on the fifth feed; keep the cheeks stuffed until it has stashed.
-  const cheeks = stashing || (eating && isStashFeed(count)) ? CHEEK_CAPACITY : cheekLevel(count);
+  const cheeks = zooming || (eating && isZoomiesFeed(count)) ? CHEEK_CAPACITY : cheekLevel(count);
   // One thing on its head: sleep beats the section, and the section beats the theme.
   const headwear: Headwear | null = asleep
     ? "nightcap"
@@ -355,9 +355,9 @@ export function Hamster() {
       : resolvedTheme === "light"
         ? "sunglasses"
         : null;
-  // Its paws are busy with food while eating, and empty while asleep or off stashing.
+  // Its paws are busy with food while eating, and empty while asleep or off zooming.
   const held: Held | null =
-    asleep || yawning || eating || stashing
+    asleep || yawning || eating || zooming
       ? null
       : section === "skills"
         ? "laptop"
@@ -369,14 +369,14 @@ export function Hamster() {
     full && "full",
     asleep && "asleep",
     yawning && "yawning",
-    stashing && "stashing",
-    thrilled && !asleep && !stashing && "thrilled",
+    zooming && "zooming",
+    thrilled && !asleep && !zooming && "thrilled",
     held && "holding",
   ].filter(Boolean);
 
   return (
-    <div className="hamster-dock">
-      <p className="hamster-fed" aria-live="polite">
+    <div className="cat-dock">
+      <p className="cat-fed" aria-live="polite">
         <HeartIcon />
         Fed{" "}
         <b key={feeds} className={feeds ? "bump" : undefined}>
@@ -384,7 +384,7 @@ export function Hamster() {
         </b>{" "}
         {unit} today
         {feeds > 0 && (
-          <span key={`plus-${feeds}`} className="hamster-plus" aria-hidden>
+          <span key={`plus-${feeds}`} className="cat-plus" aria-hidden>
             +1
           </span>
         )}
@@ -397,18 +397,18 @@ export function Hamster() {
           // A held key would otherwise repeat clicks as fast as the OS allows.
           if (e.repeat && (e.key === "Enter" || e.key === " ")) e.preventDefault();
         }}
-        aria-label={`${asleep ? "Wake and feed" : "Feed"} the hamster. Fed ${count} ${unit} today.`}
-        className={["hamster", ...states].join(" ")}
-        style={{ "--hm-cheeks": cheeks } as CSSProperties}
+        aria-label={`${asleep ? "Wake and feed" : "Feed"} the cat. Fed ${count} ${unit} today.`}
+        className={["cat", ...states].join(" ")}
+        style={{ "--cat-cheeks": cheeks } as CSSProperties}
       >
-        <HamsterArt
+        <CatArt
           svgRef={svgRef}
           lookRef={lookRef}
           eyeRefs={eyeRefs}
           sparkleRefs={sparkleRefs}
           treat={treat}
           dropping={dropping}
-          hideTreat={full || asleep || stashing}
+          hideTreat={full || asleep || zooming}
           asleep={asleep}
           headwear={headwear}
           held={held}
@@ -416,7 +416,7 @@ export function Hamster() {
         {hearts.map((h) => (
           <span
             key={h.id}
-            className="hamster-heart"
+            className="cat-heart"
             style={
               {
                 "--hx": `${h.x}px`,
@@ -456,7 +456,7 @@ function Eye({
   sparkleRefs: React.MutableRefObject<(SVGGElement | null)[]>;
 }) {
   return (
-    <g className="hm-eye">
+    <g className="cat-eye">
       <g
         ref={(el) => {
           eyeRefs.current[index] = el;
@@ -480,8 +480,8 @@ function Eye({
 function HeadwearArt({ kind }: { kind: Headwear }) {
   if (kind === "nightcap") {
     return (
-      <g className="hm-headwear">
-        <path className="hm-cap" d="M47 33C52 13 93 3 113 23L141 12C132 26 121 33 111 34Z" />
+      <g className="cat-headwear">
+        <path className="cat-cap" d="M47 33C52 13 93 3 113 23L141 12C132 26 121 33 111 34Z" />
         <path d="M45 34Q79 18 114 33L114 38Q79 24 45 40Z" fill="#fff4e6" />
         <circle cx="142" cy="12" r="5.5" fill="#fff4e6" />
       </g>
@@ -489,15 +489,15 @@ function HeadwearArt({ kind }: { kind: Headwear }) {
   }
   if (kind === "hardhat") {
     return (
-      <g className="hm-headwear">
-        <path className="hm-hat" d="M51 32Q52 6 79 5Q106 6 107 32Z" />
-        <path className="hm-hat-ridge" d="M79 6V31" strokeWidth="3" />
-        <rect className="hm-hat-brim" x="42" y="29" width="74" height="6.5" rx="3.2" />
+      <g className="cat-headwear">
+        <path className="cat-hat" d="M51 32Q52 6 79 5Q106 6 107 32Z" />
+        <path className="cat-hat-ridge" d="M79 6V31" strokeWidth="3" />
+        <rect className="cat-hat-brim" x="42" y="29" width="74" height="6.5" rx="3.2" />
       </g>
     );
   }
   return (
-    <g className="hm-headwear">
+    <g className="cat-headwear">
       <rect x="54" y="23" width="21" height="11" rx="5.5" fill="#222a35" />
       <rect x="83" y="23" width="21" height="11" rx="5.5" fill="#222a35" />
       <path d="M75 27.5q4-3 8 0" fill="none" stroke="#222a35" strokeWidth="2.2" />
@@ -511,27 +511,27 @@ function HeadwearArt({ kind }: { kind: Headwear }) {
 function HeldArt({ kind }: { kind: Held }) {
   if (kind === "laptop") {
     return (
-      <g className="hm-held">
+      <g className="cat-held">
         <rect x="55" y="68" width="48" height="29" rx="3" fill="#2d3440" />
-        <rect className="hm-screen" x="59" y="72" width="40" height="21" rx="2" />
+        <rect className="cat-screen" x="59" y="72" width="40" height="21" rx="2" />
         <path d="M64 78h9M64 82h17M64 86h7" stroke="#e9fffb" strokeWidth="1.7" strokeLinecap="round" opacity=".85" />
         <path d="M49 97h60l-4 5H53z" fill="#434c5a" />
       </g>
     );
   }
   return (
-    <g className="hm-held">
+    <g className="cat-held">
       <rect x="56" y="77" width="46" height="29" rx="3" fill="#fff4e6" stroke="#dccab0" strokeWidth="1.2" />
       <path d="M56.6 78.5 79 93l22.4-14.5" fill="none" stroke="#dccab0" strokeWidth="1.5" />
       <path
-        className="hm-seal"
+        className="cat-seal"
         d="M79 91.5c-1.8-2.6-6.2-1.8-5.3 1.6.8 2.7 5.3 4.7 5.3 4.7s4.5-2 5.3-4.7c.9-3.4-3.5-4.2-5.3-1.6z"
       />
     </g>
   );
 }
 
-function HamsterArt({
+function CatArt({
   svgRef,
   lookRef,
   eyeRefs,
@@ -559,17 +559,17 @@ function HamsterArt({
 
   return (
     <svg ref={svgRef} viewBox="0 0 180 130" aria-hidden="true" focusable="false">
-      <ellipse className="hm-shadow" cx="80" cy="121" rx="58" ry="5" />
-      <ellipse className="hm-shadow" cx="150" cy="121" rx="12" ry="2.6" />
+      <ellipse className="cat-shadow" cx="80" cy="121" rx="58" ry="5" />
+      <ellipse className="cat-shadow" cx="150" cy="121" rx="12" ry="2.6" />
 
       <g transform="translate(150 119)">
         <g
-          className={`hm-treat${dropping ? " drop" : ""}`}
+          className={`cat-treat${dropping ? " drop" : ""}`}
           style={hideTreat ? { opacity: 0 } : undefined}
         >
           <g className={on("seed")}>
             <path
-              className="hm-shell"
+              className="cat-shell"
               d="M0-22C5.4-22 7.5-13 7-6.5 6.5-1 3.3 1 0 1-3.3 1-6.5-1-7-6.5-7.5-13-5.4-22 0-22Z"
             />
             <path
@@ -603,19 +603,19 @@ function HamsterArt({
           </g>
         </g>
         <path
-          className="hm-twinkle"
+          className="cat-twinkle"
           d="M14-35l1.4 4.2 4.2 1.4-4.2 1.4-1.4 4.2-1.4-4.2-4.2-1.4 4.2-1.4Z"
         />
       </g>
 
-      <g className="hm-body">
-        <g ref={lookRef} className="hm-look">
-          <ellipse className="hm-tail" cx="126" cy="104" rx="8" ry="5.5" fill="#dd8a44" />
-          <g className="hm-ear l">
+      <g className="cat-body">
+        <g ref={lookRef} className="cat-look">
+          <ellipse className="cat-tail" cx="126" cy="104" rx="8" ry="5.5" fill="#dd8a44" />
+          <g className="cat-ear l">
             <circle cx="49" cy="31" r="12.5" fill="#f0a45c" />
             <circle cx="49" cy="32" r="7.2" fill="#f7b1c1" />
           </g>
-          <g className="hm-ear r">
+          <g className="cat-ear r">
             <circle cx="109" cy="31" r="12.5" fill="#f0a45c" />
             <circle cx="109" cy="32" r="7.2" fill="#f7b1c1" />
           </g>
@@ -635,17 +635,17 @@ function HamsterArt({
             d="M38 67C38 53 52 49 62 57C70 51 88 51 96 57C106 49 120 53 120 67C122 88 118 117 79 118C40 117 36 88 38 67Z"
             fill="#fff4e6"
           />
-          <g className="hm-cheek l">
+          <g className="cat-cheek l">
             <ellipse cx="50" cy="72" rx="13" ry="11.5" fill="#fff4e6" />
             <ellipse cx="52" cy="67" rx="7" ry="4.2" fill="#ff9db3" opacity=".7" />
           </g>
-          <g className="hm-cheek r">
+          <g className="cat-cheek r">
             <ellipse cx="108" cy="72" rx="13" ry="11.5" fill="#fff4e6" />
             <ellipse cx="106" cy="67" rx="7" ry="4.2" fill="#ff9db3" opacity=".7" />
           </g>
           {asleep ? (
             <path
-              className="hm-closed"
+              className="cat-closed"
               d="M55 51q7 6 14 0M89 51q7 6 14 0"
               fill="none"
               stroke="#2a1b16"
@@ -658,7 +658,7 @@ function HamsterArt({
               <Eye cx={96} index={1} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
             </>
           )}
-          <path className="hm-nose" d="M76.4 59.6Q79 57.2 81.6 59.6Q79 63.2 76.4 59.6Z" fill="#ee7f95" />
+          <path className="cat-nose" d="M76.4 59.6Q79 57.2 81.6 59.6Q79 63.2 76.4 59.6Z" fill="#ee7f95" />
           <path
             d="M74.6 64Q76.8 67 79 64Q81.2 67 83.4 64"
             fill="none"
@@ -666,7 +666,7 @@ function HamsterArt({
             strokeWidth="1.4"
             strokeLinecap="round"
           />
-          <ellipse className="hm-yawn" cx="79" cy="67" rx="3.4" ry="4.4" fill="#7a3b3a" />
+          <ellipse className="cat-yawn" cx="79" cy="67" rx="3.4" ry="4.4" fill="#7a3b3a" />
           <path
             d="M57 63l-15-2.5M57 66.5l-15 2M101 63l15-2.5M101 66.5l15 2"
             fill="none"
@@ -675,7 +675,7 @@ function HamsterArt({
             strokeLinecap="round"
             opacity=".4"
           />
-          <g className="hm-crumbs" fill="#d8c3a0">
+          <g className="cat-crumbs" fill="#d8c3a0">
             <circle cx="77" cy="70" r="1.4" style={{ "--cx": "-9px" } as CSSProperties} />
             <circle cx="81" cy="70" r="1.2" style={{ "--cx": "8px" } as CSSProperties} />
             <circle cx="75" cy="72" r="1" style={{ "--cx": "-4px" } as CSSProperties} />
@@ -683,7 +683,7 @@ function HamsterArt({
           </g>
           {headwear && <HeadwearArt kind={headwear} />}
           {held && <HeldArt kind={held} />}
-          <g className="hm-paws" fill="#f7b8c2" stroke="#e99aaa" strokeWidth=".8">
+          <g className="cat-paws" fill="#f7b8c2" stroke="#e99aaa" strokeWidth=".8">
             <ellipse cx="70" cy="88" rx="6.8" ry="5.2" />
             <ellipse cx="88" cy="88" rx="6.8" ry="5.2" />
           </g>
@@ -691,12 +691,12 @@ function HamsterArt({
       </g>
       <ellipse cx="60" cy="118" rx="9.5" ry="4.6" fill="#f5a9b8" />
       <ellipse cx="98" cy="118" rx="9.5" ry="4.6" fill="#f5a9b8" />
-      <g className="hm-zzz" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <g className="cat-zzz" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M118 36h7l-7 8h7" />
         <path d="M131 22h9l-9 10h9" />
         <path d="M146 5h11l-11 12h11" />
       </g>
-      <g className="hm-sparks">
+      <g className="cat-sparks">
         <path d="M26 20l1.6 4.4 4.4 1.6-4.4 1.6L26 32l-1.6-4.4-4.4-1.6 4.4-1.6Z" />
         <path d="M136 40l1.2 3.4 3.4 1.2-3.4 1.2-1.2 3.4-1.2-3.4-3.4-1.2 3.4-1.2Z" />
         <path d="M16 64l1 2.8 2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1Z" />

@@ -16,7 +16,7 @@ export type TerminalData = {
   skills: SkillGroup[];
   projects: Project[];
   copy: (typeof playful)["terminal"];
-  hamsterCount: number;
+  catCount: number;
 };
 
 export type Result = { kind: "lines"; lines: Line[] } | { kind: "clear" };
@@ -32,7 +32,7 @@ export const COMMANDS = [
   "projects",
   "contact",
   "resume",
-  "hamster",
+  "cat",
   "clear",
 ];
 
@@ -94,9 +94,9 @@ export function runCommand(raw: string, data: TerminalData): Result {
     }
     case "resume":
       return lines([[{ text: "download  ", tone: "dim" }, { text: s.resumePath, tone: "strong", href: s.resumePath, download: true }]]);
-    case "hamster": {
-      const template = data.hamsterCount === 1 ? copy.hamsterFed.one : copy.hamsterFed.many;
-      return lines([[{ text: template.replace("{n}", String(data.hamsterCount)) }]]);
+    case "cat": {
+      const template = data.catCount === 1 ? copy.catFed.one : copy.catFed.many;
+      return lines([[{ text: template.replace("{n}", String(data.catCount)) }]]);
     }
     case "clear":
       return { kind: "clear" };

@@ -8,7 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { ScrollProgress } from "./ScrollProgress";
 
 export function Nav() {
-  /* Scroll-spy, shared with the hamster so its props follow the same section. */
+  /* Scroll-spy, shared with the cat so its props follow the same section. */
   const active = useActiveSection();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);

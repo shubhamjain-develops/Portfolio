@@ -28,8 +28,8 @@ export function Contact() {
   }
 
   return (
-    // Until the side gutter is wider than the fixed hamster (2xl), leave room
-    // below the last row so the hamster never sits on top of it.
+    // Until the side gutter is wider than the fixed cat (2xl), leave room
+    // below the last row so the cat never sits on top of it.
     <footer id="contact" className="scroll-mt-20 pb-44 pt-16 sm:pt-20 2xl:pb-14">
       <div className="shell">
         <Reveal>

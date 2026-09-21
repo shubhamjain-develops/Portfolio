@@ -1,10 +1,10 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { HAMSTER_KEY, localDay, readCount, recordFeed } from "@/lib/hamsterCount";
+import { CAT_KEY, localDay, readCount, recordFeed } from "@/lib/catCount";
 
 /*
- * Today's feed count, shared by everything that shows it (the hamster, the
+ * Today's feed count, shared by everything that shows it (the cat, the
  * status footer, the terminal). One module-level store, so a feed updates all
  * of them at once — the `storage` event never fires in the tab that wrote.
  *
@@ -35,7 +35,7 @@ function refresh() {
 
 function start() {
   try {
-    stored = localStorage.getItem(HAMSTER_KEY);
+    stored = localStorage.getItem(CAT_KEY);
   } catch {
     // Blocked site data: count in memory for this visit.
   }
@@ -43,7 +43,7 @@ function start() {
 
   // Another tab fed it. Only the count follows; that tab played the animation.
   const onStorage = (e: StorageEvent) => {
-    if (e.key !== HAMSTER_KEY) return;
+    if (e.key !== CAT_KEY) return;
     stored = e.newValue;
     refresh();
   };
@@ -74,12 +74,12 @@ function subscribe(listener: () => void) {
 }
 
 /** Record one feed for today and return the new count. */
-export function feedHamster(): number {
+export function feedCat(): number {
   const today = localDay();
   const next = recordFeed(stored, today);
   stored = JSON.stringify(next);
   try {
-    localStorage.setItem(HAMSTER_KEY, stored);
+    localStorage.setItem(CAT_KEY, stored);
   } catch {
     // Private mode or blocked storage: the count still shows for this visit.
   }
@@ -89,7 +89,7 @@ export function feedHamster(): number {
   return count;
 }
 
-/** How many times the hamster has been fed today, in this browser. 0 on the server. */
-export function useHamsterCount(): number {
+/** How many times the cat has been fed today, in this browser. 0 on the server. */
+export function useCatCount(): number {
   return useSyncExternalStore(subscribe, () => count, () => 0);
 }

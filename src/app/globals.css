@@ -20,7 +20,7 @@
     --c-accent: 10 115 101;
     --c-accent-2: 37 99 168;
     /* Coral, the one extra colour. Kept to three spots: the current role on
-       the timeline, the hero click-burst and the hamster. */
+       the timeline, the hero click-burst and the cat. */
     --c-warm: 201 78 44;
     --c-accent-ink: 255 255 255;
 
@@ -183,11 +183,11 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Hamster, fixed bottom-left. The illustration keeps its own colours;
+ * Cat, fixed bottom-left. The illustration keeps its own colours;
  * the only palette colour it uses is coral (--c-warm) for the counter
  * and hearts. Sits under the nav (z-50) and case-study modal (z-70).
  * ------------------------------------------------------------------ */
-.hamster-dock {
+.cat-dock {
   position: fixed;
   left: max(16px, env(safe-area-inset-left));
   bottom: 12px;
@@ -196,7 +196,7 @@
   justify-items: start;
 }
 
-.hamster-fed {
+.cat-fed {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -217,20 +217,20 @@
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
-.hamster-fed svg {
+.cat-fed svg {
   width: 12px;
   height: 12px;
   color: rgb(var(--c-warm));
 }
-.hamster-fed b {
+.cat-fed b {
   display: inline-block;
   font-weight: 600;
   color: rgb(var(--c-text));
 }
-.hamster-fed b.bump {
-  animation: hamster-bump 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+.cat-fed b.bump {
+  animation: cat-bump 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.hamster-plus {
+.cat-plus {
   position: absolute;
   top: -6px;
   right: -8px;
@@ -238,10 +238,10 @@
   font-weight: 600;
   color: rgb(var(--c-warm));
   pointer-events: none;
-  animation: hamster-plus 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: cat-plus 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-.hamster {
+.cat {
   position: relative;
   display: block;
   width: 168px;
@@ -251,18 +251,18 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.hamster > svg {
+.cat > svg {
   display: block;
   width: 100%;
   height: auto;
   overflow: visible;
 }
 @media (max-width: 640px) {
-  .hamster {
+  .cat {
     width: 124px;
   }
 }
-.hamster-heart {
+.cat-heart {
   position: absolute;
   left: 43%;
   top: 12%;
@@ -270,98 +270,98 @@
   height: 15px;
   color: rgb(var(--c-warm));
   pointer-events: none;
-  animation: hamster-heart 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cat-heart 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.hamster-heart svg {
+.cat-heart svg {
   display: block;
   width: 100%;
   height: 100%;
 }
 
-.hm-shadow { fill: rgb(0 0 0 / 0.16); }
-.hm-shell { fill: #46434e; stroke: rgb(var(--c-text) / 0.3); stroke-width: 1; }
-.hm-body,
-.hm-cheek,
-.hm-paws,
-.hm-ear,
-.hm-eye,
-.hm-nose,
-.hm-treat,
-.hm-twinkle,
-.hm-crumbs circle {
+.cat-shadow { fill: rgb(0 0 0 / 0.16); }
+.cat-shell { fill: #46434e; stroke: rgb(var(--c-text) / 0.3); stroke-width: 1; }
+.cat-body,
+.cat-cheek,
+.cat-paws,
+.cat-ear,
+.cat-eye,
+.cat-nose,
+.cat-treat,
+.cat-twinkle,
+.cat-crumbs circle {
   transform-box: fill-box;
 }
-.hm-treat > g { display: none; }
-.hm-treat > g.on { display: inline; }
-.hm-body { transform-origin: 40% 100%; animation: hm-reach 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-.hm-paws { animation: hm-paws-reach 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-.hm-ear { transform-origin: 50% 100%; animation: hm-ear-twitch 3.6s ease-in-out infinite; }
-.hm-ear.r { animation-delay: 0.15s; }
-.hm-nose { transform-origin: center; animation: hm-sniff 0.9s ease-in-out infinite; }
-.hamster:hover .hm-nose { animation-duration: 0.4s; }
-.hm-eye { transform-origin: center; animation: hm-blink 4.6s infinite; }
-.hm-treat { transform-origin: 50% 100%; animation: hm-wobble 3.6s ease-in-out infinite; }
-.hm-twinkle { fill: rgb(var(--c-warm)); transform-origin: center; animation: hm-twinkle 1.8s ease-in-out infinite; }
-/* Hamster.tsx sets --hm-cheeks to 0-5 from today's count: each feed puffs a little more. */
-.hm-cheek {
+.cat-treat > g { display: none; }
+.cat-treat > g.on { display: inline; }
+.cat-body { transform-origin: 40% 100%; animation: cat-reach 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.cat-paws { animation: cat-paws-reach 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.cat-ear { transform-origin: 50% 100%; animation: cat-ear-twitch 3.6s ease-in-out infinite; }
+.cat-ear.r { animation-delay: 0.15s; }
+.cat-nose { transform-origin: center; animation: cat-sniff 0.9s ease-in-out infinite; }
+.cat:hover .cat-nose { animation-duration: 0.4s; }
+.cat-eye { transform-origin: center; animation: cat-blink 4.6s infinite; }
+.cat-treat { transform-origin: 50% 100%; animation: cat-wobble 3.6s ease-in-out infinite; }
+.cat-twinkle { fill: rgb(var(--c-warm)); transform-origin: center; animation: cat-twinkle 1.8s ease-in-out infinite; }
+/* Cat.tsx sets --cat-cheeks to 0-5 from today's count: each feed puffs a little more. */
+.cat-cheek {
   transform-origin: center;
-  transform: scale(calc(1 + var(--hm-cheeks, 0) * 0.07));
+  transform: scale(calc(1 + var(--cat-cheeks, 0) * 0.07));
   transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.hm-crumbs circle { opacity: 0; transform-origin: center; }
+.cat-crumbs circle { opacity: 0; transform-origin: center; }
 
-/* Following the cursor: Hamster.tsx tilts .hm-look and moves the eyes.
+/* Following the cursor: Cat.tsx tilts .cat-look and moves the eyes.
    When the cursor is close it gets excited — hops, perks its ears, sniffs
    faster — unless it is busy eating. */
-.hm-look { transform-box: fill-box; transform-origin: 50% 90%; }
-.hamster.hm-excited:not(.eating) .hm-body { animation: hm-hop 0.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-.hamster.hm-excited:not(.eating) .hm-paws { animation: none; }
-.hamster.hm-excited:not(.eating) .hm-ear { animation: hm-ear-perk 0.8s ease-in-out infinite; }
-.hamster.hm-excited:not(.eating) .hm-ear.r { animation-name: hm-ear-perk-r; }
-.hamster.hm-excited .hm-nose { animation-duration: 0.35s; }
-@keyframes hm-hop { 0%, 100% { transform: none; } 35% { transform: translateY(-4px); } 60% { transform: translateY(0); } }
-@keyframes hm-ear-perk { 0%, 100% { transform: none; } 50% { transform: rotate(-10deg); } }
-@keyframes hm-ear-perk-r { 0%, 100% { transform: none; } 50% { transform: rotate(10deg); } }
+.cat-look { transform-box: fill-box; transform-origin: 50% 90%; }
+.cat.cat-excited:not(.eating) .cat-body { animation: cat-hop 0.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.cat.cat-excited:not(.eating) .cat-paws { animation: none; }
+.cat.cat-excited:not(.eating) .cat-ear { animation: cat-ear-perk 0.8s ease-in-out infinite; }
+.cat.cat-excited:not(.eating) .cat-ear.r { animation-name: cat-ear-perk-r; }
+.cat.cat-excited .cat-nose { animation-duration: 0.35s; }
+@keyframes cat-hop { 0%, 100% { transform: none; } 35% { transform: translateY(-4px); } 60% { transform: translateY(0); } }
+@keyframes cat-ear-perk { 0%, 100% { transform: none; } 50% { transform: rotate(-10deg); } }
+@keyframes cat-ear-perk-r { 0%, 100% { transform: none; } 50% { transform: rotate(10deg); } }
 
-.hamster.eating .hm-body { animation: hm-lunge 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
-.hamster.eating .hm-paws { animation: hm-grab 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
-.hamster.eating .hm-treat { animation: hm-gulp 0.42s ease-in forwards; }
-.hamster.eating .hm-twinkle { opacity: 0; animation: none; }
-.hamster.eating .hm-cheek { animation: hm-chew 1.2s ease-in-out; }
-.hamster.eating .hm-eye { animation: hm-happy 1.2s; }
-.hamster.eating .hm-crumbs circle { animation: hm-crumb 0.8s 0.42s ease-out both; }
-.hamster.eating .hm-crumbs circle:nth-child(2) { animation-delay: 0.54s; }
-.hamster.eating .hm-crumbs circle:nth-child(3) { animation-delay: 0.66s; }
-.hamster.eating .hm-crumbs circle:nth-child(4) { animation-delay: 0.78s; }
-.hm-treat.drop { animation: hm-drop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.hamster.full .hm-cheek { transform: scale(1.36); }
+.cat.eating .cat-body { animation: cat-lunge 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+.cat.eating .cat-paws { animation: cat-grab 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
+.cat.eating .cat-treat { animation: cat-gulp 0.42s ease-in forwards; }
+.cat.eating .cat-twinkle { opacity: 0; animation: none; }
+.cat.eating .cat-cheek { animation: cat-chew 1.2s ease-in-out; }
+.cat.eating .cat-eye { animation: cat-happy 1.2s; }
+.cat.eating .cat-crumbs circle { animation: cat-crumb 0.8s 0.42s ease-out both; }
+.cat.eating .cat-crumbs circle:nth-child(2) { animation-delay: 0.54s; }
+.cat.eating .cat-crumbs circle:nth-child(3) { animation-delay: 0.66s; }
+.cat.eating .cat-crumbs circle:nth-child(4) { animation-delay: 0.78s; }
+.cat-treat.drop { animation: cat-drop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.cat.full .cat-cheek { transform: scale(1.36); }
 
 /* Its day. Asleep (23:00-06:00): curled low, eyes shut, z's drifting up.
    A click yawns it awake; the fifth feed sends it off to stash. */
-.hm-zzz { display: none; stroke: rgb(var(--c-dim)); }
-.hm-zzz path { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.hm-yawn { opacity: 0; transform-box: fill-box; transform-origin: 50% 0; }
-.hamster.asleep .hm-zzz { display: inline; }
-.hamster.asleep .hm-zzz path { animation: hm-z 2.7s ease-in infinite; }
-.hamster.asleep .hm-zzz path:nth-child(2) { animation-delay: 0.9s; }
-.hamster.asleep .hm-zzz path:nth-child(3) { animation-delay: 1.8s; }
-.hamster.asleep .hm-body { transform-origin: 45% 100%; animation: hm-doze 4.8s ease-in-out infinite; }
-.hamster.asleep .hm-paws,
-.hamster.asleep .hm-ear,
-.hamster.asleep .hm-nose { animation: none; }
-.hamster.asleep .hm-twinkle { opacity: 0; animation: none; }
-.hamster.yawning .hm-body { animation: hm-stretch 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
-.hamster.yawning .hm-yawn { animation: hm-yawn 0.9s ease-in-out; }
-.hamster.stashing > svg { animation: hm-stash 1.8s ease-in-out; }
-.hamster.stashing .hm-cheek { animation: hm-unstuff 1.8s ease-in-out forwards; }
-.hamster.stashing .hm-twinkle { opacity: 0; animation: none; }
+.cat-zzz { display: none; stroke: rgb(var(--c-dim)); }
+.cat-zzz path { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.cat-yawn { opacity: 0; transform-box: fill-box; transform-origin: 50% 0; }
+.cat.asleep .cat-zzz { display: inline; }
+.cat.asleep .cat-zzz path { animation: cat-z 2.7s ease-in infinite; }
+.cat.asleep .cat-zzz path:nth-child(2) { animation-delay: 0.9s; }
+.cat.asleep .cat-zzz path:nth-child(3) { animation-delay: 1.8s; }
+.cat.asleep .cat-body { transform-origin: 45% 100%; animation: cat-doze 4.8s ease-in-out infinite; }
+.cat.asleep .cat-paws,
+.cat.asleep .cat-ear,
+.cat.asleep .cat-nose { animation: none; }
+.cat.asleep .cat-twinkle { opacity: 0; animation: none; }
+.cat.yawning .cat-body { animation: cat-stretch 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+.cat.yawning .cat-yawn { animation: cat-yawn 0.9s ease-in-out; }
+.cat.zooming > svg { animation: cat-stash 1.8s ease-in-out; }
+.cat.zooming .cat-cheek { animation: cat-unstuff 1.8s ease-in-out forwards; }
+.cat.zooming .cat-twinkle { opacity: 0; animation: none; }
 
-@keyframes hm-z { 0% { opacity: 0; transform: translate(0, 6px) scale(0.6); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translate(10px, -14px) scale(1.1); } }
-@keyframes hm-doze { 0%, 100% { transform: translateY(5px) scale(1.04, 0.9); } 50% { transform: translateY(4px) scale(1.06, 0.87); } }
-@keyframes hm-stretch { 0%, 100% { transform: none; } 45% { transform: translateY(-3px) scale(1.03, 1.07); } }
-@keyframes hm-yawn { 0%, 100% { opacity: 0; transform: scaleY(0.2); } 30%, 70% { opacity: 1; transform: none; } }
+@keyframes cat-z { 0% { opacity: 0; transform: translate(0, 6px) scale(0.6); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translate(10px, -14px) scale(1.1); } }
+@keyframes cat-doze { 0%, 100% { transform: translateY(5px) scale(1.04, 0.9); } 50% { transform: translateY(4px) scale(1.06, 0.87); } }
+@keyframes cat-stretch { 0%, 100% { transform: none; } 45% { transform: translateY(-3px) scale(1.03, 1.07); } }
+@keyframes cat-yawn { 0%, 100% { opacity: 0; transform: scaleY(0.2); } 30%, 70% { opacity: 1; transform: none; } }
 /* Waddles right toward the treat spot, turns, and waddles home; never leaves the screen. */
-@keyframes hm-stash {
+@keyframes cat-stash {
   0% { transform: none; }
   14% { transform: translateX(8px) rotate(4deg); }
   28% { transform: translateX(18px) rotate(-4deg); }
@@ -371,59 +371,59 @@
   90% { transform: scaleX(-1); }
   100% { transform: none; }
 }
-@keyframes hm-unstuff { 0%, 40% { transform: scale(1.35); } 56%, 100% { transform: scale(1); } }
+@keyframes cat-unstuff { 0%, 40% { transform: scale(1.35); } 56%, 100% { transform: scale(1); } }
 
-/* What it wears and holds (Hamster.tsx picks one of each). Only ink, teal
-   and the hamster's coral: the props must not bring the rainbow back. */
-.hm-cap { fill: #3a4452; }
-.hm-hat,
-.hm-hat-brim { fill: rgb(var(--c-warm)); }
-.hm-hat-brim { filter: brightness(0.82); }
-.hm-hat-ridge { fill: none; stroke: rgb(0 0 0 / 0.16); }
-.hm-screen { fill: rgb(var(--c-accent)); }
-.hm-seal { fill: rgb(var(--c-warm)); }
-.hm-held { transform-box: fill-box; transform-origin: 50% 100%; animation: hm-prop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
-.hamster.holding .hm-paws { animation: none; transform: translateY(9px); }
-@keyframes hm-prop-in { from { opacity: 0; transform: translateY(8px) scale(0.9); } }
+/* What it wears and holds (Cat.tsx picks one of each). Only ink, teal
+   and the cat's coral: the props must not bring the rainbow back. */
+.cat-cap { fill: #3a4452; }
+.cat-hat,
+.cat-hat-brim { fill: rgb(var(--c-warm)); }
+.cat-hat-brim { filter: brightness(0.82); }
+.cat-hat-ridge { fill: none; stroke: rgb(0 0 0 / 0.16); }
+.cat-screen { fill: rgb(var(--c-accent)); }
+.cat-seal { fill: rgb(var(--c-warm)); }
+.cat-held { transform-box: fill-box; transform-origin: 50% 100%; animation: cat-prop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
+.cat.holding .cat-paws { animation: none; transform: translateY(9px); }
+@keyframes cat-prop-in { from { opacity: 0; transform: translateY(8px) scale(0.9); } }
 
 /* Thrilled: an Email or Résumé link has the visitor's attention. No words, just joy. */
-.hm-sparks { fill: rgb(var(--c-warm)); }
-.hm-sparks path { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.hamster.thrilled:not(.eating) .hm-body { animation: hm-thrill 0.55s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-.hamster.thrilled:not(.eating) .hm-ear { animation: hm-ear-perk 0.55s ease-in-out infinite; }
-.hamster.thrilled:not(.eating) .hm-ear.r { animation-name: hm-ear-perk-r; }
-.hamster.thrilled .hm-sparks path { animation: hm-spark 0.9s ease-out infinite; }
-.hamster.thrilled .hm-sparks path:nth-child(2) { animation-delay: 0.3s; }
-.hamster.thrilled .hm-sparks path:nth-child(3) { animation-delay: 0.6s; }
-@keyframes hm-thrill { 0%, 100% { transform: none; } 25% { transform: translateY(-7px) rotate(-5deg); } 50% { transform: none; } 75% { transform: translateY(-7px) rotate(5deg); } }
-@keyframes hm-spark { 0% { opacity: 0; transform: scale(0.3); } 40% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.6) translateY(-8px); } }
+.cat-sparks { fill: rgb(var(--c-warm)); }
+.cat-sparks path { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.cat.thrilled:not(.eating) .cat-body { animation: cat-thrill 0.55s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
+.cat.thrilled:not(.eating) .cat-ear { animation: cat-ear-perk 0.55s ease-in-out infinite; }
+.cat.thrilled:not(.eating) .cat-ear.r { animation-name: cat-ear-perk-r; }
+.cat.thrilled .cat-sparks path { animation: cat-spark 0.9s ease-out infinite; }
+.cat.thrilled .cat-sparks path:nth-child(2) { animation-delay: 0.3s; }
+.cat.thrilled .cat-sparks path:nth-child(3) { animation-delay: 0.6s; }
+@keyframes cat-thrill { 0%, 100% { transform: none; } 25% { transform: translateY(-7px) rotate(-5deg); } 50% { transform: none; } 75% { transform: translateY(-7px) rotate(5deg); } }
+@keyframes cat-spark { 0% { opacity: 0; transform: scale(0.3); } 40% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.6) translateY(-8px); } }
 
 /* On a phone the dock would sit over a text field and the keyboard; step aside while typing. */
 @media (max-width: 640px) {
-  body:has(input:focus, textarea:focus) .hamster-dock {
+  body:has(input:focus, textarea:focus) .cat-dock {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s, visibility 0s 0.2s;
   }
 }
 
-@keyframes hamster-bump { 40% { transform: translateY(-3px) scale(1.3); color: rgb(var(--c-warm)); } }
-@keyframes hamster-plus { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
-@keyframes hamster-heart { 0% { opacity: 0; transform: translate(0, 10px) scale(0.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--hx), -52px) scale(1.05) rotate(var(--hr)); } }
-@keyframes hm-reach { 0%, 14%, 100% { transform: none; } 36%, 52% { transform: translateX(4px) rotate(5deg); } 44% { transform: translateX(5px) rotate(6deg); } 64% { transform: none; } 72% { transform: translateY(-4px); } 80% { transform: none; } }
-@keyframes hm-paws-reach { 0%, 16%, 100% { transform: none; } 36%, 52% { transform: translate(8px, -4px); } 44% { transform: translate(10px, -5px); } 64% { transform: none; } }
-@keyframes hm-ear-twitch { 0%, 74%, 100% { transform: none; } 80% { transform: rotate(-12deg); } 86% { transform: rotate(7deg); } }
-@keyframes hm-sniff { 0%, 60%, 100% { transform: none; } 70% { transform: scale(1.18, 0.82); } 80% { transform: scale(0.92, 1.1); } }
-@keyframes hm-blink { 0%, 94%, 100% { transform: none; } 96% { transform: scaleY(0.1); } }
-@keyframes hm-wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
-@keyframes hm-twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.45); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
-@keyframes hm-lunge { 0% { transform: none; } 28% { transform: translateX(12px) rotate(8deg); } 46%, 100% { transform: none; } }
-@keyframes hm-grab { 0% { transform: none; } 28% { transform: translate(14px, -4px); } 46%, 86% { transform: translate(0, -16px); } 100% { transform: none; } }
-@keyframes hm-gulp { 0% { transform: none; } 100% { opacity: 0; transform: translate(-62px, -46px) scale(0.2); } }
-@keyframes hm-chew { 0%, 34% { transform: none; } 44% { transform: scale(1.45); } 54% { transform: scale(1.32, 1.48); } 64% { transform: scale(1.5, 1.34); } 74% { transform: scale(1.32, 1.48); } 86% { transform: scale(1.42); } 100% { transform: scale(1.08); } }
-@keyframes hm-happy { 0%, 32% { transform: none; } 40%, 88% { transform: scaleY(0.18); } 100% { transform: none; } }
-@keyframes hm-crumb { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--cx), 15px); } }
-@keyframes hm-drop { 0% { opacity: 0; transform: translateY(-64px) rotate(-35deg); } 45% { opacity: 1; } 70% { transform: rotate(10deg); } 85% { transform: translateY(-5px) rotate(-4deg); } 100% { transform: none; } }
+@keyframes cat-bump { 40% { transform: translateY(-3px) scale(1.3); color: rgb(var(--c-warm)); } }
+@keyframes cat-plus { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+@keyframes cat-heart { 0% { opacity: 0; transform: translate(0, 10px) scale(0.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--hx), -52px) scale(1.05) rotate(var(--hr)); } }
+@keyframes cat-reach { 0%, 14%, 100% { transform: none; } 36%, 52% { transform: translateX(4px) rotate(5deg); } 44% { transform: translateX(5px) rotate(6deg); } 64% { transform: none; } 72% { transform: translateY(-4px); } 80% { transform: none; } }
+@keyframes cat-paws-reach { 0%, 16%, 100% { transform: none; } 36%, 52% { transform: translate(8px, -4px); } 44% { transform: translate(10px, -5px); } 64% { transform: none; } }
+@keyframes cat-ear-twitch { 0%, 74%, 100% { transform: none; } 80% { transform: rotate(-12deg); } 86% { transform: rotate(7deg); } }
+@keyframes cat-sniff { 0%, 60%, 100% { transform: none; } 70% { transform: scale(1.18, 0.82); } 80% { transform: scale(0.92, 1.1); } }
+@keyframes cat-blink { 0%, 94%, 100% { transform: none; } 96% { transform: scaleY(0.1); } }
+@keyframes cat-wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes cat-twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.45); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
+@keyframes cat-lunge { 0% { transform: none; } 28% { transform: translateX(12px) rotate(8deg); } 46%, 100% { transform: none; } }
+@keyframes cat-grab { 0% { transform: none; } 28% { transform: translate(14px, -4px); } 46%, 86% { transform: translate(0, -16px); } 100% { transform: none; } }
+@keyframes cat-gulp { 0% { transform: none; } 100% { opacity: 0; transform: translate(-62px, -46px) scale(0.2); } }
+@keyframes cat-chew { 0%, 34% { transform: none; } 44% { transform: scale(1.45); } 54% { transform: scale(1.32, 1.48); } 64% { transform: scale(1.5, 1.34); } 74% { transform: scale(1.32, 1.48); } 86% { transform: scale(1.42); } 100% { transform: scale(1.08); } }
+@keyframes cat-happy { 0%, 32% { transform: none; } 40%, 88% { transform: scaleY(0.18); } 100% { transform: none; } }
+@keyframes cat-crumb { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--cx), 15px); } }
+@keyframes cat-drop { 0% { opacity: 0; transform: translateY(-64px) rotate(-35deg); } 45% { opacity: 1; } 70% { transform: rotate(10deg); } 85% { transform: translateY(-5px) rotate(-4deg); } 100% { transform: none; } }
 
 /* ------------------------------------------------------------------ *
  * Motion safety. Framer Motion components read useReducedMotion(), and
@@ -441,9 +441,9 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  /* The z's only show by animating in, so give the sleeping hamster still ones. */
-  .hamster.asleep .hm-zzz path,
-  .hamster.thrilled .hm-sparks path {
+  /* The z's only show by animating in, so give the sleeping cat still ones. */
+  .cat.asleep .cat-zzz path,
+  .cat.thrilled .cat-sparks path {
     opacity: 0.8;
   }
 }

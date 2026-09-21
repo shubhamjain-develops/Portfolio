@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { experience, playful, projects, site, skills } from "@/data/content";
 import { complete, runCommand, type Line, type Part } from "@/lib/terminal";
-import { useHamsterCount } from "@/lib/useHamsterCount";
+import { useCatCount } from "@/lib/useCatCount";
 
 /** Past this many rows the oldest output is dropped, so a long session can't grow without limit. */
 const MAX_ROWS = 60;
@@ -25,7 +25,7 @@ type Row = { id: number; line: Line };
  * the first command (never on page load) and then scrolls inside a fixed height.
  */
 export function Terminal() {
-  const hamsterCount = useHamsterCount();
+  const catCount = useCatCount();
   const [rows, setRows] = useState<Row[]>([]);
   const [value, setValue] = useState("");
   const [chip, setChip] = useState(0);
@@ -46,7 +46,7 @@ export function Terminal() {
     history.current.unshift(typed);
     recall.current = -1;
 
-    const result = runCommand(typed, { site, experience, skills, projects, copy, hamsterCount });
+    const result = runCommand(typed, { site, experience, skills, projects, copy, catCount });
     if (result.kind === "clear") {
       setRows([]);
       return;
