@@ -34,18 +34,21 @@ export function Hero() {
     <section
       ref={ref}
       id="top"
-      className="relative isolate overflow-hidden pb-24 pt-32 sm:pb-32 sm:pt-40"
+      // z-10: the portal's word sits behind the hero (see Portal.tsx). At least
+      // a screen tall with the content centred, so a tall window has no empty
+      // band under the buttons and the portal's lead-in starts at the top.
+      className="relative isolate z-10 flex min-h-[100svh] flex-col justify-center overflow-hidden pb-24 pt-32 sm:pb-32 sm:pt-40"
     >
       <motion.div
         aria-hidden
         style={reduce ? undefined : { y: canvasY }}
-        className="absolute inset-0 -z-10"
+        // Fades out to transparent, not to the page colour, so the word behind stays visible.
+        className="absolute inset-0 -z-10 [mask-image:linear-gradient(to_bottom,#000_calc(100%-10rem),transparent)]"
       >
         <div className="absolute inset-0 grid-bg" />
         <HeroCanvas />
         {/* warm/cool wash so the canvas doesn't read as pure noise */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_15%_0%,rgb(var(--c-accent)/0.10),transparent_60%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-bg" />
       </motion.div>
 
       <motion.div

@@ -7,6 +7,11 @@ import { site } from "@/data/content";
 import { CHEEK_CAPACITY, cheekLevel, isAsleep, isZoomiesFeed } from "@/lib/catCount";
 import { useActiveSection } from "@/lib/useActiveSection";
 import { feedCat, useCatCount } from "@/lib/useCatCount";
+import {
+  BLUSH, BODY, CELL, CHEEK_L, CHEEK_L_FULL, CHEEK_R, CHEEK_R_FULL, CRUMBS, DRUMSTICK, ENVELOPE, EYE,
+  EYE_HAPPY, EYE_SHUT, FISH, HARDHAT, HEAD, HEART, LAPTOP, MOUTH_OPEN, NIGHTCAP, PALETTE, SHRIMP, SPARK,
+  SUNGLASSES, TAIL, TWINKLE, Z_BIG, Z_SMALL, type Sprite,
+} from "./catSprites";
 
 const TREATS = ["fish", "shrimp", "drumstick"] as const;
 const CHEW_MS = 1200;
@@ -19,19 +24,12 @@ const MIN_FEED_GAP_MS = 400;
 const SLEEP_CHECK_MS = 5_000;
 
 /** The SVG's viewBox width, for turning screen pixels into SVG units. */
-const VIEWBOX_WIDTH = 180;
-/** Midpoint between the eyes, in viewBox coordinates. */
-const FACE_X = 79;
-const FACE_Y = 60;
-/**
- * How far the eyes move (in SVG units) when looking fully to one side. The
- * white sparkles move a little further than the dark bead, so the eyes read as
- * rolling toward the cursor rather than sliding.
- */
-const EYE_RANGE = { x: 5.5, y: 3.6 };
-const SPARKLE_EXTRA = { x: 1.6, y: 1.1 };
-/** Gentle body lean toward the cursor, in degrees. */
-const MAX_TILT = 7;
+const VIEWBOX_WIDTH = 256;
+/** Midpoint between the eyes, in SVG units from the viewBox's top-left corner. */
+const FACE_X = 92;
+const FACE_Y = 104;
+/** How far the cursor has to be to the side before the eyes jump a cell toward it (-1 to 1). */
+const LOOK_ASIDE = 0.35;
 /** Eyes are fully turned once the cursor is this many screen pixels away. */
 const FULL_TURN_AT = 80;
 /** The cursor counts as "close" within this many screen pixels of the face. */
@@ -59,7 +57,7 @@ function isCheerLink(target: EventTarget | null): boolean {
 }
 
 /**
- * A cat in a cardboard box in the bottom-left corner. It eats when clicked and shows how many
+ * A cat sitting in the bottom-left corner. It eats when clicked and shows how many
  * times it was fed today. The count lives only in the visitor's browser, per
  * local calendar day. It renders after mount because the server can't know
  * what's in localStorage or the visitor's clock, and a guess would flash on
@@ -99,9 +97,6 @@ export function Cat() {
 
   const buttonRef = useRef<HTMLButtonElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-  const lookRef = useRef<SVGGElement>(null);
-  const eyeRefs = useRef<(SVGGElement | null)[]>([]);
-  const sparkleRefs = useRef<(SVGGElement | null)[]>([]);
 
   const later = (fn: () => void, ms: number) => {
     timers.current.push(window.setTimeout(fn, ms));
@@ -191,8 +186,9 @@ export function Cat() {
     };
   }, []);
 
-  // Eyes and body follow the cursor. One rAF loop eases toward a target and
-  // writes straight to the SVG, so pointer moves never re-render React.
+  // The eyes follow the cursor. One rAF loop eases toward a target and, being
+  // pixel art, snaps the eyes a whole cell left or right through a data
+  // attribute on the SVG, so pointer moves never re-render React.
   useEffect(() => {
     if (!mounted || reduce) return;
     const svg = svgRef.current;
@@ -204,7 +200,8 @@ export function Cat() {
     let raf = 0;
     // Where to look, as a direction from -1 to 1 on each axis.
     const target = { x: 0, y: 0 };
-    const eased = { x: 0, y: 0 };
+    let eased = 0;
+    let look = "c";
 
     const aim = (now: number) => {
       if (!pointer) {
@@ -229,14 +226,12 @@ export function Cat() {
 
     const frame = (now: number) => {
       aim(now);
-      eased.x += (target.x - eased.x) * 0.22;
-      eased.y += (target.y - eased.y) * 0.22;
-
-      const eyes = `translate(${(eased.x * EYE_RANGE.x).toFixed(2)} ${(eased.y * EYE_RANGE.y).toFixed(2)})`;
-      const sparkle = `translate(${(eased.x * SPARKLE_EXTRA.x).toFixed(2)} ${(eased.y * SPARKLE_EXTRA.y).toFixed(2)})`;
-      for (const eye of eyeRefs.current) eye?.setAttribute("transform", eyes);
-      for (const glint of sparkleRefs.current) glint?.setAttribute("transform", sparkle);
-      lookRef.current?.style.setProperty("transform", `rotate(${(eased.x * MAX_TILT).toFixed(2)}deg)`);
+      eased += (target.x - eased) * 0.22;
+      const next = eased > LOOK_ASIDE ? "r" : eased < -LOOK_ASIDE ? "l" : "c";
+      if (next !== look) {
+        look = next;
+        svg.dataset.look = next;
+      }
       raf = requestAnimationFrame(frame);
     };
 
@@ -268,6 +263,7 @@ export function Cat() {
       document.removeEventListener("mouseout", onLeaveWindow);
       document.removeEventListener("focusin", onFocus);
       button.classList.remove("cat-excited");
+      svg.dataset.look = "c";
     };
   }, [mounted, reduce]);
 
@@ -399,17 +395,13 @@ export function Cat() {
         }}
         aria-label={`${asleep ? "Wake and feed" : "Feed"} the cat. Fed ${count} ${unit} today.`}
         className={["cat", ...states].join(" ")}
-        style={{ "--cat-cheeks": cheeks } as CSSProperties}
       >
         <CatArt
           svgRef={svgRef}
-          lookRef={lookRef}
-          eyeRefs={eyeRefs}
-          sparkleRefs={sparkleRefs}
           treat={treat}
           dropping={dropping}
           hideTreat={full || asleep || zooming}
-          asleep={asleep}
+          cheeks={full ? CHEEK_CAPACITY : cheeks}
           headwear={headwear}
           held={held}
         />
@@ -433,307 +425,151 @@ export function Cat() {
   );
 }
 
+/** A pixel heart in the current text colour, for the counter and the feeding burst. */
 function HeartIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <path
-        fill="currentColor"
-        d="M12 21s-7.6-4.7-10-9.4C.4 8.3 2.3 4.4 6.1 4.1c2.2-.2 4.2 1 5.9 3.1 1.7-2.1 3.7-3.3 5.9-3.1 3.8.3 5.7 4.2 4.1 7.5C19.6 16.3 12 21 12 21z"
-      />
+    <svg viewBox="0 0 5 4" aria-hidden="true" focusable="false" shapeRendering="crispEdges">
+      {HEART.map((row, y) =>
+        [...row].map((ch, x) => (ch === "." ? null : <rect key={`${x}.${y}`} x={x} y={y} width="1" height="1" fill="currentColor" />))
+      )}
     </svg>
   );
 }
 
-/** Outline ink and the sticker palette. The die-cut white edge keeps it readable on any background. */
-const INK = "#2b2233";
-const ORANGE = "#ffa53b";
-const STRIPE = "#e0771b";
-const CREAM = "#fff1d6";
-const PINK = "#ff8fa3";
+/**
+ * Draws a sprite as SVG rects, one rect per run of same-coloured cells in a
+ * row, so a 24-cell row is a handful of rects rather than 24.
+ */
+function Pixels({ sprite, x, y }: { sprite: Sprite; x: number; y: number }) {
+  const rects: React.ReactElement[] = [];
+  sprite.forEach((row, r) => {
+    let c = 0;
+    while (c < row.length) {
+      let end = c + 1;
+      while (end < row.length && row[end] === row[c]) end++;
+      const fill = PALETTE[row[c]];
+      if (fill) {
+        rects.push(
+          <rect key={`${r}.${c}`} x={(x + c) * CELL} y={(y + r) * CELL} width={(end - c) * CELL} height={CELL} fill={fill} />
+        );
+      }
+      c = end;
+    }
+  });
+  return <>{rects}</>;
+}
 
-const TAIL = "M118 98C144 102 156 86 148 68C146 62 140 62 140 68";
-const EAR_L = "M39 48Q37 22 42 8Q44 4 48 6Q62 12 71 27Z";
-const EAR_R = "M119 48Q121 22 116 8Q114 4 110 6Q96 12 87 27Z";
-const EAR_L_INNER = "M46 40Q45 24 46 15Q56 19 63 29Z";
-const EAR_R_INNER = "M112 40Q113 24 112 15Q102 19 95 29Z";
-const FACE =
-  "M40 68C40 60 52 57 62 63C70 59 88 59 96 63C106 57 118 60 118 68C118 82 104 94 79 94C54 94 40 82 40 68Z";
-
-/** A white die-cut edge under one shape: the sticker border. */
-const DIE = { fill: "#fff", stroke: "#fff", strokeWidth: 12, strokeLinejoin: "round" } as const;
-const EDGE = { stroke: INK, strokeWidth: 3, strokeLinejoin: "round", strokeLinecap: "round" } as const;
-
-function Eye({
-  cx,
-  index,
-  eyeRefs,
-  sparkleRefs,
-}: {
-  cx: number;
-  index: number;
-  eyeRefs: React.MutableRefObject<(SVGGElement | null)[]>;
-  sparkleRefs: React.MutableRefObject<(SVGGElement | null)[]>;
-}) {
+/** Both eyes, shifted `dx` cells to look aside. */
+function Eyes({ sprite, dx = 0 }: { sprite: Sprite; dx?: number }) {
   return (
-    <g className="cat-eye">
-      <g
-        ref={(el) => {
-          eyeRefs.current[index] = el;
-        }}
-      >
-        <ellipse cx={cx} cy="52" rx="7.2" ry="9.4" fill={INK} />
-        <g
-          ref={(el) => {
-            sparkleRefs.current[index] = el;
-          }}
-        >
-          <circle cx={cx + 2.6} cy="48" r="3" fill="#fff" />
-          <circle cx={cx - 2.4} cy="56" r="1.4" fill="#fff" />
-        </g>
-      </g>
-    </g>
+    <>
+      <Pixels sprite={sprite} x={5 + dx} y={6} />
+      <Pixels sprite={sprite} x={15 + dx} y={6} />
+    </>
   );
 }
 
-/** On its head. Sunglasses sit pushed up, clear of the eyes the visitor is watching. */
-function HeadwearArt({ kind }: { kind: Headwear }) {
-  if (kind === "nightcap") {
-    return (
-      <g className="cat-headwear">
-        <path className="cat-cap" d="M47 33C52 13 93 3 113 23L141 12C132 26 121 33 111 34Z" {...EDGE} />
-        <path d="M45 34Q79 18 114 33L114 38Q79 24 45 40Z" fill="#fff4e6" {...EDGE} strokeWidth={2.4} />
-        <circle cx="142" cy="12" r="5.5" fill="#fff4e6" {...EDGE} />
-      </g>
-    );
-  }
-  if (kind === "hardhat") {
-    return (
-      <g className="cat-headwear">
-        <path className="cat-hat" d="M51 32Q52 6 79 5Q106 6 107 32Z" {...EDGE} />
-        <path className="cat-hat-ridge" d="M79 6V31" strokeWidth="3" />
-        <rect className="cat-hat-brim" x="42" y="29" width="74" height="6.5" rx="3.2" {...EDGE} />
-      </g>
-    );
-  }
+/** Cheeks fill out with today's feeds: a blush, then a puff, then a full puff. */
+function Cheeks({ level }: { level: number }) {
+  if (level <= 0) return null;
   return (
-    <g className="cat-headwear">
-      <rect x="54" y="23" width="21" height="11" rx="5.5" fill="#222a35" {...EDGE} strokeWidth={2.4} />
-      <rect x="83" y="23" width="21" height="11" rx="5.5" fill="#222a35" {...EDGE} strokeWidth={2.4} />
-      <path d="M75 27.5q4-3 8 0" fill="none" stroke={INK} strokeWidth="2.6" />
-      <rect x="57.5" y="25.3" width="7" height="2.4" rx="1.2" fill="#fff" opacity=".55" />
-      <rect x="86.5" y="25.3" width="7" height="2.4" rx="1.2" fill="#fff" opacity=".55" />
-    </g>
-  );
-}
-
-/** In its paws: a laptop on Skills, an envelope on Contact. */
-function HeldArt({ kind }: { kind: Held }) {
-  if (kind === "laptop") {
-    return (
-      <g className="cat-held">
-        <rect x="55" y="68" width="48" height="29" rx="3" fill="#2d3440" {...EDGE} />
-        <rect className="cat-screen" x="59" y="72" width="40" height="21" rx="2" />
-        <path d="M64 78h9M64 82h17M64 86h7" stroke="#e9fffb" strokeWidth="1.7" strokeLinecap="round" opacity=".85" />
-        <path d="M49 97h60l-4 5H53z" fill="#434c5a" {...EDGE} strokeWidth={2.4} />
-      </g>
-    );
-  }
-  return (
-    <g className="cat-held">
-      <rect x="56" y="77" width="46" height="29" rx="3" fill={CREAM} {...EDGE} />
-      <path d="M56.6 78.5 79 93l22.4-14.5" fill="none" stroke={INK} strokeWidth="2.4" strokeLinejoin="round" />
-      <path
-        className="cat-seal"
-        d="M79 91.5c-1.8-2.6-6.2-1.8-5.3 1.6.8 2.7 5.3 4.7 5.3 4.7s4.5-2 5.3-4.7c.9-3.4-3.5-4.2-5.3-1.6z"
-      />
-    </g>
+    <>
+      {level >= 5 ? (
+        <>
+          <Pixels sprite={CHEEK_L_FULL} x={0} y={7} />
+          <Pixels sprite={CHEEK_R_FULL} x={19} y={7} />
+        </>
+      ) : level >= 3 ? (
+        <>
+          <Pixels sprite={CHEEK_L} x={1} y={8} />
+          <Pixels sprite={CHEEK_R} x={19} y={8} />
+        </>
+      ) : null}
+      <Pixels sprite={BLUSH} x={4} y={8} />
+      <Pixels sprite={BLUSH} x={17} y={8} />
+    </>
   );
 }
 
 function CatArt({
   svgRef,
-  lookRef,
-  eyeRefs,
-  sparkleRefs,
   treat,
   dropping,
   hideTreat,
-  asleep,
+  cheeks,
   headwear,
   held,
 }: {
   svgRef: React.RefObject<SVGSVGElement | null>;
-  lookRef: React.RefObject<SVGGElement | null>;
-  eyeRefs: React.MutableRefObject<(SVGGElement | null)[]>;
-  sparkleRefs: React.MutableRefObject<(SVGGElement | null)[]>;
   treat: number;
   dropping: boolean;
   hideTreat: boolean;
-  asleep: boolean;
+  cheeks: number;
   headwear: Headwear | null;
   held: Held | null;
 }) {
   const on = (name: (typeof TREATS)[number]) =>
     TREATS[treat] === name ? "on" : undefined;
 
+  // 32 cells across, rows -6 to 22: room for hats above and the treat to the right.
   return (
-    <svg ref={svgRef} viewBox="0 0 180 130" aria-hidden="true" focusable="false">
-      <defs>
-        <filter id="cat-lift" x="-10%" y="-10%" width="120%" height="125%">
-          <feDropShadow dx="0" dy="2" stdDeviation="1.8" floodColor="#000" floodOpacity="0.28" />
-        </filter>
-      </defs>
-      <ellipse className="cat-shadow" cx="80" cy="124" rx="54" ry="4.6" />
-      <ellipse className="cat-shadow" cx="150" cy="121" rx="12" ry="2.6" />
+    <svg ref={svgRef} viewBox="0 -48 256 232" data-look="c" aria-hidden="true" focusable="false">
+      <rect className="cat-shadow" x={3 * CELL} y={22 * CELL} width={17 * CELL} height={CELL / 2} />
+      <rect className="cat-shadow" x={24 * CELL} y={22 * CELL} width={6 * CELL} height={CELL / 2} />
 
-      <g transform="translate(150 119)">
-        <g
-          className={`cat-treat${dropping ? " drop" : ""}`}
-          style={hideTreat ? { opacity: 0 } : undefined}
-        >
-          <g className={on("fish")}>
-            <path d="M8-8 19-16V0Z" fill="#3f8fe0" {...EDGE} strokeWidth={2.6} />
-            <ellipse cx="-2" cy="-8" rx="12" ry="7.5" fill="#63b0fb" {...EDGE} strokeWidth={2.6} />
-            <path d="M-3-14.5 1-19.5 4-13.5Z" fill="#3f8fe0" {...EDGE} strokeWidth={2.6} />
-            <circle cx="-8" cy="-10" r="1.8" fill={INK} />
-          </g>
-          <g className={on("shrimp")}>
-            <path d="M-9-3C-13-13-4-21 5-17 12-14 12-6 6-3" fill="none" stroke={INK} strokeWidth="11.5" strokeLinecap="round" />
-            <path d="M-9-3C-13-13-4-21 5-17 12-14 12-6 6-3" fill="none" stroke="#ff8f70" strokeWidth="6" strokeLinecap="round" />
-            <path d="M-6.5-15.5l3 3M0-19.5l1 4.3M6.5-16l-2 3.4" fill="none" stroke="#e5624a" strokeWidth="1.6" strokeLinecap="round" />
-            <path d="M4-1l7 2.4-1-7.4Z" fill="#e5624a" {...EDGE} strokeWidth={2.4} />
-            <circle cx="-9" cy="-4" r="1.3" fill={INK} />
-          </g>
-          <g className={on("drumstick")}>
-            <path d="M-1-9-8-2.5" fill="none" stroke={INK} strokeWidth="8" strokeLinecap="round" />
-            <path d="M-1-9-8-2.5" fill="none" stroke={CREAM} strokeWidth="3.6" strokeLinecap="round" />
-            <circle cx="-10.5" cy="-3.6" r="2.6" fill={CREAM} {...EDGE} strokeWidth={2.2} />
-            <circle cx="-7.6" cy="-1.3" r="2.6" fill={CREAM} {...EDGE} strokeWidth={2.2} />
-            <ellipse cx="3" cy="-14" rx="10.5" ry="8.6" transform="rotate(-28 3 -14)" fill="#d98a3d" {...EDGE} strokeWidth={2.6} />
-            <ellipse cx="0" cy="-17" rx="4.5" ry="2.4" transform="rotate(-28 0 -17)" fill="#fff" opacity=".35" />
-          </g>
+      <g className="px-cat">
+        <g className="px-tail">
+          {TAIL.map((frame, i) => (
+            <g key={i} className={`px-tail-f${i}`}>
+              <Pixels sprite={frame} x={19} y={10} />
+            </g>
+          ))}
         </g>
-        <path
-          className="cat-twinkle"
-          d="M14-35l1.4 4.2 4.2 1.4-4.2 1.4-1.4 4.2-1.4-4.2-4.2-1.4 4.2-1.4Z"
-        />
-      </g>
+        <Pixels sprite={BODY} x={0} y={12} />
 
-      {/* The box stays put while the cat moves inside it, so its white edge does too. */}
-      <g filter="url(#cat-lift)">
-        <rect x="34" y="88" width="92" height="38" rx="3" {...DIE} />
-        <rect x="30" y="82" width="100" height="10" rx="3" {...DIE} />
-        <path d="M30 88L18 80L24 70L40 84Z" {...DIE} />
-        <path d="M130 88L142 80L136 70L120 84Z" {...DIE} />
-      </g>
+        <g className="px-head">
+          <Pixels sprite={HEAD} x={0} y={0} />
+          <Cheeks level={cheeks} />
+          <g className="px-eyes-open">
+            <g className="px-look-c"><Eyes sprite={EYE} /></g>
+            <g className="px-look-l"><Eyes sprite={EYE} dx={-1} /></g>
+            <g className="px-look-r"><Eyes sprite={EYE} dx={1} /></g>
+          </g>
+          <g className="px-eyes-shut"><Eyes sprite={EYE_SHUT} /></g>
+          <g className="px-eyes-happy"><Eyes sprite={EYE_HAPPY} /></g>
+          <g className="px-mouth"><Pixels sprite={MOUTH_OPEN} x={10} y={9} /></g>
+          <g className="px-crumbs"><Pixels sprite={CRUMBS} x={9} y={11} /></g>
+          {headwear === "sunglasses" && <Pixels sprite={SUNGLASSES} x={6} y={1} />}
+          {headwear === "hardhat" && <Pixels sprite={HARDHAT} x={4} y={0} />}
+          {headwear === "nightcap" && <Pixels sprite={NIGHTCAP} x={3} y={-3} />}
+        </g>
 
-      <g className="cat-body">
-        <g ref={lookRef} className="cat-look">
-          <g className="cat-tail">
-            <g filter="url(#cat-lift)">
-              <path d={TAIL} fill="none" stroke="#fff" strokeWidth="21" strokeLinecap="round" />
-            </g>
-            <path d={TAIL} fill="none" stroke={INK} strokeWidth="15" strokeLinecap="round" />
-            <path d={TAIL} fill="none" stroke={ORANGE} strokeWidth="7.5" strokeLinecap="round" />
-            <path d={TAIL} fill="none" stroke={STRIPE} strokeWidth="7.5" strokeDasharray="3 9" strokeDashoffset="-4" />
+        {held && (
+          <g className="cat-held">
+            {held === "laptop" ? <Pixels sprite={LAPTOP} x={4} y={14} /> : <Pixels sprite={ENVELOPE} x={6} y={14} />}
           </g>
-          <g transform="translate(0 8)">
-            <g filter="url(#cat-lift)">
-              <ellipse cx="79" cy="58" rx="42" ry="36" {...DIE} />
-            </g>
-            <g className="cat-ear l">
-              <path d={EAR_L} {...DIE} />
-              <path d={EAR_L} fill={ORANGE} {...EDGE} strokeWidth={4} />
-              <path d={EAR_L_INNER} fill={PINK} />
-            </g>
-            <g className="cat-ear r">
-              <path d={EAR_R} {...DIE} />
-              <path d={EAR_R} fill={ORANGE} {...EDGE} strokeWidth={4} />
-              <path d={EAR_R_INNER} fill={PINK} />
-            </g>
-            <ellipse cx="79" cy="58" rx="42" ry="36" fill={ORANGE} />
-            <path d={FACE} fill={CREAM} />
-            <ellipse cx="79" cy="58" rx="42" ry="36" fill="none" {...EDGE} strokeWidth={4} />
-            <path d="M79 24v9M70 26l2.5 7M88 26l-2.5 7" fill="none" stroke={STRIPE} strokeWidth="4" strokeLinecap="round" />
-            <g className="cat-cheek l">
-              <ellipse cx="50" cy="73" rx="12" ry="10" fill={CREAM} {...EDGE} strokeWidth={3.4} />
-            </g>
-            <g className="cat-cheek r">
-              <ellipse cx="108" cy="73" rx="12" ry="10" fill={CREAM} {...EDGE} strokeWidth={3.4} />
-            </g>
-            <ellipse cx="50" cy="70" rx="8" ry="5" fill={PINK} opacity=".85" />
-            <ellipse cx="108" cy="70" rx="8" ry="5" fill={PINK} opacity=".85" />
-            {asleep ? (
-              <path
-                className="cat-closed"
-                d="M55 53q7 6 14 0M89 53q7 6 14 0"
-                fill="none"
-                stroke={INK}
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-            ) : (
-              <>
-                <Eye cx={62} index={0} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
-                <Eye cx={96} index={1} eyeRefs={eyeRefs} sparkleRefs={sparkleRefs} />
-              </>
-            )}
-            <path className="cat-nose" d="M75.5 62.4h7l-3.5 4.2Z" fill="#ff6f8f" stroke={INK} strokeWidth="2.4" strokeLinejoin="round" />
-            <path
-              d="M79 66.6v2.4M79 69Q75.5 73 71.5 69.5M79 69Q82.5 73 86.5 69.5"
-              fill="none"
-              stroke={INK}
-              strokeWidth="2.6"
-              strokeLinecap="round"
-            />
-            <ellipse className="cat-yawn" cx="79" cy="71" rx="4.2" ry="5" fill="#7a3b3a" stroke={INK} strokeWidth="2" />
-            <path
-              d="M50 66 36 62M50 72 34 73M108 66 122 62M108 72 124 73"
-              fill="none"
-              stroke={INK}
-              strokeWidth="2.4"
-              strokeLinecap="round"
-            />
-            <g className="cat-crumbs" fill="#d8c3a0">
-              <circle cx="77" cy="72" r="1.5" style={{ "--cx": "-9px" } as CSSProperties} />
-              <circle cx="81" cy="72" r="1.3" style={{ "--cx": "8px" } as CSSProperties} />
-              <circle cx="75" cy="74" r="1.1" style={{ "--cx": "-4px" } as CSSProperties} />
-              <circle cx="83" cy="73" r="1.3" style={{ "--cx": "11px" } as CSSProperties} />
-            </g>
-            {headwear && <HeadwearArt kind={headwear} />}
-          </g>
+        )}
+
+        <g className="px-sparks">
+          <Pixels sprite={SPARK} x={0} y={3} />
+          <Pixels sprite={SPARK} x={21} y={5} />
+          <Pixels sprite={SPARK} x={1} y={12} />
         </g>
       </g>
 
-      <path d="M30 88L18 80L24 70L40 84Z" fill="#b98748" {...EDGE} />
-      <path d="M130 88L142 80L136 70L120 84Z" fill="#b98748" {...EDGE} />
-      <rect x="34" y="88" width="92" height="38" rx="3" fill="#c99a5b" {...EDGE} strokeWidth={4} />
-      <rect x="70" y="92" width="20" height="34" fill="#ecd9a8" opacity=".85" />
-      <path d="M100 118l7-10 7 10zM107 116v-7" fill={INK} stroke={INK} strokeWidth="2" strokeLinejoin="round" />
-      <path d="M40 100h22M40 106h16M40 112h20" stroke={INK} strokeWidth="2" strokeLinecap="round" opacity=".6" />
-      <rect x="30" y="82" width="100" height="10" rx="3" fill="#d8ab6a" {...EDGE} />
-
-      <g className="cat-paws" fill={CREAM} stroke={INK} strokeWidth="3" strokeLinejoin="round">
-        <ellipse cx="54" cy="84" rx="10" ry="7" />
-        <ellipse cx="104" cy="84" rx="10" ry="7" />
-        <path d="M50 81v5M54 80v6M58 81v5M100 81v5M104 80v6M108 81v5" fill="none" strokeWidth="1.8" strokeLinecap="round" />
+      <g
+        className={`cat-treat${dropping ? " drop" : ""}`}
+        style={hideTreat ? { opacity: 0 } : undefined}
+      >
+        <g className={on("fish")}><Pixels sprite={FISH} x={24} y={18} /></g>
+        <g className={on("shrimp")}><Pixels sprite={SHRIMP} x={24} y={18} /></g>
+        <g className={on("drumstick")}><Pixels sprite={DRUMSTICK} x={24} y={18} /></g>
       </g>
+      <g className="px-twinkle"><Pixels sprite={TWINKLE} x={29} y={15} /></g>
 
-      {held && (
-        <g transform={held === "laptop" ? "translate(18.4 46.4) scale(.78)" : "translate(16.8 34.8) scale(.8) rotate(-6 79 91.5)"}>
-          <HeldArt kind={held} />
-        </g>
-      )}
-
-      <g className="cat-zzz" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M118 36h7l-7 8h7" />
-        <path d="M131 22h9l-9 10h9" />
-        <path d="M146 5h11l-11 12h11" />
-      </g>
-      <g className="cat-sparks">
-        <path d="M26 20l1.6 4.4 4.4 1.6-4.4 1.6L26 32l-1.6-4.4-4.4-1.6 4.4-1.6Z" />
-        <path d="M136 40l1.2 3.4 3.4 1.2-3.4 1.2-1.2 3.4-1.2-3.4-3.4-1.2 3.4-1.2Z" />
-        <path d="M12 46l1 2.8 2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1Z" />
+      <g className="px-zzz">
+        <g className="px-z1"><Pixels sprite={Z_BIG} x={21} y={0} /></g>
+        <g className="px-z2"><Pixels sprite={Z_SMALL} x={25} y={-3} /></g>
       </g>
     </svg>
   );

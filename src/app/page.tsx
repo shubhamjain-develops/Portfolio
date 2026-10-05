@@ -9,6 +9,8 @@ import { Contact } from "@/components/Contact";
 import { Divider } from "@/components/Section";
 import { JsonLd } from "@/components/JsonLd";
 import { Cat } from "@/components/Cat";
+import { Portal } from "@/components/Portal";
+import { Crowd } from "@/components/Crowd";
 
 export default function Home() {
   return (
@@ -17,6 +19,7 @@ export default function Home() {
       <Nav />
       <main id="main">
         <Hero />
+        <Portal />
         <About />
         <Divider />
         <Experience />
@@ -26,6 +29,7 @@ export default function Home() {
         <Skills />
         <Divider />
         <Education />
+        <Crowd />
         <Contact />
       </main>
       <Cat />
