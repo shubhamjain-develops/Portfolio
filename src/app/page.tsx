@@ -9,6 +9,7 @@ import { Contact } from "@/components/Contact";
 import { Divider } from "@/components/Section";
 import { JsonLd } from "@/components/JsonLd";
 import { Cat } from "@/components/Cat";
+import { Crowd } from "@/components/Crowd";
 
 export default function Home() {
   return (
@@ -26,6 +27,7 @@ export default function Home() {
         <Skills />
         <Divider />
         <Education />
+        <Crowd />
         <Contact />
       </main>
       <Cat />

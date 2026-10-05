@@ -80,6 +80,14 @@ export const availability = {
   ],
 };
 
+/** The walking crowd above Contact. Open Peeps (CC0) via Skiper UI's Skiper 39. */
+export const crowd = {
+  label: "The one you're looking for",
+  sheet: "/crowd/open-peeps.png",
+  /** Sheet index (row-major, 15 across) of the peep who stands still in teal: arms crossed, short hair. */
+  standout: 66,
+};
+
 export type Job = {
   title: string;
   company: string;
