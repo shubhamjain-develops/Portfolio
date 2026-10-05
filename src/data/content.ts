@@ -80,6 +80,29 @@ export const availability = {
   ],
 };
 
+/** The scroll-through-a-letter interlude between the hero and About. */
+export const portal = {
+  word: "SYSTEMS",
+  eyebrow: "How I work",
+  support: "Pick a letter, then scroll through it.",
+  enterLabel: "Step inside",
+  title: "Three habits behind every system I ship.",
+  principles: [
+    {
+      title: "Own it end to end",
+      body: "Requirements, architecture and validation stay with me. On Kaveri 2.0 that meant critical microservices for a statewide platform.",
+    },
+    {
+      title: "Design for the constraint",
+      body: "Regulation, data nobody can afford to lose, and traffic that spikes without asking. The constraint shapes the design.",
+    },
+    {
+      title: "Agents type, I decide",
+      body: "AI coding agents work inside a human-in-the-loop workflow: I set the plan, review every diff and own the result.",
+    },
+  ],
+};
+
 /** The walking crowd above Contact. Open Peeps (CC0) via Skiper UI's Skiper 39. */
 export const crowd = {
   label: "The one you're looking for",

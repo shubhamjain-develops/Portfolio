@@ -183,6 +183,109 @@
 }
 
 /* ------------------------------------------------------------------ *
+ * Glyph portal (Portal.tsx). The word is a window onto a teal field; the
+ * camera scrolls through one letter into it. GlyphPortal scopes its own
+ * defaults under :where(), so a single class here outranks them, and the
+ * --gp-* tokens point at the palette so both themes follow the toggle.
+ * ------------------------------------------------------------------ */
+.portal {
+  --gp-paper: rgb(var(--c-bg));
+  --gp-ink: rgb(var(--c-text));
+  --gp-field: rgb(var(--c-accent));
+  --gp-foreground: rgb(var(--c-accent-ink));
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+/* The word starts behind the hero: the portal is pulled up one screen, under
+   the hero (z-10 in Hero.tsx). During the lead-in (--gp-lead 0 → 1, set by
+   GlyphPortal) the word is a faint backdrop and the portal's own labels stay
+   hidden; they fade in once the hero has scrolled away. Reduced motion keeps
+   the plain stacked layout. */
+.portal-hold { height: 100svh; }
+@media (prefers-reduced-motion: no-preference) {
+  .portal,
+  .portal-hold { margin-top: -100svh; }
+}
+.portal[data-gp-motion="on"][data-gp-ready] [data-gp-field] {
+  opacity: calc(0.14 + 0.86 * var(--gp-lead, 1));
+}
+.portal[data-gp-motion="on"] [data-gp-front],
+.portal[data-gp-motion="on"] [data-gp-caption],
+.portal[data-gp-motion="on"] [data-gp-touch-picker] {
+  opacity: calc(var(--gp-caption, 1) * clamp(0, (var(--gp-lead, 1) - 0.8) * 5, 1));
+}
+.portal[data-gp-motion="on"] [data-gp-caption]:focus-within { opacity: 1; }
+.portal-field {
+  position: absolute;
+  inset: 0;
+  transform: scale(var(--gp-field-scale, 1));
+  background-color: rgb(var(--c-accent));
+  background-image:
+    radial-gradient(circle at 18% 8%, rgb(var(--c-accent-2) / 0.45), transparent 38%),
+    radial-gradient(circle at 82% 20%, rgb(255 255 255 / 0.14), transparent 30%),
+    radial-gradient(circle at 48% 82%, rgb(0 0 0 / 0.22), transparent 46%),
+    linear-gradient(to right, rgb(var(--c-accent-ink) / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(var(--c-accent-ink) / 0.07) 1px, transparent 1px);
+  background-size: auto, auto, auto, 64px 64px, 64px 64px;
+}
+.portal-eyebrow {
+  position: absolute;
+  inset: auto 20px calc(100% - var(--gp-word-top, 35%) + 28px);
+  margin: 0;
+  text-align: center;
+}
+.portal-support {
+  position: absolute;
+  inset: calc(var(--gp-word-bottom, 50%) + 26px) 20px auto;
+  margin: 0;
+  text-align: center;
+  font-size: 1rem;
+  color: rgb(var(--c-dim));
+}
+.portal [data-gp-hint] {
+  display: none;
+}
+.portal [data-gp-caption] {
+  inset: calc(var(--gp-word-bottom, 50%) + 74px) 20px auto;
+  justify-content: center;
+}
+.portal [data-gp-enter] {
+  gap: 14px;
+  padding: 0 18px;
+  border: 1px solid rgb(var(--c-border-strong));
+  border-radius: 8px;
+  background: rgb(var(--c-surface));
+  box-shadow: var(--shadow-card);
+  font-size: 0.86rem;
+  font-weight: 600;
+  transition: border-color 0.2s, color 0.2s;
+}
+.portal [data-gp-enter]:hover {
+  border-color: rgb(var(--c-accent) / 0.6);
+  color: rgb(var(--c-accent));
+}
+.portal [data-gp-touch-picker] {
+  top: auto;
+  bottom: 22px;
+  font-family: inherit;
+}
+.portal [data-gp-select] {
+  border-color: rgb(var(--c-border));
+  border-radius: 8px;
+  color: rgb(var(--c-dim));
+}
+.portal [data-gp-content] {
+  padding: 5.5rem 0 6.5rem;
+}
+@media (max-height: 520px) {
+  .portal-support {
+    display: none;
+  }
+  .portal [data-gp-caption] {
+    top: calc(var(--gp-word-bottom, 50%) + 24px);
+  }
+}
+
+/* ------------------------------------------------------------------ *
  * Cat in a cardboard box, fixed bottom-left, drawn as a sticker: dark ink
  * outline, flat colour, white die-cut edge. The box stays still; the cat moves in it. The illustration keeps its own colours;
  * the only palette colour it uses is coral (--c-warm) for the counter
