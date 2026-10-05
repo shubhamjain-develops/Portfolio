@@ -286,10 +286,9 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Cat in a cardboard box, fixed bottom-left, drawn as a sticker: dark ink
- * outline, flat colour, white die-cut edge. The box stays still; the cat moves in it. The illustration keeps its own colours;
- * the only palette colour it uses is coral (--c-warm) for the counter
- * and hearts. Sits under the nav (z-50) and case-study modal (z-70).
+ * Cat sitting in the bottom-left corner, drawn as a pixel sprite (sprites
+ * in catSprites.ts). The dock is sized so each sprite cell is a whole number
+ * of screen pixels. Sits under the nav (z-50) and case-study modal (z-70).
  * ------------------------------------------------------------------ */
 .cat-dock {
   position: fixed;
@@ -348,7 +347,8 @@
 .cat {
   position: relative;
   display: block;
-  width: 168px;
+  /* 32 cells × 5px; 4px on phones, below. */
+  width: 160px;
   padding: 0;
   border: 0;
   background: none;
@@ -360,21 +360,22 @@
   width: 100%;
   height: auto;
   overflow: visible;
+  shape-rendering: crispEdges;
 }
 @media (max-width: 640px) {
   .cat {
-    width: 124px;
+    width: 128px;
   }
 }
 .cat-heart {
   position: absolute;
-  left: 43%;
-  top: 12%;
+  left: 32%;
+  top: 14%;
   width: 15px;
   height: 15px;
   color: rgb(var(--c-warm));
   pointer-events: none;
-  animation: cat-heart 1.25s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: cat-heart 1.25s steps(8, end) both;
 }
 .cat-heart svg {
   display: block;
@@ -383,129 +384,116 @@
 }
 
 .cat-shadow { fill: rgb(0 0 0 / 0.16); }
-.cat-body,
-.cat-cheek,
-.cat-paws,
-.cat-ear,
-.cat-eye,
-.cat-nose,
-.cat-treat,
-.cat-twinkle,
-.cat-crumbs circle {
-  transform-box: fill-box;
-}
+
+/* Pixel rules: everything moves in whole 8-unit cells, and frames swap in
+   steps rather than easing. Keyframes on `visibility` use steps(1), which
+   holds each keyframe's value until the next one. */
+.px-tail-f1,
+.px-tail-f2,
+.px-look-l,
+.px-look-r,
+.px-eyes-shut,
+.px-eyes-happy,
+.px-mouth,
+.px-crumbs,
+.px-sparks,
+.px-zzz { visibility: hidden; }
 .cat-treat > g { display: none; }
 .cat-treat > g.on { display: inline; }
-.cat-body { transform-origin: 40% 100%; animation: cat-reach 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-.cat-paws { animation: cat-paws-reach 3.6s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-.cat-ear { transform-origin: 50% 100%; animation: cat-ear-twitch 3.6s ease-in-out infinite; }
-.cat-tail { transform-box: fill-box; transform-origin: 0% 88%; animation: cat-tail-sway 3.4s ease-in-out infinite; }
-.cat-ear.r { animation-delay: 0.15s; }
-.cat-nose { transform-origin: center; animation: cat-sniff 0.9s ease-in-out infinite; }
-.cat:hover .cat-nose { animation-duration: 0.4s; }
-.cat-eye { transform-origin: center; animation: cat-blink 4.6s infinite; }
-.cat-treat { transform-origin: 50% 100%; animation: cat-wobble 3.6s ease-in-out infinite; }
-.cat-twinkle { fill: rgb(var(--c-warm)); transform-origin: center; animation: cat-twinkle 1.8s ease-in-out infinite; }
-/* Cat.tsx sets --cat-cheeks to 0-5 from today's count. Each feed makes an outlined cheek puff a little
-   more solid and a little bigger; at 0 it is invisible. */
-.cat-cheek {
-  transform-origin: center;
-  transform: scale(calc(1 + var(--cat-cheeks, 0) * 0.07));
-  opacity: calc(var(--cat-cheeks, 0) * 0.25);
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.45s;
-}
-.cat-crumbs circle { opacity: 0; transform-origin: center; }
 
-/* Following the cursor: Cat.tsx tilts .cat-look and moves the eyes.
-   When the cursor is close it gets excited — hops, perks its ears, sniffs
-   faster — unless it is busy eating. */
-.cat-look { transform-box: fill-box; transform-origin: 50% 90%; }
-.cat.cat-excited:not(.eating) .cat-body { animation: cat-hop 0.8s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-.cat.cat-excited:not(.eating) .cat-paws { animation: none; }
-.cat.cat-excited:not(.eating) .cat-ear { animation: cat-ear-perk 0.8s ease-in-out infinite; }
-.cat.cat-excited:not(.eating) .cat-ear.r { animation-name: cat-ear-perk-r; }
-.cat.cat-excited .cat-nose { animation-duration: 0.35s; }
-.cat.cat-excited .cat-tail,
-.cat.thrilled .cat-tail { animation-duration: 0.6s; }
-@keyframes cat-hop { 0%, 100% { transform: none; } 35% { transform: translateY(-4px); } 60% { transform: translateY(0); } }
-@keyframes cat-ear-perk { 0%, 100% { transform: none; } 50% { transform: rotate(-10deg); } }
-@keyframes cat-ear-perk-r { 0%, 100% { transform: none; } 50% { transform: rotate(10deg); } }
+/* At rest: the tail swishes 0-1-0-2, the head dips a cell as it breathes,
+   it blinks (sometimes twice), the treat hops and a star twinkles over it. */
+.px-tail-f0 { animation: px-tail-0 1.2s steps(1) infinite; }
+.px-tail-f1 { animation: px-tail-1 1.2s steps(1) infinite; }
+.px-tail-f2 { animation: px-tail-2 1.2s steps(1) infinite; }
+.px-head { animation: px-breathe 2s steps(1) infinite; }
+.px-eyes-open { animation: px-eyes-open 5.5s steps(1) infinite; }
+.px-eyes-shut { animation: px-eyes-shut 5.5s steps(1) infinite; }
+.cat-treat { animation: px-treat-hop 1.8s steps(1) infinite; }
+.px-twinkle { animation: px-blink 1s steps(1) infinite; }
 
-.cat.eating .cat-body { animation: cat-lunge 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
-.cat.eating .cat-paws { animation: cat-grab 1.2s cubic-bezier(0.22, 1, 0.36, 1); }
-.cat.eating .cat-treat { animation: cat-gulp 0.42s ease-in forwards; }
-.cat.eating .cat-twinkle { opacity: 0; animation: none; }
-.cat.eating .cat-cheek { opacity: 1; animation: cat-chew 1.2s ease-in-out; }
-.cat.eating .cat-eye { animation: cat-happy 1.2s; }
-.cat.eating .cat-crumbs circle { animation: cat-crumb 0.8s 0.42s ease-out both; }
-.cat.eating .cat-crumbs circle:nth-child(2) { animation-delay: 0.54s; }
-.cat.eating .cat-crumbs circle:nth-child(3) { animation-delay: 0.66s; }
-.cat.eating .cat-crumbs circle:nth-child(4) { animation-delay: 0.78s; }
-.cat-treat.drop { animation: cat-drop 0.65s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.cat.full .cat-cheek { transform: scale(1.36); opacity: 1; }
+/* Where it looks: Cat.tsx sets data-look to l, c or r as the cursor moves. */
+.cat svg[data-look="l"] .px-look-c,
+.cat svg[data-look="r"] .px-look-c { visibility: hidden; }
+.cat svg[data-look="l"] .px-look-l,
+.cat svg[data-look="r"] .px-look-r { visibility: inherit; }
 
-/* Its day. Asleep (23:00-06:00): curled low, eyes shut, z's drifting up.
-   A click yawns it awake; the fifth feed sets off the zoomies. */
-.cat-zzz { display: none; stroke: rgb(var(--c-dim)); }
-.cat-zzz path { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.cat-yawn { opacity: 0; transform-box: fill-box; transform-origin: 50% 0; }
-.cat.asleep .cat-zzz { display: inline; }
-.cat.asleep .cat-zzz path { animation: cat-z 2.7s ease-in infinite; }
-.cat.asleep .cat-zzz path:nth-child(2) { animation-delay: 0.9s; }
-.cat.asleep .cat-zzz path:nth-child(3) { animation-delay: 1.8s; }
-.cat.asleep .cat-body { transform-origin: 45% 100%; animation: cat-doze 4.8s ease-in-out infinite; }
-.cat.asleep .cat-paws,
-.cat.asleep .cat-ear,
-.cat.asleep .cat-tail,
-.cat.asleep .cat-nose { animation: none; }
-.cat.asleep .cat-twinkle { opacity: 0; animation: none; }
-.cat.yawning .cat-body { animation: cat-stretch 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
-.cat.yawning .cat-yawn { animation: cat-yawn 0.9s ease-in-out; }
-.cat.zooming > svg { animation: cat-zoom 1.6s ease-in-out; }
-.cat.zooming .cat-cheek { animation: cat-unpuff 1.6s ease-in-out forwards; }
-.cat.zooming .cat-twinkle { opacity: 0; animation: none; }
+/* Cursor close: tail goes, head bobs quicker. */
+.cat.cat-excited .px-tail-f0,
+.cat.cat-excited .px-tail-f1,
+.cat.cat-excited .px-tail-f2,
+.cat.thrilled .px-tail-f0,
+.cat.thrilled .px-tail-f1,
+.cat.thrilled .px-tail-f2 { animation-duration: 0.5s; }
+.cat.cat-excited .px-head { animation-duration: 0.8s; }
 
-@keyframes cat-z { 0% { opacity: 0; transform: translate(0, 6px) scale(0.6); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translate(10px, -14px) scale(1.1); } }
-@keyframes cat-doze { 0%, 100% { transform: translateY(5px) scale(1.04, 0.9); } 50% { transform: translateY(4px) scale(1.06, 0.87); } }
-@keyframes cat-stretch { 0%, 100% { transform: none; } 45% { transform: translateY(-3px) scale(1.03, 1.07); } }
-@keyframes cat-yawn { 0%, 100% { opacity: 0; transform: scaleY(0.2); } 30%, 70% { opacity: 1; transform: none; } }
+/* Eating: it leans at the treat, the treat hops into its mouth in three
+   jumps, it chomps three times with happy eyes, and crumbs fall. */
+.cat.eating .px-head { animation: px-lunge 1.2s steps(1); }
+.cat.eating .px-eyes-open,
+.cat.eating .px-eyes-shut { animation: none; visibility: hidden; }
+.cat.eating .px-eyes-happy { visibility: visible; }
+.cat.eating .px-mouth { animation: px-chomp 0.24s 0.36s steps(1) 3; }
+.cat.eating .px-crumbs { animation: px-crumbs 0.6s 0.5s steps(3, end) both; }
+.cat.eating .cat-treat { animation: px-gulp 0.36s steps(3, end) forwards; }
+.cat.eating .px-twinkle { visibility: hidden; animation: none; }
+.cat-treat.drop { animation: px-drop 0.5s steps(4, end) both; }
+
+/* Its day. Asleep (23:00-06:00): head down a cell, eyes shut, tail still,
+   z's stepping up. A click yawns it awake; the fifth feed sets off the zoomies. */
+.cat.asleep .px-head { animation: none; transform: translateY(8px); }
+.cat.asleep .px-eyes-open { animation: none; visibility: hidden; }
+.cat.asleep .px-eyes-shut { animation: none; visibility: visible; }
+.cat.asleep .px-tail-f0 { animation: none; visibility: visible; }
+.cat.asleep .px-tail-f1,
+.cat.asleep .px-tail-f2,
+.cat.asleep .px-twinkle { animation: none; visibility: hidden; }
+.cat.asleep .px-zzz { visibility: visible; }
+.cat.asleep .px-z1 { animation: px-z 2.4s steps(4, end) infinite; }
+.cat.asleep .px-z2 { animation: px-z 2.4s -1.2s steps(4, end) infinite; }
+.cat.yawning .px-head { animation: px-stretch 0.9s steps(1); }
+.cat.yawning .px-eyes-open { animation: none; visibility: hidden; }
+.cat.yawning .px-eyes-shut { animation: none; visibility: visible; }
+.cat.yawning .px-mouth { visibility: visible; }
+.cat.zooming > svg { animation: cat-zoom 1.6s steps(12, end); }
+.cat.zooming .px-twinkle { visibility: hidden; animation: none; }
+
+/* Thrilled: an Email or Résumé link has the visitor's attention. It hops on
+   the spot with sparks around it. No words, just joy. */
+.cat.thrilled:not(.eating) .px-cat { animation: px-hop 0.5s steps(1) infinite; }
+.cat.thrilled .px-sparks { visibility: visible; animation: px-blink 0.5s steps(1) infinite; }
+
+/* What it holds (Cat.tsx picks one): pops in a cell at a time. */
+.cat-held { animation: px-pop 0.3s steps(2, end); }
+
 /* Dashes right, turns, and races home; never leaves the screen. */
 @keyframes cat-zoom {
   0% { transform: none; }
   12% { transform: translateX(-2px) scale(1.02, 0.93); }
-  30% { transform: translate(34px, -6px) rotate(5deg); }
+  30% { transform: translate(34px, -6px); }
   42% { transform: translateX(46px) scaleX(-1); }
-  60% { transform: translate(24px, -8px) scaleX(-1) rotate(-5deg); }
+  60% { transform: translate(24px, -8px) scaleX(-1); }
   80% { transform: translateX(4px) scaleX(-1); }
   92% { transform: scaleX(-1); }
   100% { transform: none; }
 }
-@keyframes cat-unpuff { 0%, 40% { transform: scale(1.35); opacity: 1; } 56%, 100% { transform: scale(1); opacity: 0; } }
-
-/* What it wears and holds (Cat.tsx picks one of each). Only ink, teal
-   and the cat's coral: the props must not bring the rainbow back. */
-.cat-cap { fill: #3a4452; }
-.cat-hat,
-.cat-hat-brim { fill: rgb(var(--c-warm)); }
-.cat-hat-brim { filter: brightness(0.82); }
-.cat-hat-ridge { fill: none; stroke: rgb(0 0 0 / 0.16); }
-.cat-screen { fill: rgb(var(--c-accent)); }
-.cat-seal { fill: rgb(var(--c-warm)); }
-.cat-held { transform-box: fill-box; transform-origin: 50% 100%; animation: cat-prop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
-.cat.holding .cat-paws { animation: none; }
-@keyframes cat-prop-in { from { opacity: 0; transform: translateY(8px) scale(0.9); } }
-
-/* Thrilled: an Email or Résumé link has the visitor's attention. No words, just joy. */
-.cat-sparks { fill: rgb(var(--c-warm)); }
-.cat-sparks path { opacity: 0; transform-box: fill-box; transform-origin: center; }
-.cat.thrilled:not(.eating) .cat-body { animation: cat-thrill 0.55s cubic-bezier(0.22, 1, 0.36, 1) infinite; }
-.cat.thrilled:not(.eating) .cat-ear { animation: cat-ear-perk 0.55s ease-in-out infinite; }
-.cat.thrilled:not(.eating) .cat-ear.r { animation-name: cat-ear-perk-r; }
-.cat.thrilled .cat-sparks path { animation: cat-spark 0.9s ease-out infinite; }
-.cat.thrilled .cat-sparks path:nth-child(2) { animation-delay: 0.3s; }
-.cat.thrilled .cat-sparks path:nth-child(3) { animation-delay: 0.6s; }
-@keyframes cat-thrill { 0%, 100% { transform: none; } 25% { transform: translateY(-7px) rotate(-5deg); } 50% { transform: none; } 75% { transform: translateY(-7px) rotate(5deg); } }
-@keyframes cat-spark { 0% { opacity: 0; transform: scale(0.3); } 40% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.6) translateY(-8px); } }
+@keyframes px-tail-0 { 0% { visibility: visible; } 25% { visibility: hidden; } 50% { visibility: visible; } 75%, 100% { visibility: hidden; } }
+@keyframes px-tail-1 { 0% { visibility: hidden; } 25% { visibility: visible; } 50%, 100% { visibility: hidden; } }
+@keyframes px-tail-2 { 0% { visibility: hidden; } 75%, 100% { visibility: visible; } }
+@keyframes px-breathe { 0% { transform: none; } 60% { transform: translateY(8px); } 100% { transform: none; } }
+@keyframes px-eyes-open { 0% { visibility: visible; } 88% { visibility: hidden; } 90% { visibility: visible; } 93% { visibility: hidden; } 95%, 100% { visibility: visible; } }
+@keyframes px-eyes-shut { 0% { visibility: hidden; } 88% { visibility: visible; } 90% { visibility: hidden; } 93% { visibility: visible; } 95%, 100% { visibility: hidden; } }
+@keyframes px-treat-hop { 0% { transform: none; } 80% { transform: translateY(-8px); } 88%, 100% { transform: none; } }
+@keyframes px-blink { 0% { visibility: visible; } 50%, 100% { visibility: hidden; } }
+@keyframes px-lunge { 0% { transform: none; } 8% { transform: translate(8px, 8px); } 30% { transform: none; } 100% { transform: none; } }
+@keyframes px-chomp { 0% { visibility: visible; } 50%, 100% { visibility: hidden; } }
+@keyframes px-crumbs { from { visibility: visible; transform: none; } to { visibility: hidden; transform: translateY(24px); } }
+@keyframes px-gulp { from { transform: none; } to { transform: translate(-112px, -72px); visibility: hidden; } }
+@keyframes px-drop { from { transform: translateY(-64px); visibility: hidden; } 25% { visibility: visible; } to { transform: none; visibility: visible; } }
+@keyframes px-z { from { transform: none; visibility: visible; } to { transform: translate(16px, -32px); visibility: hidden; } }
+@keyframes px-stretch { 0% { transform: none; } 15% { transform: translateY(-8px); } 80%, 100% { transform: none; } }
+@keyframes px-hop { 0% { transform: translateY(-16px); } 50%, 100% { transform: none; } }
+@keyframes px-pop { from { transform: translateY(16px); } to { transform: none; } }
 
 /* On a phone the dock would sit over a text field and the keyboard; step aside while typing. */
 @media (max-width: 640px) {
@@ -519,21 +507,6 @@
 @keyframes cat-bump { 40% { transform: translateY(-3px) scale(1.3); color: rgb(var(--c-warm)); } }
 @keyframes cat-plus { 0% { opacity: 0; transform: translateY(4px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
 @keyframes cat-heart { 0% { opacity: 0; transform: translate(0, 10px) scale(0.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--hx), -52px) scale(1.05) rotate(var(--hr)); } }
-@keyframes cat-reach { 0%, 14%, 100% { transform: none; } 36%, 52% { transform: translateX(4px) rotate(5deg); } 44% { transform: translateX(5px) rotate(6deg); } 64% { transform: none; } 72% { transform: translateY(-4px); } 80% { transform: none; } }
-@keyframes cat-paws-reach { 0%, 16%, 100% { transform: none; } 36%, 52% { transform: translate(3px, -2px); } 44% { transform: translate(4px, -2px); } 64% { transform: none; } }
-@keyframes cat-ear-twitch { 0%, 74%, 100% { transform: none; } 80% { transform: rotate(-12deg); } 86% { transform: rotate(7deg); } }
-@keyframes cat-sniff { 0%, 60%, 100% { transform: none; } 70% { transform: scale(1.18, 0.82); } 80% { transform: scale(0.92, 1.1); } }
-@keyframes cat-blink { 0%, 94%, 100% { transform: none; } 96% { transform: scaleY(0.1); } }
-@keyframes cat-tail-sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(6deg); } }
-@keyframes cat-wobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
-@keyframes cat-twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.45); } 50% { opacity: 1; transform: scale(1) rotate(45deg); } }
-@keyframes cat-lunge { 0% { transform: none; } 28% { transform: translateX(12px) rotate(8deg); } 46%, 100% { transform: none; } }
-@keyframes cat-grab { 0% { transform: none; } 28% { transform: translate(0, -6px); } 46%, 86% { transform: translate(0, -20px); } 100% { transform: none; } }
-@keyframes cat-gulp { 0% { transform: none; } 100% { opacity: 0; transform: translate(-62px, -46px) scale(0.2); } }
-@keyframes cat-chew { 0%, 34% { transform: none; } 44% { transform: scale(1.45); } 54% { transform: scale(1.32, 1.48); } 64% { transform: scale(1.5, 1.34); } 74% { transform: scale(1.32, 1.48); } 86% { transform: scale(1.42); } 100% { transform: scale(1.08); } }
-@keyframes cat-happy { 0%, 32% { transform: none; } 40%, 88% { transform: scaleY(0.18); } 100% { transform: none; } }
-@keyframes cat-crumb { 0% { opacity: 1; transform: none; } 100% { opacity: 0; transform: translate(var(--cx), 15px); } }
-@keyframes cat-drop { 0% { opacity: 0; transform: translateY(-64px) rotate(-35deg); } 45% { opacity: 1; } 70% { transform: rotate(10deg); } 85% { transform: translateY(-5px) rotate(-4deg); } 100% { transform: none; } }
 
 /* ------------------------------------------------------------------ *
  * Motion safety. Framer Motion components read useReducedMotion(), and
